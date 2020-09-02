@@ -2,15 +2,22 @@ import requests
 import json
 import urllib
 import datetime
+import csv
 from bs4 import BeautifulSoup
 
 class TConnectApi:
-    API_BASE_URL = 'https://tdcservices.tandemdiabetes.com/tconnect/controliq/api/'
+    CONTROLIQ_BASE_URL = 'https://tdcservices.tandemdiabetes.com/tconnect/controliq/api/'
     LOGIN_URL = 'https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f'
+
+    THERAPYTIMELINE2CSV_URL = 'https://tconnectws2.tandemdiabetes.com/therapytimeline2csv/%s/%s/%s'
 
     userGuid = None
     accessToken = None
     accessTokenExpiresAt = None
+
+    def __init__(self, email, password):
+        if not self.login(email, password):
+            raise Exception('Unable to authenticate')
 
     def login(self, email, password):
         with requests.Session() as s:
@@ -46,16 +53,54 @@ class TConnectApi:
             raise Exception('No access token provided')
         return {'Authorization': 'Bearer %s' % self.accessToken}
 
-    def api(self, endpoint, query):
-        r = requests.get(self.API_BASE_URL + endpoint, query, headers=self.api_headers())
+    def controliq_api(self, endpoint, query):
+        r = requests.get(self.CONTROLIQ_BASE_URL + endpoint, query, headers=self.api_headers())
+        if r.status_code != 200:
+            print("API response:", r.status_code, r.text)
         return r.json()
+    
+    def _parse_date(self, date):
+        if type(date) == str:
+            return date
+        return (date or datetime.datetime.now()).strftime('%m-%d-%Y')
 
     def therapy_timeline(self, start=None, end=None):
-        startDate = start if type(start) == str else (start or datetime.datetime.now()).strftime('%m-%d-%Y')
-        endDate = end if type(end) == str else (end or datetime.datetime.now()).strftime('%m-%d-%Y')
+        startDate = self._parse_date(start)
+        endDate = self._parse_date(end)
 
-        return self.api('therapytimeline/users/%s' % (self.userGuid), {
+        return self.controliq_api('therapytimeline/users/%s' % (self.userGuid), {
             "startDate": startDate,
             "endDate": endDate
         })
+    
+    def _split_empty_sections(self, text):
+        sections = [[]]
+        sectionIndex = 0
+        for line in text.splitlines():
+            if len(line.strip()) > 0:
+                sections[sectionIndex].append(line)
+            else:
+                sections.append([])
+                sectionIndex += 1
+
+        return sections + [None] * (4 - len(sections))
+    
+    def _csv_to_dict(self, rawdata):
+        data = []
+        headers = rawdata[0].split(",")
+        for row in csv.reader(rawdata[1:]):
+            data.append({headers[i]: row[i] for i in range(len(row)) if i < len(headers)})
+        
+        return data
+
+
+    def therapy_timeline_csv(self, start=None, end=None):
+        startDate = self._parse_date(start)
+        endDate = self._parse_date(end)
+
+        r = requests.get(self.THERAPYTIMELINE2CSV_URL % (self.userGuid, startDate, endDate))
+
+        header, readingData, iobData, bolusData = self._split_empty_sections(r.text)
+
+        return self._csv_to_dict(readingData), self._csv_to_dict(iobData), self._csv_to_dict(bolusData)
 
