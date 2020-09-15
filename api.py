@@ -58,7 +58,7 @@ class TConnectApi:
         if r.status_code != 200:
             print("API response:", r.status_code, r.text)
         return r.json()
-    
+
     def _parse_date(self, date):
         if type(date) == str:
             return date
@@ -72,7 +72,7 @@ class TConnectApi:
             "startDate": startDate,
             "endDate": endDate
         })
-    
+
     def _split_empty_sections(self, text):
         sections = [[]]
         sectionIndex = 0
@@ -84,13 +84,15 @@ class TConnectApi:
                 sectionIndex += 1
 
         return sections + [None] * (4 - len(sections))
-    
+
     def _csv_to_dict(self, rawdata):
         data = []
+        if not rawdata or len(rawdata) == 0:
+            return data
         headers = rawdata[0].split(",")
         for row in csv.reader(rawdata[1:]):
             data.append({headers[i]: row[i] for i in range(len(row)) if i < len(headers)})
-        
+
         return data
 
 

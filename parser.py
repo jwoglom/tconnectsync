@@ -33,7 +33,7 @@ class TConnectEntry:
             "duration_mins": duration_mins,
             "basal_rate": basal_rate,
         }
-    
+
     @staticmethod
     def parse_suspension_entry(data):
         time = TConnectEntry._epoch_parse(data["x"])
@@ -42,7 +42,7 @@ class TConnectEntry:
             "continuation": data["continuation"],
             "suspendReason": data["suspendReason"],
         }
-    
+
     @staticmethod
     def _datetime_parse(date):
         return arrow.get(date, tzinfo=TIMEZONE_NAME)
@@ -55,7 +55,7 @@ class TConnectEntry:
             "reading": data["Readings (CGM / BGM)"],
             "reading_type": data["Description"],
         }
-    
+
     @staticmethod
     def parse_iob_entry(data):
         # EventDateTime is stored in the user's timezone.
@@ -64,7 +64,7 @@ class TConnectEntry:
             "iob": data["IOB"],
             "event_id": data["EventID"],
         }
-    
+
     @staticmethod
     def parse_bolus_entry(data):
         # RequestDateTime and CompletionDateTime are stored in the user's timezone.

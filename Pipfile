@@ -11,5 +11,3 @@ bs4 = "*"
 arrow = "*"
 lxml = "*"
 
-[requires]
-python_version = "3.7"
