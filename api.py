@@ -55,13 +55,13 @@ class TConnectApi:
     def controliq_api(self, endpoint, query):
         r = requests.get(self.CONTROLIQ_BASE_URL + endpoint, query, headers=self.api_headers())
         if r.status_code != 200:
-            raise Exception("ControlIQ API HTTP %s response: %s" % (str(r.status_code), r.text))
+            raise ApiException(r.status_code, "ControlIQ API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.json()
 
     def ws2_api(self, endpoint, query):
         r = requests.get(self.WS2_BASE_URL + endpoint, query, headers=self.api_headers())
         if r.status_code != 200:
-            raise Exception("WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
+            raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.text
 
     def _parse_date(self, date):
@@ -134,3 +134,7 @@ class TConnectApi:
             "bolusData": self._csv_to_dict(bolusData)
         }
 
+class ApiException(Exception):
+    def __init__(self, status_code, text, *args, **kwargs):
+        self.status_code = status_code
+        super().__init__(text, *args, **kwargs)

@@ -8,7 +8,7 @@ import requests
 import arrow
 import argparse
 
-from api import TConnectApi
+from api import TConnectApi, ApiException
 from parser import TConnectEntry
 from nightscout import (
     NightscoutEntry,
@@ -31,6 +31,9 @@ except Exception:
 Merges together input from the therapy timeline API into a digestable format of basal data.
 """
 def process_ciq_basal_events(data):
+    if data is None:
+        return []
+
     suspensionEvents = {}
     for s in data["suspensionDeliveryEvents"]:
         entry = TConnectEntry.parse_suspension_entry(s)
@@ -163,6 +166,10 @@ def ns_write_iob_events(iobEvents, pretend=False):
         last_upload_time = arrow.get(last_upload["created_at"])
     print("Last Nightscout iob upload:", last_upload_time)
 
+    if not iobEvents or len(iobEvents) == 0:
+        print("No IOB events: skipping")
+        return
+
     event = iobEvents[-1]
     if last_upload_time and arrow.get(event["time"]) <= last_upload_time:
         print("  Skipping already uploaded iob event:", event)
@@ -185,7 +192,14 @@ def ns_write_iob_events(iobEvents, pretend=False):
 
 def process_time_range(tconnect, time_start, time_end, pretend):
     print("Reading basal data from t:connect")
-    ciqBasalData = tconnect.therapy_timeline(time_start, time_end)
+    try:
+        ciqBasalData = tconnect.therapy_timeline(time_start, time_end)
+    except ApiException as e:
+        if e.status_code == 404 and time_start.date() < datetime.date(2020, 2, 1):
+            print("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
+            ciqBasalData = None
+        else:
+            raise e
 
     print("Reading bolus and IOB data from t:connect")
     csvdata = tconnect.therapy_timeline_csv(time_start, time_end)
