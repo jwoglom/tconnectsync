@@ -7,9 +7,8 @@ from bs4 import BeautifulSoup
 
 class TConnectApi:
     CONTROLIQ_BASE_URL = 'https://tdcservices.tandemdiabetes.com/tconnect/controliq/api/'
+    WS2_BASE_URL = 'https://tconnectws2.tandemdiabetes.com/'
     LOGIN_URL = 'https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f'
-
-    THERAPYTIMELINE2CSV_URL = 'https://tconnectws2.tandemdiabetes.com/therapytimeline2csv/%s/%s/%s'
 
     userGuid = None
     accessToken = None
@@ -56,8 +55,14 @@ class TConnectApi:
     def controliq_api(self, endpoint, query):
         r = requests.get(self.CONTROLIQ_BASE_URL + endpoint, query, headers=self.api_headers())
         if r.status_code != 200:
-            print("API response:", r.status_code, r.text)
+            raise Exception("ControlIQ API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.json()
+
+    def ws2_api(self, endpoint, query):
+        r = requests.get(self.WS2_BASE_URL + endpoint, query, headers=self.api_headers())
+        if r.status_code != 200:
+            raise Exception("WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
+        return r.text
 
     def _parse_date(self, date):
         if type(date) == str:
@@ -100,9 +105,32 @@ class TConnectApi:
         startDate = self._parse_date(start)
         endDate = self._parse_date(end)
 
-        r = requests.get(self.THERAPYTIMELINE2CSV_URL % (self.userGuid, startDate, endDate))
+        req_text = self.ws2_api('therapytimeline2csv/%s/%s/%s' % (self.userGuid, startDate, endDate), {})
 
-        header, readingData, iobData, bolusData = self._split_empty_sections(r.text)
+        sections = self._split_empty_sections(req_text)
 
-        return self._csv_to_dict(readingData), self._csv_to_dict(iobData), self._csv_to_dict(bolusData)
+        readingData = None
+        iobData = None
+        basalData = None
+        bolusData = None
+
+        for s in sections:
+            if s and len(s) > 2:
+                firstrow = s[1].replace('"', '').strip()
+                if firstrow.startswith("t:slim X2 Insulin Pump"):
+                    readingData = s
+                elif firstrow.startswith("IOB"):
+                    iobData = s
+                elif firstrow.startswith("Basal"):
+                    basalData = s
+                elif firstrow.startswith("Bolus"):
+                    bolusData = s
+
+
+        return {
+            "readingData": self._csv_to_dict(readingData),
+            "iobData": self._csv_to_dict(iobData),
+            "basalData": self._csv_to_dict(basalData),
+            "bolusData": self._csv_to_dict(bolusData)
+        }
 

@@ -30,7 +30,7 @@ except Exception:
 """
 Merges together input from the therapy timeline API into a digestable format of basal data.
 """
-def process_basal_events(data):
+def process_ciq_basal_events(data):
     suspensionEvents = {}
     for s in data["suspensionDeliveryEvents"]:
         entry = TConnectEntry.parse_suspension_entry(s)
@@ -38,13 +38,13 @@ def process_basal_events(data):
 
     basalEvents = []
     for b in data["basal"]["tempDeliveryEvents"]:
-        basalEvents.append(TConnectEntry.parse_basal_entry(b, delivery_type="tempDelivery"))
+        basalEvents.append(TConnectEntry.parse_ciq_basal_entry(b, delivery_type="tempDelivery"))
 
     for b in data["basal"]["algorithmDeliveryEvents"]:
-        basalEvents.append(TConnectEntry.parse_basal_entry(b, delivery_type="algorithmDelivery"))
+        basalEvents.append(TConnectEntry.parse_ciq_basal_entry(b, delivery_type="algorithmDelivery"))
 
     for b in data["basal"]["profileDeliveryEvents"]:
-        basalEvents.append(TConnectEntry.parse_basal_entry(b, delivery_type="profileDelivery"))
+        basalEvents.append(TConnectEntry.parse_ciq_basal_entry(b, delivery_type="profileDelivery"))
 
     basalEvents.sort(key=lambda x: arrow.get(x["time"]))
 
@@ -52,6 +52,23 @@ def process_basal_events(data):
         if i["time"] in suspensionEvents:
             i["suspendReason"] = suspensionEvents[i["time"]]["suspendReason"]
 
+    return basalEvents
+
+"""
+Processes basal data input from the therapy timeline CSV (which only exists for pre Control-IQ data) into a digestable format.
+"""
+def add_csv_basal_events(basalEvents, data):
+    last_entry = None
+    for row in data:
+        entry = TConnectEntry.parse_csv_basal_entry(row)
+        if last_entry:
+            diff_mins = (arrow.get(entry["time"]) - arrow.get(last_entry["time"])).seconds // 60
+            entry["duration_mins"] = diff_mins
+
+        basalEvents.append(entry)
+        last_entry = entry
+
+    basalEvents.sort(key=lambda x: arrow.get(x["time"]))
     return basalEvents
 
 """
@@ -66,7 +83,8 @@ def ns_write_basal_events(basalEvents, pretend=False):
 
     for event in basalEvents:
         if last_upload_time and arrow.get(event["time"]) <= last_upload_time:
-            #print("Skipping already uploaded basal event:", event)
+            if pretend:
+                print("Skipping basal event before last upload time:", event)
             continue
 
         entry = NightscoutEntry.basal(
@@ -108,7 +126,8 @@ def ns_write_bolus_events(bolusEvents, pretend=False):
 
     for event in bolusEvents:
         if last_upload_time and arrow.get(event["completion_time"]) <= last_upload_time:
-            #print("Skipping already uploaded bolus event:", event)
+            if pretend:
+                print("Skipping basal event before last upload time:", event)
             continue
 
         entry = NightscoutEntry.bolus(
@@ -164,11 +183,40 @@ def ns_write_iob_events(iobEvents, pretend=False):
         if not pretend:
             delete_nightscout('activity/{}'.format(last_upload['_id']))
 
+def process_time_range(tconnect, time_start, time_end, pretend):
+    print("Reading basal data from t:connect")
+    ciqBasalData = tconnect.therapy_timeline(time_start, time_end)
+
+    print("Reading bolus and IOB data from t:connect")
+    csvdata = tconnect.therapy_timeline_csv(time_start, time_end)
+
+    readingData = csvdata["readingData"]
+    iobData = csvdata["iobData"]
+    csvBasalData = csvdata["basalData"]
+    bolusData = csvdata["bolusData"]
+
+    if readingData and len(readingData) > 0:
+        print("Last CGM reading from t:connect:", readingData[-1])
+
+    basalEvents = process_ciq_basal_events(ciqBasalData)
+    if csvBasalData:
+        add_csv_basal_events(basalEvents, csvBasalData)
+
+    ns_write_basal_events(basalEvents, pretend=pretend)
+
+
+    bolusEvents = process_bolus_events(bolusData)
+    ns_write_bolus_events(bolusEvents, pretend=pretend)
+
+    iobEvents = process_iob_events(iobData)
+    ns_write_iob_events(iobEvents, pretend=pretend)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.")
     parser.add_argument('--pretend', dest='pretend', action='store_const', const=True, default=False, help='Pretend mode: do not upload any data to Nightscout.')
-    parser.add_argument('--days', dest='days', type=int, default=1, help='The number of days of t:connect data to read in')
+    parser.add_argument('--start-date', dest='start_date', type=str, default=None, help='The oldest date to process data from. Must be specified with --end-date.')
+    parser.add_argument('--end-date', dest='end_date', type=str, default=None, help='The newest date to process data until. Must be specified with --start-date.')
+    parser.add_argument('--days', dest='days', type=int, default=1, help='The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.')
 
     return parser.parse_args()
 
@@ -178,28 +226,21 @@ def main():
     if args.pretend:
         print("Pretend mode: will not write to Nightscout")
 
-    time_end = datetime.datetime.now()
-    time_start = time_end - datetime.timedelta(days=args.days)
+    if args.start_date and args.end_date:
+        time_start = arrow.get(args.start_date)
+        time_end = arrow.get(args.end_date)
+    else:
+        time_end = datetime.datetime.now()
+        time_start = time_end - datetime.timedelta(days=args.days)
+
+    if time_end < time_start:
+        raise Exception('time_start must be before time_end')
+
+    print("Processing data between", time_start, "and", time_end)
 
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
 
-    print("Reading basal data from t:connect")
-    basaldata = tconnect.therapy_timeline(time_start, time_end)
-
-    print("Reading bolus and IOB data from t:connect")
-    cgmdata, iobdata, bolusdata = tconnect.therapy_timeline_csv(time_start, time_end)
-
-    if cgmdata and len(cgmdata) > 0:
-        print("Last CGM reading from t:connect:", cgmdata[-1])
-
-    basalEvents = process_basal_events(basaldata)
-    ns_write_basal_events(basalEvents, pretend=args.pretend)
-
-    bolusEvents = process_bolus_events(bolusdata)
-    ns_write_bolus_events(bolusEvents, pretend=args.pretend)
-
-    iobEvents = process_iob_events(iobdata)
-    ns_write_iob_events(iobEvents, pretend=args.pretend)
+    process_time_range(tconnect, time_start, time_end, args.pretend)
 
 if __name__ == '__main__':
     main()

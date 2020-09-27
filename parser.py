@@ -22,7 +22,7 @@ class TConnectEntry:
         return arrow.get(x, tzinfo="America/Los_Angeles").replace(tzinfo=TIMEZONE_NAME)
 
     @staticmethod
-    def parse_basal_entry(data, delivery_type=""):
+    def parse_ciq_basal_entry(data, delivery_type=""):
         time = TConnectEntry._epoch_parse(data["x"])
         duration_mins = data["duration"] / 60
         basal_rate = data["y"]
@@ -63,6 +63,16 @@ class TConnectEntry:
             "time": TConnectEntry._datetime_parse(data["EventDateTime"]).format(),
             "iob": data["IOB"],
             "event_id": data["EventID"],
+        }
+
+    @staticmethod
+    def parse_csv_basal_entry(data, duration_mins=None):
+        # EventDateTime is stored in the user's timezone.
+        return {
+            "time": TConnectEntry._datetime_parse(data["EventDateTime"]).format(),
+            "delivery_type": "Unknown",
+            "duration_mins": duration_mins,
+            "basal_rate": data["BasalRate"],
         }
 
     @staticmethod
