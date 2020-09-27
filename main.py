@@ -6,6 +6,7 @@ import json
 import hashlib
 import requests
 import arrow
+import argparse
 
 from api import TConnectApi
 from parser import TConnectEntry
@@ -26,6 +27,9 @@ except Exception:
     print('Unable to import secret.py')
     sys.exit(1)
 
+"""
+Merges together input from the therapy timeline API into a digestable format of basal data.
+"""
 def process_basal_events(data):
     suspensionEvents = {}
     for s in data["suspensionDeliveryEvents"]:
@@ -45,13 +49,15 @@ def process_basal_events(data):
     basalEvents.sort(key=lambda x: arrow.get(x["time"]))
 
     for i in basalEvents:
-        print(i)
         if i["time"] in suspensionEvents:
             i["suspendReason"] = suspensionEvents[i["time"]]["suspendReason"]
 
     return basalEvents
 
-def ns_write_basal_events(basalEvents):
+"""
+Given processed basal data, adds basal events to Nightscout.
+"""
+def ns_write_basal_events(basalEvents, pretend=False):
     last_upload = last_uploaded_nightscout_entry(BASAL_EVENTTYPE)
     last_upload_time = None
     if last_upload:
@@ -69,9 +75,13 @@ def ns_write_basal_events(basalEvents):
             created_at=event["time"],
             reason=event["delivery_type"]
         )
-        print("Processing basal:", event, "entry:", entry)
-        upload_nightscout(entry)
+        print("  Processing basal:", event, "entry:", entry)
+        if not pretend:
+            upload_nightscout(entry)
 
+"""
+Given bolus data input from the therapy timeline CSV, converts it into a digestable format.
+"""
 def process_bolus_events(bolusdata):
     bolusEvents = []
 
@@ -86,7 +96,10 @@ def process_bolus_events(bolusdata):
 
     return bolusEvents
 
-def ns_write_bolus_events(bolusEvents):
+"""
+Given processed bolus data, adds bolus events to Nightscout.
+"""
+def ns_write_bolus_events(bolusEvents, pretend=False):
     last_upload = last_uploaded_nightscout_entry(BOLUS_EVENTTYPE)
     last_upload_time = None
     if last_upload:
@@ -105,9 +118,13 @@ def ns_write_bolus_events(bolusEvents):
             notes="{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "")
         )
 
-        print("Processing bolus:", event, "entry:", entry)
-        upload_nightscout(entry)
+        print("  Processing bolus:", event, "entry:", entry)
+        if not pretend:
+            upload_nightscout(entry)
 
+"""
+Given IOB data input from the therapy timeline CSV, converts it into a digestable format.
+"""
 def process_iob_events(iobdata):
     iobEvents = []
     for d in iobdata:
@@ -117,7 +134,10 @@ def process_iob_events(iobdata):
 
     return iobEvents
 
-def ns_write_iob_events(iobEvents):
+"""
+Given processed IOB data, creates a single Nightscout activity definition to store IOB.
+"""
+def ns_write_iob_events(iobEvents, pretend=False):
     last_upload = last_uploaded_nightscout_activity(IOB_ACTIVITYTYPE)
     last_upload_time = None
     if last_upload:
@@ -126,7 +146,7 @@ def ns_write_iob_events(iobEvents):
 
     event = iobEvents[-1]
     if last_upload_time and arrow.get(event["time"]) <= last_upload_time:
-        print("Skipping already uploaded iob event:", event)
+        print("  Skipping already uploaded iob event:", event)
         return
 
     entry = NightscoutEntry.iob(
@@ -134,40 +154,52 @@ def ns_write_iob_events(iobEvents):
         created_at=event["time"]
     )
 
-    print("Processing iob:", event, "entry:", entry)
-    upload_nightscout(entry, entity='activity')
+    print("  Processing iob:", event, "entry:", entry)
+    if not pretend:
+        upload_nightscout(entry, entity='activity')
 
     # Delete the previous activity
     if last_upload and '_id' in last_upload:
-        print("Deleting old iob entry:", last_upload)
-        delete_nightscout('activity/{}'.format(last_upload['_id']))
+        print("  Deleting old iob entry:", last_upload)
+        if not pretend:
+            delete_nightscout('activity/{}'.format(last_upload['_id']))
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.")
+    parser.add_argument('--pretend', dest='pretend', action='store_const', const=True, default=False, help='Pretend mode: do not upload any data to Nightscout.')
+    parser.add_argument('--days', dest='days', type=int, default=1, help='The number of days of t:connect data to read in')
+
+    return parser.parse_args()
 
 def main():
-    now = datetime.datetime.now()
+    args = parse_args()
+
+    if args.pretend:
+        print("Pretend mode: will not write to Nightscout")
+
+    time_end = datetime.datetime.now()
+    time_start = time_end - datetime.timedelta(days=args.days)
 
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
 
-    basaldata = tconnect.therapy_timeline(now - datetime.timedelta(days=1), now)
+    print("Reading basal data from t:connect")
+    basaldata = tconnect.therapy_timeline(time_start, time_end)
 
-    # open("basaldata.json","w").write(json.dumps(data))
-    # basaldata = json.loads(open("basaldata.json").read())
+    print("Reading bolus and IOB data from t:connect")
+    cgmdata, iobdata, bolusdata = tconnect.therapy_timeline_csv(time_start, time_end)
+
+    if cgmdata and len(cgmdata) > 0:
+        print("Last CGM reading from t:connect:", cgmdata[-1])
 
     basalEvents = process_basal_events(basaldata)
-    ns_write_basal_events(basalEvents)
-
-    csvdata = tconnect.therapy_timeline_csv(now - datetime.timedelta(days=1), now)
-    cgmdata, iobdata, bolusdata = csvdata
-
-    print("Most recent cgmdata:", cgmdata[-1])
-
-    # open("csvdata.json", "w").write(json.dumps(csvdata))
-    # cgmdata, iobdata, bolusdata = json.loads(open("csvdata.json").read())
+    ns_write_basal_events(basalEvents, pretend=args.pretend)
 
     bolusEvents = process_bolus_events(bolusdata)
-    ns_write_bolus_events(bolusEvents)
+    ns_write_bolus_events(bolusEvents, pretend=args.pretend)
 
     iobEvents = process_iob_events(iobdata)
-    ns_write_iob_events(iobEvents)
+    ns_write_iob_events(iobEvents, pretend=args.pretend)
 
 if __name__ == '__main__':
     main()
