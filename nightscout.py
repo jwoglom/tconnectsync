@@ -21,7 +21,7 @@ class NightscoutEntry:
         return {
             "eventType": BASAL_EVENTTYPE,
             "reason": reason,
-            "duration": int(round(duration_mins)),
+            "duration": int(round(duration_mins)) if duration_mins else None,
             "absolute": float(value),
             "created_at": created_at,
             "carbs": None,

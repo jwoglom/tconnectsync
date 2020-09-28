@@ -109,11 +109,15 @@ def process_bolus_events(bolusdata):
     for b in bolusdata:
         parsed = TConnectEntry.parse_bolus_entry(b)
         if parsed["completion"] != "Completed":
-            print("Skipping non-completed bolus data:", b, "parsed:", parsed)
-            continue
+            if parsed["insulin"] and float(parsed["insulin"]) > 0:
+                # Count non-completed bolus if any insulin was delivered (vs. the amount of insulin requested)
+                parsed["description"] += " (%s)" % parsed["completion"]
+            else:
+                print("Skipping non-completed bolus data:", b, "parsed:", parsed)
+                continue
         bolusEvents.append(parsed)
 
-    bolusEvents.sort(key=lambda x: arrow.get(x["completion_time"]))
+    bolusEvents.sort(key=lambda event: arrow.get(event["completion_time"] if not event["extended_bolus"] else event["bolex_start_time"]))
 
     return bolusEvents
 
@@ -136,8 +140,8 @@ def ns_write_bolus_events(bolusEvents, pretend=False):
         entry = NightscoutEntry.bolus(
             bolus=event["insulin"],
             carbs=event["carbs"],
-            created_at=event["completion_time"],
-            notes="{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "")
+            created_at=event["completion_time"] if not event["extended_bolus"] else event["bolex_start_time"],
+            notes="{}{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "", " (Extended)" if event["extended_bolus"] == "1" else "")
         )
 
         print("  Processing bolus:", event, "entry:", entry)
@@ -191,17 +195,20 @@ def ns_write_iob_events(iobEvents, pretend=False):
             delete_nightscout('activity/{}'.format(last_upload['_id']))
 
 def process_time_range(tconnect, time_start, time_end, pretend):
-    print("Reading basal data from t:connect")
+    print("Downloading t:connect ControlIQ data")
     try:
         ciqBasalData = tconnect.therapy_timeline(time_start, time_end)
     except ApiException as e:
+        # The ControlIQ API returns a 404 if the user did not have a ControlIQ enabled
+        # device in the time range which is queried. Since it launched in early 2020,
+        # ignore 404's before February.
         if e.status_code == 404 and time_start.date() < datetime.date(2020, 2, 1):
             print("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
             ciqBasalData = None
         else:
             raise e
 
-    print("Reading bolus and IOB data from t:connect")
+    print("Downloading t:connect CSV data")
     csvdata = tconnect.therapy_timeline_csv(time_start, time_end)
 
     readingData = csvdata["readingData"]
@@ -229,7 +236,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.")
     parser.add_argument('--pretend', dest='pretend', action='store_const', const=True, default=False, help='Pretend mode: do not upload any data to Nightscout.')
     parser.add_argument('--start-date', dest='start_date', type=str, default=None, help='The oldest date to process data from. Must be specified with --end-date.')
-    parser.add_argument('--end-date', dest='end_date', type=str, default=None, help='The newest date to process data until. Must be specified with --start-date.')
+    parser.add_argument('--end-date', dest='end_date', type=str, default=None, help='The newest date to process data until (inclusive). Must be specified with --start-date.')
     parser.add_argument('--days', dest='days', type=int, default=1, help='The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.')
 
     return parser.parse_args()
