@@ -21,7 +21,7 @@ class NightscoutEntry:
         return {
             "eventType": BASAL_EVENTTYPE,
             "reason": reason,
-            "duration": int(round(duration_mins)) if duration_mins else None,
+            "duration": float(duration_mins) if duration_mins else None,
             "absolute": float(value),
             "created_at": created_at,
             "carbs": None,
@@ -64,6 +64,14 @@ def delete_nightscout(entity):
 		'api-secret': hashlib.sha1(NS_SECRET.encode()).hexdigest()
 	})
 	print("Nightscout delete status:", upload.status_code, upload.text)
+
+def put_nightscout(ns_format, entity):
+	upload = requests.put(NS_URL + 'api/v1/' + entity + '?api_secret=' + NS_SECRET, json=ns_format, headers={
+		'Accept': 'application/json',
+		'Content-Type': 'application/json',
+		'api-secret': hashlib.sha1(NS_SECRET.encode()).hexdigest()
+	})
+	print("Nightscout put status:", upload.status_code, upload.text)
 
 def last_uploaded_nightscout_entry(eventType):
     latest = requests.get(NS_URL + 'api/v1/treatments?count=1&find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[eventType]=' + urllib.parse.quote(eventType) + '&ts=' + str(time.time()), headers={

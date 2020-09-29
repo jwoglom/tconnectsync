@@ -14,6 +14,7 @@ from nightscout import (
     NightscoutEntry,
     upload_nightscout,
     delete_nightscout,
+    put_nightscout,
     last_uploaded_nightscout_entry,
     last_uploaded_nightscout_activity,
     BASAL_EVENTTYPE,
@@ -85,10 +86,16 @@ def ns_write_basal_events(basalEvents, pretend=False):
     print("Last Nightscout basal upload:", last_upload_time)
 
     for event in basalEvents:
-        if last_upload_time and arrow.get(event["time"]) <= last_upload_time:
+        if last_upload_time and arrow.get(event["time"]) < last_upload_time:
             if pretend:
                 print("Skipping basal event before last upload time:", event)
             continue
+
+        recent_needs_update = False
+        if last_upload_time and arrow.get(event["time"]) == last_upload_time:
+            # If this entry has the same time as the most recent upload, but
+            # has newer info, then delete and recreate it.
+            recent_needs_update = (round(last_upload["duration"]) < round(event["duration_mins"]))
 
         entry = NightscoutEntry.basal(
             value=event["basal_rate"],
@@ -96,8 +103,14 @@ def ns_write_basal_events(basalEvents, pretend=False):
             created_at=event["time"],
             reason=event["delivery_type"]
         )
+
         print("  Processing basal:", event, "entry:", entry)
-        if not pretend:
+        if recent_needs_update:
+            print("Replacing last uploaded entry:", last_upload)
+            if not pretend:
+                entry['_id'] = last_upload['_id']
+                put_nightscout(entry, entity='treatments')
+        elif not pretend:
             upload_nightscout(entry)
 
 """
