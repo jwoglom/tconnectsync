@@ -7,8 +7,10 @@ import hashlib
 import requests
 import arrow
 import argparse
+import time
 
-from api import TConnectApi, ApiException
+from api import TConnectApi
+from api.common import ApiException
 from parser import TConnectEntry
 from nightscout import (
     NightscoutEntry,
@@ -23,7 +25,12 @@ from nightscout import (
 )
 
 try:
-    from secret import TCONNECT_EMAIL, TCONNECT_PASSWORD
+    from secret import (
+        TCONNECT_EMAIL,
+        TCONNECT_PASSWORD,
+        PUMP_SERIAL_NUMBER,
+        TIMEZONE_NAME
+    )
 except Exception:
     print('Unable to import secret.py')
     sys.exit(1)
@@ -83,8 +90,9 @@ def ns_write_basal_events(basalEvents, pretend=False):
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
-    print("Last Nightscout basal upload:", last_upload_time)
+    print("Last Nightscout basal upload:", arrow.get(last_upload_time, TIMEZONE_NAME))
 
+    add_count = 0
     for event in basalEvents:
         if last_upload_time and arrow.get(event["time"]) < last_upload_time:
             if pretend:
@@ -104,6 +112,8 @@ def ns_write_basal_events(basalEvents, pretend=False):
             reason=event["delivery_type"]
         )
 
+        add_count += 1
+
         print("  Processing basal:", event, "entry:", entry)
         if recent_needs_update:
             print("Replacing last uploaded entry:", last_upload)
@@ -112,6 +122,8 @@ def ns_write_basal_events(basalEvents, pretend=False):
                 put_nightscout(entry, entity='treatments')
         elif not pretend:
             upload_nightscout(entry)
+
+    return add_count
 
 """
 Given bolus data input from the therapy timeline CSV, converts it into a digestable format.
@@ -144,6 +156,7 @@ def ns_write_bolus_events(bolusEvents, pretend=False):
         last_upload_time = arrow.get(last_upload["created_at"])
     print("Last Nightscout bolus upload:", last_upload_time)
 
+    add_count = 0
     for event in bolusEvents:
         if last_upload_time and arrow.get(event["completion_time"]) <= last_upload_time:
             if pretend:
@@ -157,9 +170,13 @@ def ns_write_bolus_events(bolusEvents, pretend=False):
             notes="{}{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "", " (Extended)" if event["extended_bolus"] == "1" else "")
         )
 
+        add_count += 1
+
         print("  Processing bolus:", event, "entry:", entry)
         if not pretend:
             upload_nightscout(entry)
+
+    return add_count
 
 """
 Given IOB data input from the therapy timeline CSV, converts it into a digestable format.
@@ -185,12 +202,12 @@ def ns_write_iob_events(iobEvents, pretend=False):
 
     if not iobEvents or len(iobEvents) == 0:
         print("No IOB events: skipping")
-        return
+        return 0
 
     event = iobEvents[-1]
     if last_upload_time and arrow.get(event["time"]) <= last_upload_time:
         print("  Skipping already uploaded iob event:", event)
-        return
+        return 0
 
     entry = NightscoutEntry.iob(
         iob=event["iob"],
@@ -207,10 +224,12 @@ def ns_write_iob_events(iobEvents, pretend=False):
         if not pretend:
             delete_nightscout('activity/{}'.format(last_upload['_id']))
 
+    return 1
+
 def process_time_range(tconnect, time_start, time_end, pretend):
     print("Downloading t:connect ControlIQ data")
     try:
-        ciqBasalData = tconnect.therapy_timeline(time_start, time_end)
+        ciqBasalData = tconnect.controliq.therapy_timeline(time_start, time_end)
     except ApiException as e:
         # The ControlIQ API returns a 404 if the user did not have a ControlIQ enabled
         # device in the time range which is queried. Since it launched in early 2020,
@@ -222,7 +241,7 @@ def process_time_range(tconnect, time_start, time_end, pretend):
             raise e
 
     print("Downloading t:connect CSV data")
-    csvdata = tconnect.therapy_timeline_csv(time_start, time_end)
+    csvdata = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
 
     readingData = csvdata["readingData"]
     iobData = csvdata["iobData"]
@@ -230,20 +249,24 @@ def process_time_range(tconnect, time_start, time_end, pretend):
     bolusData = csvdata["bolusData"]
 
     if readingData and len(readingData) > 0:
-        print("Last CGM reading from t:connect:", readingData[-1])
+        print("Last CGM reading from t:connect:", readingData[-1]['EventDateTime'] if 'EventDateTime' in readingData[-1] else readingData)
+
+    added = 0
 
     basalEvents = process_ciq_basal_events(ciqBasalData)
     if csvBasalData:
         add_csv_basal_events(basalEvents, csvBasalData)
 
-    ns_write_basal_events(basalEvents, pretend=pretend)
+    added += ns_write_basal_events(basalEvents, pretend=pretend)
 
 
     bolusEvents = process_bolus_events(bolusData)
-    ns_write_bolus_events(bolusEvents, pretend=pretend)
+    added += ns_write_bolus_events(bolusEvents, pretend=pretend)
 
     iobEvents = process_iob_events(iobData)
-    ns_write_iob_events(iobEvents, pretend=pretend)
+    added += ns_write_iob_events(iobEvents, pretend=pretend)
+
+    return added
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.")
@@ -251,6 +274,7 @@ def parse_args():
     parser.add_argument('--start-date', dest='start_date', type=str, default=None, help='The oldest date to process data from. Must be specified with --end-date.')
     parser.add_argument('--end-date', dest='end_date', type=str, default=None, help='The newest date to process data until (inclusive). Must be specified with --start-date.')
     parser.add_argument('--days', dest='days', type=int, default=1, help='The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.')
+    parser.add_argument('--auto-update', dest='auto_update', action='store_const', const=True, default=False, help='If set, continuously checks for updates from t:connect and syncs with Nightscout.')
 
     return parser.parse_args()
 
@@ -259,6 +283,9 @@ def main():
 
     if args.pretend:
         print("Pretend mode: will not write to Nightscout")
+
+    if args.auto_update and (args.start_date or args.end_date):
+        raise Exception('Auto-update cannot be used with start/end date')
 
     if args.start_date and args.end_date:
         time_start = arrow.get(args.start_date)
@@ -270,11 +297,55 @@ def main():
     if time_end < time_start:
         raise Exception('time_start must be before time_end')
 
-    print("Processing data between", time_start, "and", time_end)
-
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
 
-    process_time_range(tconnect, time_start, time_end, args.pretend)
+    if args.auto_update:
+        # Read from android api, find exact interval to cut down on API calls
+        # Refresh API token. If failure, die, have wrapper script re-run.
+
+        last_event_index = None
+        last_event_time = None
+        time_diffs = []
+        while True:
+            last_event = tconnect.android.last_event_uploaded(PUMP_SERIAL_NUMBER)
+            if not last_event_index or last_event['maxPumpEventIndex'] > last_event_index:
+                now = time.time()
+                print('New event index:', last_event['maxPumpEventIndex'], 'last:', last_event_index)
+
+                if args.pretend:
+                    print('Would update now')
+                else:
+                    added = process_time_range(tconnect, time_start, time_end, args.pretend)
+                    print('Added', added, 'items')
+
+                if last_event_index:
+                    time_diffs.append(now - last_event_time)
+                    print('Time diffs:', time_diffs)
+
+                last_event_index = last_event['maxPumpEventIndex']
+                last_event_time = now
+            else:
+                print('No event index change:', last_event['maxPumpEventIndex'])
+
+                if len(time_diffs) > 2:
+                    print('Sleeping 60 seconds after unexpected no index change')
+                    time.sleep(60)
+                    continue
+
+            sleep_secs = 60
+            if len(time_diffs) > 10:
+                time_diffs = time_diffs[1:]
+
+            if len(time_diffs) > 2:
+                sleep_secs = sum(time_diffs) / len(time_diffs)
+
+            # Sleep for a rolling average of time between updates
+            print('Sleeping for', sleep_secs, 'sec')
+            time.sleep(sleep_secs)
+    else:
+        print("Processing data between", time_start, "and", time_end)
+        added = process_time_range(tconnect, time_start, time_end, args.pretend)
+        print("Added", added, "items")
 
 if __name__ == '__main__':
     main()
