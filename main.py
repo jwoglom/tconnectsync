@@ -90,7 +90,7 @@ def ns_write_basal_events(basalEvents, pretend=False):
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
-    print("Last Nightscout basal upload:", arrow.get(last_upload_time, TIMEZONE_NAME))
+    print("Last Nightscout basal upload:", last_upload_time)
 
     add_count = 0
     for event in basalEvents:
@@ -105,11 +105,15 @@ def ns_write_basal_events(basalEvents, pretend=False):
             # has newer info, then delete and recreate it.
             recent_needs_update = (round(last_upload["duration"]) < round(event["duration_mins"]))
 
+        reason = event["delivery_type"]
+        if "suspendReason" in reason:
+            reason += " (" + reason["suspendReason"] + ")"
+
         entry = NightscoutEntry.basal(
             value=event["basal_rate"],
             duration_mins=event["duration_mins"],
             created_at=event["time"],
-            reason=event["delivery_type"]
+            reason=reason
         )
 
         add_count += 1
