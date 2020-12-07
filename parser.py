@@ -8,6 +8,9 @@ except Exception:
     sys.exit(1)
 
 class TConnectEntry:
+    BASAL_EVENTS = { 0: "Suspension", 1: "Profile", 2: "TempRate", 3: "Algorithm" }
+    ACTIVITY_EVENTS = { 1: "Sleep", 2: "Exercise", 3: "AutoBolus", 4: "CarbOnly" }
+
     @staticmethod
     def _epoch_parse(x):
         # data["x"] is an integer epoch timestamp which, when read as an equivalent timestamp
@@ -78,17 +81,19 @@ class TConnectEntry:
     @staticmethod
     def parse_bolus_entry(data):
         # All DateTime's are stored in the user's timezone.
+        complete = (data["ExtendedBolusIsComplete"] or data["BolusIsComplete"])
         extended_bolus = ("extended" in data["Description"].lower())
 
         return {
             "description": data["Description"],
+            "complete": "1" if complete else "",
             "completion": data["CompletionStatusDesc"] if not extended_bolus else data["BolexCompletionStatusDesc"],
-            "request_time": TConnectEntry._datetime_parse(data["RequestDateTime"]).format() if not extended_bolus else None,
-            "completion_time": TConnectEntry._datetime_parse(data["CompletionDateTime"]).format() if not extended_bolus else None,
+            "request_time": TConnectEntry._datetime_parse(data["RequestDateTime"]).format() if complete and not extended_bolus else None,
+            "completion_time": TConnectEntry._datetime_parse(data["CompletionDateTime"]).format() if complete and not extended_bolus else None,
             "insulin": data["InsulinDelivered"],
             "carbs": data["CarbSize"],
             "user_override": data["UserOverride"],
             "extended_bolus": "1" if extended_bolus else "",
-            "bolex_completion_time": TConnectEntry._datetime_parse(data["BolexCompletionDateTime"]).format() if extended_bolus else None,
-            "bolex_start_time": TConnectEntry._datetime_parse(data["BolexStartDateTime"]).format() if extended_bolus else None,
+            "bolex_completion_time": TConnectEntry._datetime_parse(data["BolexCompletionDateTime"]).format() if complete and extended_bolus else None,
+            "bolex_start_time": TConnectEntry._datetime_parse(data["BolexStartDateTime"]).format() if complete and extended_bolus else None,
         }
