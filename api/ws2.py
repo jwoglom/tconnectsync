@@ -46,7 +46,7 @@ class WS2Api:
         startDate = parse_date(start)
         endDate = parse_date(end)
 
-        req_text = self.get('therapytimeline2csv/%s/%s/%s' % (self.userGuid, startDate, endDate), {})
+        req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate), {})
 
         sections = self._split_empty_sections(req_text)
 
