@@ -2,7 +2,7 @@ import requests
 import datetime
 import csv
 
-from .common import parse_date, ApiException
+from .common import parse_date, base_headers, ApiException
 
 class WS2Api:
     BASE_URL = 'https://tconnectws2.tandemdiabetes.com/'
@@ -13,7 +13,7 @@ class WS2Api:
         self.userGuid = userGuid
 
     def get(self, endpoint, query):
-        r = requests.get(self.BASE_URL + endpoint, query)
+        r = requests.get(self.BASE_URL + endpoint, query, headers=base_headers())
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.text
