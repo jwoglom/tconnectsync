@@ -1,11 +1,10 @@
 # tconnectsync
 
-Tconnectsync synchronizes data one-way from the Tandem Diabetes t:connect application to Nightscout.
+Tconnectsync synchronizes data one-way from the Tandem Diabetes t:connect web/mobile application to Nightscout.
 
-If you have a t:slim X2 pump with the companion t:connect Android or iOS app, this will allow your pump bolus and basal data to be uploaded to Nightscout automatically. The t:connect Android app, by default, uploads pump data to Tandem's servers every hour, [but using this tool you can update the frequency to as low as every five minutes](https://github.com/jwoglom/tconnectpatcher)!
+If you have a t:slim X2 pump with the companion t:connect mobile Android or iOS app, this will allow your pump bolus and basal data to be uploaded to [Nightscout](https://github.com/nightscout/cgm-remote-monitor) automatically. The t:connect Android app, by default, uploads pump data to Tandem's servers every hour, [but using this tool you can update the frequency to as low as every five minutes](https://github.com/jwoglom/tconnectpatcher)! This allows for nearly real-time (but not instantaneous) pump data updates, almost like your pump uploads data directly to Nightscout!
 
-At a high level, tconnectsync works by querying Tandem's undocumented APIs to receive basal and bolus data from t:connect, and then uploads that data as treatment objects to [Nightscout](https://github.com/nightscout/cgm-remote-monitor).
-
+At a high level, tconnectsync works by querying Tandem's undocumented APIs to receive basal and bolus data from t:connect, and then uploads that data as treatment objects to Nightscout. It contains features for checking for new Tandem pump data continuously, and updating that data along with the pump's reported IOB value to Nightscout whenever there is new data.
 
 ## Tandem APIs
 
@@ -33,7 +32,7 @@ TIMEZONE_NAME = 'America/New_York'
 
 This file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect).
 
-I have only tested tconnectsync with a Tandem pump set in the US Eastern timezone. Tandem's undocumented APIs are [a bit loose with timezones](https://github.com/jwoglom/tconnectsync/blob/master/parser.py#L15), so please let me know if you notice any timezone-related bugs.
+I have only tested tconnectsync with a Tandem pump set in the US Eastern timezone. Tandem's (to us, undocumented) APIs are [a bit loose with timezones](https://github.com/jwoglom/tconnectsync/blob/d841c3811aeff3671d941a7d3ff4b80cce6a219e/parser.py#L16), so please let me know if you notice any timezone-related bugs.
 
 You can run the application using Pipenv. Assuming you have only Python 3 and pip installed, install pipenv with `pip3 install pipenv`. Then install tconnectsync's dependencies with `pipenv install`, and you can launch the program with `pipenv run python3 main.py`.
 
@@ -79,7 +78,7 @@ VENV=$($PIPENV --venv)
 
 source $VENV/bin/activate
 
-cd /var/www/tconnectsync
+cd /path/to/tconnectsync
 exec python3 -u main.py --auto-update
 ```
 
@@ -92,3 +91,5 @@ python3 main.py --start-date 2020-01-01 --end-date 2020-03-01
 ```
 
 In order to bulk-import a lot of data, you may need to use shorter intervals, and invoke tconnectsync multiple times. Tandem's API endpoints occasionally return invalid data if you request too large of a data window which causes tconnectsync to error out mid-way through.
+
+One oddity when backfilling data is that the Control:IQ specific API endpoints return errors if they are queried before you updated your pump to utilize Control:IQ. This is [partially worked around in tconnectsync's code](https://github.com/jwoglom/tconnectsync/blob/d841c3811aeff3671d941a7d3ff4b80cce6a219e/main.py#L238), but you might need to update the logic if you did not switch to a Control:IQ enabled pump immediately after launch.
