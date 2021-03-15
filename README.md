@@ -6,6 +6,15 @@ If you have a t:slim X2 pump with the companion t:connect Android or iOS app, th
 
 At a high level, tconnectsync works by querying Tandem's undocumented APIs to receive basal and bolus data from t:connect, and then uploads that data as treatment objects to [Nightscout](https://github.com/nightscout/cgm-remote-monitor).
 
+
+## Tandem APIs
+
+This application utilizes three separate Tandem APIs for obtaining t:connect data, referenced here by the identifying part of their URLs:
+
+* [**controliq**](https://github.com/jwoglom/tconnectsync/blob/master/api/controliq.py) - Contains Control:IQ related data, namely a timeline of all Basal events uploaded by the pump, separated by type (temp basals, algorithmically-updated basals, or profile-updated basals).
+* [**android**](https://github.com/jwoglom/tconnectsync/blob/master/api/android.py) - Used internally by the t:connect Android app, these API endpoints were discovered by reverse-engineering the Android app. Most of the API endpoints are used for uploading pump data, and tconnectsync uses one endpoint which returns the most recent event ID uploaded by the pump, so we know when more data has been uploaded.
+* [**tconnectws2**](https://github.com/jwoglom/tconnectsync/blob/master/api/ws2.py) - More legacy than the others, this seems to power the bulk of the main t:connect website. It is used to retrieve a CSV export of non-ControlIQ basal data, as well as bolus and IOB data. (I haven't found any mentions of bolus or IOB data in the Control:IQ-specific API.)
+
 ## Setup
 
 Create a file named `secret.py` containing configuration values. See `sample.py.example`:
@@ -24,7 +33,7 @@ TIMEZONE_NAME = 'America/New_York'
 
 This file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect).
 
-I have only tested tconnectsync with a Tandem pump set in the US Eastern timezone. Tandem's undocumented APIs are [a bit loose with timezone mechanic](https://github.com/jwoglom/tconnectsync/blob/master/parser.py#L15), so please let me know if there are any timezone-related problems if running a pump in a different timezone.
+I have only tested tconnectsync with a Tandem pump set in the US Eastern timezone. Tandem's undocumented APIs are [a bit loose with timezones](https://github.com/jwoglom/tconnectsync/blob/master/parser.py#L15), so please let me know if you notice any timezone-related bugs.
 
 You can run the application using Pipenv. Assuming you have only Python 3 and pip installed, install pipenv with `pip3 install pipenv`. Then install tconnectsync's dependencies with `pipenv install`, and you can launch the program with `pipenv run python3 main.py`.
 
