@@ -11,3 +11,6 @@ bs4 = "*"
 arrow = "*"
 lxml = "*"
 python-dotenv = "*"
+
+[scripts]
+tconnectsync = "python3 main.py"
