@@ -88,7 +88,14 @@ You can now continue to either the **Running with Cron** or **Running with Super
 
 First, [ensure that you have Docker running and installed](https://docs.docker.com/get-started/#download-and-install-docker).
 
-To build and launch the project:
+To download and run the `jwoglom/tconnectsync` prebuilt Docker image from [Docker Hub](https://hub.docker.com/r/jwoglom/tconnectsync):
+
+```bash
+$ docker pull jwoglom/tconnectsync:latest
+$ docker run tconnectsync --help
+```
+
+To instead build the image locally and launch the project:
 
 ```bash
 $ git clone https://github.com/jwoglom/tconnectsync
