@@ -3,7 +3,7 @@ import urllib
 import datetime
 from bs4 import BeautifulSoup
 
-from .common import parse_date, base_headers, ApiException
+from .common import parse_date, base_headers, ApiException, ApiLoginException
 
 class ControlIQApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/tconnect/controliq/api/'
@@ -14,8 +14,7 @@ class ControlIQApi:
     accessTokenExpiresAt = None
 
     def __init__(self, email, password):
-        if not self.login(email, password):
-            raise Exception('Unable to authenticate')
+        self.login(email, password)
 
     def login(self, email, password):
         with requests.Session() as s:
@@ -35,11 +34,12 @@ class ControlIQApi:
             }
             req = s.post(self.LOGIN_URL, data=data, headers={'Referer': self.LOGIN_URL, **base_headers()}, allow_redirects=False)
             if req.status_code != 302:
-                return False
+                raise ApiLoginException(req.status_code, 'Error logging in to t:connect. Check your login credentials.')
+
 
             fwd = s.post(urllib.parse.urljoin(self.LOGIN_URL, req.headers['Location']), cookies=req.cookies, headers=base_headers())
             if fwd.status_code != 200:
-                return False
+                raise ApiException(fwd.status_code, 'Error retrieving t:connect login cookies.')
 
             self.userGuid = req.cookies['UserGUID']
             self.accessToken = req.cookies['accessToken']

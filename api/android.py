@@ -8,7 +8,7 @@ import arrow
 
 from bs4 import BeautifulSoup
 
-from .common import ApiException
+from .common import ApiException, ApiLoginException
 
 class AndroidApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/'
@@ -30,7 +30,6 @@ class AndroidApi:
     def __init__(self, email, password):
         self.login(email, password)
 
-    # TODO: auto refresh token
     def login(self, email, password):
         r = requests.post(
             self.BASE_URL + self.OAUTH_TOKEN_PATH,
@@ -45,9 +44,12 @@ class AndroidApi:
         )
 
         if r.status_code != 200:
-            raise ApiException(r.status_code, 'Received HTTP %s during login: %s' % (r.status_code, r.text))
+            raise ApiLoginException(r.status_code, 'Received HTTP %s during login: %s' % (r.status_code, r.text))
 
         j = r.json()
+        if "user" not in j or not j["user"]:
+            raise ApiException(r.status_code, 'No user details present in AndroidApi oauth response')
+
         self.accessToken = j["accessToken"]
         self.accessTokenExpiresAt = j["accessTokenExpiresAt"]
         self.refreshToken = j["refreshToken"]

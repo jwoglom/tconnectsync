@@ -12,3 +12,6 @@ class ApiException(Exception):
     def __init__(self, status_code, text, *args, **kwargs):
         self.status_code = status_code
         super().__init__(text, *args, **kwargs)
+
+class ApiLoginException(ApiException):
+    pass
