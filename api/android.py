@@ -48,7 +48,7 @@ class AndroidApi:
 
         j = r.json()
         if "user" not in j or not j["user"]:
-            raise ApiException(r.status_code, 'No user details present in AndroidApi oauth response')
+            raise ApiException(r.status_code, 'No user details present in AndroidApi oauth response: %s' % r.text)
 
         self.accessToken = j["accessToken"]
         self.accessTokenExpiresAt = j["accessTokenExpiresAt"]
