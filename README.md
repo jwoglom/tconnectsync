@@ -22,18 +22,18 @@ Create a file named `.env` containing configuration values. You should specify t
 
 ```bash
 # Your credentials for t:connect
-TCONNECT_EMAIL=email@email.com
-TCONNECT_PASSWORD=password
+TCONNECT_EMAIL='email@email.com'
+TCONNECT_PASSWORD='password'
 
 # Your pump's serial number (numeric)
 PUMP_SERIAL_NUMBER=11111111
 
 # URL and API secret for Nightscout
-NS_URL=https://yournightscouturl/
-NS_SECRET=apisecret
+NS_URL='https://yournightscouturl/'
+NS_SECRET='apisecret'
 
 # Current timezone of the pump
-TIMEZONE_NAME=America/New_York
+TIMEZONE_NAME='America/New_York'
 ```
 
 This file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect).
