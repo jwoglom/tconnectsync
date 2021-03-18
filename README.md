@@ -1,5 +1,7 @@
 # tconnectsync
 
+![Python Package workflow](https://github.com/jwoglom/tconnectsync/actions/workflows/python-package.yml/badge.svg)
+
 Tconnectsync synchronizes data one-way from the Tandem Diabetes t:connect web/mobile application to Nightscout.
 
 If you have a t:slim X2 pump with the companion t:connect mobile Android or iOS app, this will allow your pump bolus and basal data to be uploaded to [Nightscout](https://github.com/nightscout/cgm-remote-monitor) automatically. The t:connect Android app, by default, uploads pump data to Tandem's servers every hour, [but using this tool you can update the frequency to as low as every five minutes](https://github.com/jwoglom/tconnectpatcher)! This allows for nearly real-time (but not instantaneous) pump data updates, almost like your pump uploads data directly to Nightscout!
