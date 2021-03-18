@@ -2,7 +2,7 @@ import sys
 import arrow
 
 try:
-    from secret import TIMEZONE_NAME
+    from .secret import TIMEZONE_NAME
 except Exception:
     print('Unable to import parser secrets from secret.py')
     sys.exit(1)

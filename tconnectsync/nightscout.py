@@ -5,7 +5,7 @@ import time
 import urllib.parse
 
 try:
-    from secret import NS_URL, NS_SECRET, TIMEZONE_NAME
+    from .secret import NS_URL, NS_SECRET, TIMEZONE_NAME
 except Exception:
     print('Unable to import Nightscout secrets from secret.py')
     sys.exit(1)

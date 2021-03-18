@@ -14,7 +14,7 @@ from tconnectsync.api.common import ApiException
 from tconnectsync.process import process_time_range
 
 try:
-    from secret import (
+    from tconnectsync.secret import (
         TCONNECT_EMAIL,
         TCONNECT_PASSWORD,
         PUMP_SERIAL_NUMBER,
