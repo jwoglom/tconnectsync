@@ -13,7 +13,8 @@ from ..parser.tconnect import TConnectEntry
 
 
 """
-Merges together input from the therapy timeline API into a digestable format of basal data.
+Merges together input from the therapy timeline API
+into a digestable format of basal data.
 """
 def process_ciq_basal_events(data):
     if data is None:
@@ -43,7 +44,8 @@ def process_ciq_basal_events(data):
     return basalEvents
 
 """
-Processes basal data input from the therapy timeline CSV (which only exists for pre Control-IQ data) into a digestable format.
+Processes basal data input from the therapy timeline CSV (which only
+exists for pre Control-IQ data) into a digestable format.
 """
 def add_csv_basal_events(basalEvents, data):
     last_entry = {}
