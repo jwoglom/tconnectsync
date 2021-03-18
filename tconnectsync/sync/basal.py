@@ -1,13 +1,15 @@
 import arrow
 
-from ..nightscout import (
+from ..parser.nightscout import (
     BASAL_EVENTTYPE,
-    NightscoutEntry,
+    NightscoutEntry
+)
+from ..nightscout import (
     last_uploaded_nightscout_entry,
     put_nightscout,
     upload_nightscout
 )
-from ..parser import TConnectEntry
+from ..parser.tconnect import TConnectEntry
 
 
 """
@@ -44,7 +46,7 @@ def process_ciq_basal_events(data):
 Processes basal data input from the therapy timeline CSV (which only exists for pre Control-IQ data) into a digestable format.
 """
 def add_csv_basal_events(basalEvents, data):
-    last_entry = None
+    last_entry = {}
     for row in data:
         entry = TConnectEntry.parse_csv_basal_entry(row)
         if last_entry:

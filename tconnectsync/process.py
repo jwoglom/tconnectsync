@@ -23,14 +23,14 @@ If pretend is true, then doesn't actually write data to Nightscout.
 def process_time_range(tconnect, time_start, time_end, pretend):
     print("Downloading t:connect ControlIQ data")
     try:
-        ciqBasalData = tconnect.controliq.therapy_timeline(time_start, time_end)
+        ciqTherapyTimelineData = tconnect.controliq.therapy_timeline(time_start, time_end)
     except ApiException as e:
         # The ControlIQ API returns a 404 if the user did not have a ControlIQ enabled
         # device in the time range which is queried. Since it launched in early 2020,
         # ignore 404's before February.
         if e.status_code == 404 and time_start.date() < datetime.date(2020, 2, 1):
             print("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
-            ciqBasalData = None
+            ciqTherapyTimelineData = None
         else:
             raise e
 
@@ -47,7 +47,7 @@ def process_time_range(tconnect, time_start, time_end, pretend):
 
     added = 0
 
-    basalEvents = process_ciq_basal_events(ciqBasalData)
+    basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
     if csvBasalData:
         add_csv_basal_events(basalEvents, csvBasalData)
 

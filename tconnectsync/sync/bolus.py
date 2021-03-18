@@ -1,13 +1,15 @@
 import arrow
 
-from ..nightscout import (
+from ..parser.nightscout import (
     BOLUS_EVENTTYPE,
-    NightscoutEntry,
+    NightscoutEntry
+)
+from ..nightscout import (
     last_uploaded_nightscout_entry,
     put_nightscout,
     upload_nightscout
 )
-from ..parser import TConnectEntry
+from ..parser.tconnect import TConnectEntry
 
 """
 Given bolus data input from the therapy timeline CSV, converts it into a digestable format.

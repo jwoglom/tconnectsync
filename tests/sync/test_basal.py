@@ -2,7 +2,7 @@
 
 import unittest
 from tconnectsync.sync.basal import process_ciq_basal_events
-from tconnectsync.parser import TConnectEntry
+from tconnectsync.parser.tconnect import TConnectEntry
 
 class TestBasalSync(unittest.TestCase):
     base = {

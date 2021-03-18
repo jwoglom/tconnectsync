@@ -1,13 +1,15 @@
 import arrow
 
-from ..nightscout import (
+from ..parser.nightscout import (
     IOB_ACTIVITYTYPE,
-    NightscoutEntry,
+    NightscoutEntry
+)
+from ..nightscout import (
     last_uploaded_nightscout_activity,
     delete_nightscout,
     upload_nightscout
 )
-from ..parser import TConnectEntry
+from ..parser.tconnect import TConnectEntry
 
 """
 Given IOB data input from the therapy timeline CSV, converts it into a digestable format.

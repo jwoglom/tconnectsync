@@ -2,11 +2,15 @@ import sys
 import arrow
 
 try:
-    from .secret import TIMEZONE_NAME
+    from ..secret import TIMEZONE_NAME
 except Exception:
     print('Unable to import parser secrets from secret.py')
     sys.exit(1)
 
+"""
+Conversion methods for parsing raw t:connect data into
+a more digestable format, which is used internally.
+"""
 class TConnectEntry:
     BASAL_EVENTS = { 0: "Suspension", 1: "Profile", 2: "TempRate", 3: "Algorithm" }
     ACTIVITY_EVENTS = { 1: "Sleep", 2: "Exercise", 3: "AutoBolus", 4: "CarbOnly" }
