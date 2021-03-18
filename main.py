@@ -9,10 +9,10 @@ import arrow
 import argparse
 import time
 
-from api import TConnectApi
-from api.common import ApiException
-from parser import TConnectEntry
-from nightscout import (
+from tconnectsync.api import TConnectApi
+from tconnectsync.api.common import ApiException
+from tconnectsync.parser import TConnectEntry
+from tconnectsync.nightscout import (
     NightscoutEntry,
     upload_nightscout,
     delete_nightscout,
