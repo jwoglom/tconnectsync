@@ -1,7 +1,12 @@
 import time
 
 from .process import process_time_range
-from .secret import PUMP_SERIAL_NUMBER
+from .secret import (
+    PUMP_SERIAL_NUMBER,
+    AUTOUPDATE_DEFAULT_SLEEP_SECONDS,
+    AUTOUPDATE_MAX_SLEEP_SECONDS,
+    AUTOUPDATE_USE_FIXED_SLEEP
+)
 
 """
 Performs the auto-update functionality. Runs indefinitely in a loop
@@ -40,12 +45,16 @@ def process_auto_update(tconnect, time_start, time_end, pretend):
                 time.sleep(60)
                 continue
 
-        sleep_secs = 60
-        if len(time_diffs) > 10:
-            time_diffs = time_diffs[1:]
+        sleep_secs = AUTOUPDATE_DEFAULT_SLEEP_SECONDS
+        if AUTOUPDATE_USE_FIXED_SLEEP != 1:
+            if len(time_diffs) > 10:
+                time_diffs = time_diffs[1:]
 
-        if len(time_diffs) > 2:
-            sleep_secs = sum(time_diffs) / len(time_diffs)
+            if len(time_diffs) > 2:
+                sleep_secs = sum(time_diffs) / len(time_diffs)
+
+            if sleep_secs > AUTOUPDATE_MAX_SLEEP_SECONDS:
+                sleep_secs = AUTOUPDATE_MAX_SLEEP_SECONDS
 
         # Sleep for a rolling average of time between updates
         print('Sleeping for', sleep_secs, 'sec')
