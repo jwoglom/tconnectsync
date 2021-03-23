@@ -8,6 +8,7 @@ import argparse
 from tconnectsync.api import TConnectApi
 from tconnectsync.process import process_time_range
 from tconnectsync.autoupdate import process_auto_update
+from tconnectsync.check import check_login
 
 try:
     from tconnectsync.secret import (
@@ -26,6 +27,7 @@ def parse_args():
     parser.add_argument('--end-date', dest='end_date', type=str, default=None, help='The newest date to process data until (inclusive). Must be specified with --start-date.')
     parser.add_argument('--days', dest='days', type=int, default=1, help='The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.')
     parser.add_argument('--auto-update', dest='auto_update', action='store_const', const=True, default=False, help='If set, continuously checks for updates from t:connect and syncs with Nightscout.')
+    parser.add_argument('--check-login', dest='check_login', action='store_const', const=True, default=False, help='If set, checks that the provided t:connect credentials can be used to log in.')
 
     return parser.parse_args()
 
@@ -46,6 +48,9 @@ def main():
         raise Exception('time_start must be before time_end')
 
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
+
+    if args.check_login:
+        return check_login(tconnect, time_start, time_end)
 
     if args.auto_update:
         print("Starting auto-update between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
