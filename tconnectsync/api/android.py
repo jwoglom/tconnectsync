@@ -10,6 +10,10 @@ from bs4 import BeautifulSoup
 
 from .common import ApiException, ApiLoginException
 
+"""
+The AndroidApi class contains methods which are queried in the t:connect
+Android application.
+"""
 class AndroidApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/'
     OAUTH_TOKEN_PATH = 'cloud/oauth2/token'
@@ -84,3 +88,21 @@ class AndroidApi:
     """
     def last_event_uploaded(self, pump_serial_number):
         return self.get('cloud/upload/getlasteventuploaded?sn=%d' % pump_serial_number)
+
+    """
+    Returns BG and pump threshold values.
+    {'targetBGHigh': <integer>, 'targetBGLow': <integer>, 'hypoThreshold': <integer>,
+     'hyperThreshold': <integer>, 'siteChangeThreshold': <integer>,
+     'cartridgeChangeThreshold': <integer>, 'tubingChangeThreshold': <integer>}
+    """
+    def therapy_thresholds(self):
+        return self.get('cloud/usersettings/api/therapythresholds?userId=%s' % self.userId)
+
+    """
+    Returns general user information.
+    {'firstName': <string>, 'lastName': <string>, 'birthDate': 'YYYY-MM-DDT00:00:00.000Z',
+     'emailAddress': <string>, 'secretQuestion': <string>, 'secretAnswer': <string>,
+     'secretQuestionId': <integer>}
+    """
+    def patient_info(self):
+        return self.get('cloud/account/patient_info')

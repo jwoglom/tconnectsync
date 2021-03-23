@@ -57,11 +57,30 @@ class ControlIQApi:
             raise ApiException(r.status_code, "ControlIQ API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.json()
 
+    """
+    Returns detailed basal event information and reasons for delivery suspension.
+    """
     def therapy_timeline(self, start=None, end=None):
         startDate = parse_date(start)
         endDate = parse_date(end)
 
         return self.get('therapytimeline/users/%s' % (self.userGuid), {
+            "startDate": startDate,
+            "endDate": endDate
+        })
+
+    """
+    Returns a summary of pump and cgm activity.
+    {'averageReading': <integer>, 'timeInUseMinutes': <integer>, 'controlIqSetToOffMinutes': <integer>,
+    'cgmInactiveMinutes': <integer>, 'pumpInactiveMinutes': <integer>, 'averageDailySleepMinutes': <integer>,
+    'weeklyExerciseEvents': <integer>, 'timeInUsePercent': <integer>, 'controlIqOffPercent': <integer>,
+    'cgmInactivePercent': <integer>, 'pumpInactivePercent': <integer>, 'totalDays': <integer>}
+    """
+    def dashboard_summary(self, start, end):
+        startDate = parse_date(start)
+        endDate = parse_date(end)
+
+        return self.get('summary/users/%s' % (self.userGuid), {
             "startDate": startDate,
             "endDate": endDate
         })
