@@ -18,6 +18,18 @@ class WS2Api:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.text
 
+    def get_jsonp(self, endpoint):
+        r = requests.get(self.BASE_URL + endpoint, {'callback': 'cb'}, headers=base_headers())
+        if r.status_code != 200:
+            raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
+
+        t = r.text.strip()
+        if t.startswith('cb('):
+            t = t[3:]
+        if t.endswith(')'):
+            t = t[:-1]
+
+        return t
 
     def _split_empty_sections(self, text):
         sections = [[]]
@@ -74,3 +86,12 @@ class WS2Api:
             "basalData": self._csv_to_dict(basalData),
             "bolusData": self._csv_to_dict(bolusData)
         }
+
+    """
+    Returns info on BasalIQ in JSONP format.
+    """
+    def basaliqtech(self, start=None, end=None):
+        startDate = parse_date(start)
+        endDate = parse_date(end)
+
+        return self.get_jsonp('basaliqtech/%s/%s/%s' % (self.userGuid, startDate, endDate))

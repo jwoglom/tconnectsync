@@ -12,7 +12,8 @@ from .common import ApiException, ApiLoginException
 
 """
 The AndroidApi class contains methods which are queried in the t:connect
-Android application.
+Android application. These methods are a part of the tdc API which require
+Android specific credentials.
 """
 class AndroidApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/'
@@ -90,6 +91,20 @@ class AndroidApi:
         return self.get('cloud/upload/getlasteventuploaded?sn=%d' % pump_serial_number)
 
     """
+    Returns user login information about a tconnect account.
+    {'firstName': <string>, 'lastName': <string>, 'birthDate': 'YYYY-MM-DDT00:00:00.000Z',
+     'emailAddress': <string>, 'secretQuestion': <string>, 'secretAnswer': <string>,
+     'secretQuestionId': <integer>}
+    """
+    def patient_info(self):
+        return self.get('cloud/account/patient_info')
+
+
+    # TODO: these methods are used in the web app, not the Android app,
+    # but support the same auth tokens and are on this domain. They should
+    # be moved to a new Api class.
+
+    """
     Returns BG and pump threshold values.
     {'targetBGHigh': <integer>, 'targetBGLow': <integer>, 'hypoThreshold': <integer>,
      'hyperThreshold': <integer>, 'siteChangeThreshold': <integer>,
@@ -99,10 +114,12 @@ class AndroidApi:
         return self.get('cloud/usersettings/api/therapythresholds?userId=%s' % self.userId)
 
     """
-    Returns general user information.
-    {'firstName': <string>, 'lastName': <string>, 'birthDate': 'YYYY-MM-DDT00:00:00.000Z',
-     'emailAddress': <string>, 'secretQuestion': <string>, 'secretAnswer': <string>,
-     'secretQuestionId': <integer>}
+    Returns therapy-related user information about a tconnect account.
+    {'userID': <string>, 'targetBgHigh': <integer>, 'targetBgLow': <integer>,
+     'hypoThreshold': <integer>, 'hyperThreshold': <integer>,
+     'dateOfBirth': 'YYYY-MM-DDT00:00:00', 'age': <integer>,
+     'patientFullName': <string>, 'caregiverDateOfBirth': <string>,
+     'hasCGM': <bool>, 'hasBASALIQ': <bool>, 'hasControlIQ': <bool>}
     """
-    def patient_info(self):
-        return self.get('cloud/account/patient_info')
+    def user_profile(self):
+        return self.get('cloud/usersettings/api/UserProfile?userId=%s' % self.userId)
