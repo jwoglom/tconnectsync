@@ -94,7 +94,7 @@ To download and run the `jwoglom/tconnectsync` prebuilt Docker image from [Docke
 
 ```bash
 $ docker pull jwoglom/tconnectsync:latest
-$ docker run tconnectsync --help
+$ docker run jwoglom/tconnectsync --help
 ```
 
 To instead build the image locally and launch the project:
