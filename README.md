@@ -20,7 +20,7 @@ This application utilizes three separate Tandem APIs for obtaining t:connect dat
 
 ## Setup
 
-Create a file named `.env` containing configuration values. You should specify the following parameters:
+Create a file named `.env` containing configuration values inside the checked-out tconnectsync folder (the same folder as `main.py`). You should specify the following parameters:
 
 ```bash
 # Your credentials for t:connect
@@ -61,7 +61,7 @@ If run with the `--auto-update` flag, then the application performs the followin
 You can run the application using Pipenv. Assuming you have only Python 3 and pip installed, install pipenv with `pip3 install pipenv`. Then install tconnectsync's dependencies with `pipenv install`, and you can launch the program with `pipenv run tconnectsync` (which, through an alias defined in `Pipfile`, runs ``pipenv run python3 main.py`).
 
 ```bash
-$ git clone https://github.com/jwoglom/tconnectsync
+$ git clone https://github.com/jwoglom/tconnectsync && cd tconnectsync
 $ pip3 install pipenv
 $ pipenv install
 $ pipenv run tconnectsync --help
