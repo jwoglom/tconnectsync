@@ -4,11 +4,6 @@ from ..parser.nightscout import (
     BOLUS_EVENTTYPE,
     NightscoutEntry
 )
-from ..nightscout import (
-    last_uploaded_nightscout_entry,
-    put_nightscout,
-    upload_nightscout
-)
 from ..parser.tconnect import TConnectEntry
 
 """
@@ -35,8 +30,8 @@ def process_bolus_events(bolusdata):
 """
 Given processed bolus data, adds bolus events to Nightscout.
 """
-def ns_write_bolus_events(bolusEvents, pretend=False):
-    last_upload = last_uploaded_nightscout_entry(BOLUS_EVENTTYPE)
+def ns_write_bolus_events(nightscout, bolusEvents, pretend=False):
+    last_upload = nightscout.last_uploaded_entry(BOLUS_EVENTTYPE)
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
@@ -60,6 +55,6 @@ def ns_write_bolus_events(bolusEvents, pretend=False):
 
         print("  Processing bolus:", event, "entry:", entry)
         if not pretend:
-            upload_nightscout(entry)
+            nightscout.upload_entry(entry)
 
     return add_count

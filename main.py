@@ -9,11 +9,14 @@ from tconnectsync.api import TConnectApi
 from tconnectsync.process import process_time_range
 from tconnectsync.autoupdate import process_auto_update
 from tconnectsync.check import check_login
+from tconnectsync.nightscout import NightscoutApi
 
 try:
     from tconnectsync.secret import (
         TCONNECT_EMAIL,
-        TCONNECT_PASSWORD
+        TCONNECT_PASSWORD,
+        NS_URL,
+        NS_SECRET
     )
 except Exception:
     print('Unable to read secret.py')
@@ -49,15 +52,17 @@ def main():
 
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
 
+    nightscout = NightscoutApi(NS_URL, NS_SECRET)
+
     if args.check_login:
         return check_login(tconnect, time_start, time_end)
 
     if args.auto_update:
         print("Starting auto-update between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
-        process_auto_update(tconnect, time_start, time_end, args.pretend)
+        process_auto_update(tconnect, nightscout, time_start, time_end, args.pretend)
     else:
         print("Processing data between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
-        added = process_time_range(tconnect, time_start, time_end, args.pretend)
+        added = process_time_range(tconnect, nightscout, time_start, time_end, args.pretend)
         print("Added", added, "items")
 
 if __name__ == '__main__':

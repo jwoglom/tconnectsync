@@ -12,7 +12,7 @@ from .secret import (
 Performs the auto-update functionality. Runs indefinitely in a loop
 until stopped (ctrl+c).
 """
-def process_auto_update(tconnect, time_start, time_end, pretend):
+def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
     # Read from android api, find exact interval to cut down on API calls
     # Refresh API token. If failure, die, have wrapper script re-run.
 
@@ -28,7 +28,7 @@ def process_auto_update(tconnect, time_start, time_end, pretend):
             if pretend:
                 print('Would update now')
             else:
-                added = process_time_range(tconnect, time_start, time_end, pretend)
+                added = process_time_range(tconnect, nightscout, time_start, time_end, pretend)
                 print('Added', added, 'items')
 
             if last_event_index:
