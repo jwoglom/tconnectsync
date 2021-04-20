@@ -5,7 +5,7 @@ from tconnectsync.parser.tconnect import TConnectEntry
 
 class TestTConnectEntry(unittest.TestCase):
     def test_parse_ciq_basal_entry(self):
-        self.assertEquals(
+        self.assertEqual(
             TConnectEntry.parse_ciq_basal_entry({
                 "y": 0.8,
                 "duration": 1221,
@@ -19,7 +19,7 @@ class TestTConnectEntry(unittest.TestCase):
             }
         )
 
-        self.assertEquals(
+        self.assertEqual(
             TConnectEntry.parse_ciq_basal_entry({
                 "y": 0.797,
                 "duration": 300,
