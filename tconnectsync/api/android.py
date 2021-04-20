@@ -57,13 +57,15 @@ class AndroidApi:
 
         self.accessToken = j["accessToken"]
         self.accessTokenExpiresAt = j["accessTokenExpiresAt"]
+        # NOTE: the refresh token is currently unused, instead a new access
+        # token is obtained from scratch by re-logging in when it expires.
         self.refreshToken = j["refreshToken"]
         self.refreshTokenExpiresAt = j["refreshTokenExpiresAt"]
         self.userId = j["user"]["id"]
         self.patientObjectId = j["user"]["patientObjectId"]
 
     def needs_relogin(self):
-        diff = (arrow.get(self.refreshTokenExpiresAt) - arrow.get())
+        diff = (arrow.get(self.accessTokenExpiresAt) - arrow.get())
         return (diff.seconds <= 5 * 60)
 
     def api_headers(self):
