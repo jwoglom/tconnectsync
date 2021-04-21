@@ -8,6 +8,9 @@ class ControlIQApi(tconnectsync.api.controliq.ControlIQApi):
     def login(self, email, password):
         raise NotImplementedError
 
+    def needs_relogin(self):
+        return False
+
     def get(self, endpoint, query):
         raise NotImplementedError
 
