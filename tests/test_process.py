@@ -167,7 +167,10 @@ class TestProcessTimeRange(unittest.TestCase):
         tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
 
         def fake_therapy_timeline_csv(time_start, time_end):
-            return TestBolusSync.get_example_csv_bolus_events()
+            return {
+                **self.stub_therapy_timeline_csv(time_start, time_end),
+                "bolusData": TestBolusSync.get_example_csv_bolus_events(),
+            }
 
         tconnect.ws2.therapy_timeline_csv = fake_therapy_timeline_csv
 

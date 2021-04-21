@@ -1,152 +1,34 @@
 #!/usr/bin/env python3
 
 import unittest
+
+from tconnectsync.sync.bolus import process_bolus_events
 from tconnectsync.parser.tconnect import TConnectEntry
 
+from ..parser.test_tconnect import TestTConnectEntryBolus
+
 class TestBolusSync(unittest.TestCase):
-    base = {
-        "readingData": [],
-        "iobData": [],
-        "basalData": [],
-        "bolusData": []
-    }
 
     @staticmethod
     def get_example_csv_bolus_events():
-        data = TestBolusSync.base.copy()
-        data["bolusData"] = [
-            {
-                "Type": "Bolus",
-                "Description": "Standard/Correction",
-                "BG": "141",
-                "IOB": "",
-                "BolusRequestID": "7001.000",
-                "BolusCompletionID": "7001.000",
-                "CompletionDateTime": "2021-04-01T12:58:26",
-                "InsulinDelivered": "13.53",
-                "FoodDelivered": "12.50",
-                "CorrectionDelivered": "1.03",
-                "CompletionStatusID": "3",
-                "CompletionStatusDesc": "Completed",
-                "BolusIsComplete": "1",
-                "BolexCompletionID": "",
-                "BolexSize": "",
-                "BolexStartDateTime": "",
-                "BolexCompletionDateTime": "",
-                "BolexInsulinDelivered": "",
-                "BolexIOB": "",
-                "BolexCompletionStatusID": "",
-                "BolexCompletionStatusDesc": "",
-                "ExtendedBolusIsComplete": "",
-                "EventDateTime": "2021-04-01T12:53:36",
-                "RequestDateTime": "2021-04-01T12:53:36",
-                "BolusType": "Carb",
-                "BolusRequestOptions": "Standard/Correction",
-                "StandardPercent": "100.00",
-                "Duration": "0",
-                "CarbSize": "75",
-                "UserOverride": "0",
-                "TargetBG": "110",
-                "CorrectionFactor": "30.00",
-                "FoodBolusSize": "12.50",
-                "CorrectionBolusSize": "1.03",
-                "ActualTotalBolusRequested": "13.53",
-                "IsQuickBolus": "0",
-                "EventHistoryReportEventDesc": "0",
-                "EventHistoryReportDetails": "Correction & Food Bolus",
-                "NoteID": "CF 1:30 - Carb Ratio 1:6 - Target BG 110",
-                "IndexID": "0",
-                "Note": "1181649"
-            }, {
-                "Type": "Bolus",
-                "Description": "Standard",
-                "BG": "159",
-                "IOB": "2.13",
-                "BolusRequestID": "7007.000",
-                "BolusCompletionID": "7007.000",
-                "CompletionDateTime": "2021-04-01T23:23:17",
-                "InsulinDelivered": "1.25",
-                "FoodDelivered": "0.00",
-                "CorrectionDelivered": "0.00",
-                "CompletionStatusID": "3",
-                "CompletionStatusDesc": "Completed",
-                "BolusIsComplete": "1",
-                "BolexCompletionID": "",
-                "BolexSize": "",
-                "BolexStartDateTime": "",
-                "BolexCompletionDateTime": "",
-                "BolexInsulinDelivered": "",
-                "BolexIOB": "",
-                "BolexCompletionStatusID": "",
-                "BolexCompletionStatusDesc": "",
-                "ExtendedBolusIsComplete": "",
-                "EventDateTime": "2021-04-01T23:21:58",
-                "RequestDateTime": "2021-04-01T23:21:58",
-                "BolusType": "Carb",
-                "BolusRequestOptions": "Standard",
-                "StandardPercent": "100.00",
-                "Duration": "0",
-                "CarbSize": "0",
-                "UserOverride": "1",
-                "TargetBG": "110",
-                "CorrectionFactor": "30.00",
-                "FoodBolusSize": "0.00",
-                "CorrectionBolusSize": "0.00",
-                "ActualTotalBolusRequested": "1.25",
-                "IsQuickBolus": "0",
-                "EventHistoryReportEventDesc": "0",
-                "EventHistoryReportDetails": "Food Bolus",
-                "NoteID": "CF 1:30 - Carb Ratio 1:6 - Target BG 110 | Override: Pump calculated Bolus = 0.0 units",
-                "IndexID": "0",
-                "Note": "1182867"
-            }, {
-                "Type": "Bolus",
-                "Description": "Automatic Bolus/Correction",
-                "BG": "",
-                "IOB": "3.24",
-                "BolusRequestID": "7010.000",
-                "BolusCompletionID": "7010.000",
-                "CompletionDateTime": "2021-04-02T01:00:47",
-                "InsulinDelivered": "1.70",
-                "FoodDelivered": "0.00",
-                "CorrectionDelivered": "1.70",
-                "CompletionStatusID": "3",
-                "CompletionStatusDesc": "Completed",
-                "BolusIsComplete": "1",
-                "BolexCompletionID": "",
-                "BolexSize": "",
-                "BolexStartDateTime": "",
-                "BolexCompletionDateTime": "",
-                "BolexInsulinDelivered": "",
-                "BolexIOB": "",
-                "BolexCompletionStatusID": "",
-                "BolexCompletionStatusDesc": "",
-                "ExtendedBolusIsComplete": "",
-                "EventDateTime": "2021-04-02T00:59:13",
-                "RequestDateTime": "2021-04-02T00:59:13",
-                "BolusType": "Automatic Correction",
-                "BolusRequestOptions": "Automatic Bolus/Correction",
-                "StandardPercent": "100.00",
-                "Duration": "0",
-                "CarbSize": "0",
-                "UserOverride": "0",
-                "TargetBG": "160",
-                "CorrectionFactor": "30.00",
-                "FoodBolusSize": "0.00",
-                "CorrectionBolusSize": "1.70",
-                "ActualTotalBolusRequested": "1.70",
-                "IsQuickBolus": "0",
-                "EventHistoryReportEventDesc": "0",
-                "EventHistoryReportDetails": "Correction Bolus",
-                "NoteID": "CF 1:30 - Carb Ratio 1:0 - Target BG 160",
-                "IndexID": "0",
-                "Note": "1183132"
-            }
+        return [
+            TestTConnectEntryBolus.entryStdCorrection,
+            TestTConnectEntryBolus.entryStd,
+            TestTConnectEntryBolus.entryStdAutomatic
         ]
 
-        return data
+    def test_process_bolus_events(self):
+        bolusData = TestBolusSync.get_example_csv_bolus_events()
 
-    # TODO
+        bolusEvents = process_bolus_events(bolusData)
+        self.assertEqual(len(bolusEvents), 3)
+
+        self.assertListEqual(bolusEvents, [
+            TConnectEntry.parse_bolus_entry(bolusData[0]),
+            TConnectEntry.parse_bolus_entry(bolusData[1]),
+            TConnectEntry.parse_bolus_entry(bolusData[2])
+        ])
+
 
 if __name__ == '__main__':
     unittest.main()

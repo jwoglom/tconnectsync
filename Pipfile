@@ -14,4 +14,4 @@ python-dotenv = "*"
 
 [scripts]
 tconnectsync = "python3 main.py"
-test = "python3 -m unittest discover"
+test = "python3 -m unittest discover -vv"

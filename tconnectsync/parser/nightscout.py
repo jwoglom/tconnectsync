@@ -25,8 +25,8 @@ class NightscoutEntry:
         return {
             "eventType": BOLUS_EVENTTYPE,
 			"created_at": created_at,
-			"carbs": carbs,
-			"insulin": bolus,
+			"carbs": int(carbs),
+			"insulin": float(bolus),
 			"notes": notes,
 			"enteredBy": ENTERED_BY,
         }
