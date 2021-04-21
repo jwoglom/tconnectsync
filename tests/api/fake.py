@@ -1,11 +1,9 @@
 import tconnectsync.api
 
 class ControlIQApi(tconnectsync.api.controliq.ControlIQApi):
-    BASE_URL = 'invalid://'
-    LOGIN_URL = 'invalid://'
-
     def __init__(self):
-        pass
+        self.BASE_URL = 'invalid://'
+        self.LOGIN_URL = 'invalid://'
 
     def login(self, email, password):
         raise NotImplementedError
@@ -14,10 +12,8 @@ class ControlIQApi(tconnectsync.api.controliq.ControlIQApi):
         raise NotImplementedError
 
 class WS2Api(tconnectsync.api.ws2.WS2Api):
-    BASE_URL = 'invalid://'
-
     def __init__(self):
-        pass
+        self.BASE_URL = 'invalid://'
 
     def get(self, endpoint, query):
         raise NotImplementedError
@@ -26,10 +22,8 @@ class WS2Api(tconnectsync.api.ws2.WS2Api):
         raise NotImplementedError
 
 class AndroidApi(tconnectsync.api.android.AndroidApi):
-    BASE_URL = 'invalid://'
-
     def __init__(self):
-        pass
+        self.BASE_URL = 'invalid://'
 
     def login(self, email, password):
         raise NotImplementedError
