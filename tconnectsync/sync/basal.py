@@ -79,6 +79,11 @@ def ns_write_basal_events(nightscout, basalEvents, pretend=False):
             # has newer info, then delete and recreate it.
             recent_needs_update = (round(last_upload["duration"]) < round(event["duration_mins"]))
 
+            # If the timestamps are identical, and the duration is identical, 
+            # then don't upload a duplicate entry of what we already have.
+            if not recent_needs_update:
+                continue
+
         reason = event["delivery_type"]
         if "suspendReason" in reason:
             reason += " (" + reason["suspendReason"] + ")"
