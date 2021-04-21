@@ -4,11 +4,6 @@ from ..parser.nightscout import (
     BASAL_EVENTTYPE,
     NightscoutEntry
 )
-from ..nightscout import (
-    last_uploaded_nightscout_entry,
-    put_nightscout,
-    upload_nightscout
-)
 from ..parser.tconnect import TConnectEntry
 
 
@@ -64,8 +59,8 @@ def add_csv_basal_events(basalEvents, data):
 """
 Given processed basal data, adds basal events to Nightscout.
 """
-def ns_write_basal_events(basalEvents, pretend=False):
-    last_upload = last_uploaded_nightscout_entry(BASAL_EVENTTYPE)
+def ns_write_basal_events(nightscout, basalEvents, pretend=False):
+    last_upload = nightscout.last_uploaded_entry(BASAL_EVENTTYPE)
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
@@ -83,6 +78,11 @@ def ns_write_basal_events(basalEvents, pretend=False):
             # If this entry has the same time as the most recent upload, but
             # has newer info, then delete and recreate it.
             recent_needs_update = (round(last_upload["duration"]) < round(event["duration_mins"]))
+
+            # If the timestamps are identical, and the duration is identical, 
+            # then don't upload a duplicate entry of what we already have.
+            if not recent_needs_update:
+                continue
 
         reason = event["delivery_type"]
         if "suspendReason" in reason:
@@ -102,8 +102,8 @@ def ns_write_basal_events(basalEvents, pretend=False):
             print("Replacing last uploaded entry:", last_upload)
             if not pretend:
                 entry['_id'] = last_upload['_id']
-                put_nightscout(entry, entity='treatments')
+                nightscout.put_entry(entry, entity='treatments')
         elif not pretend:
-            upload_nightscout(entry)
+            nightscout.upload_entry(entry)
 
     return add_count

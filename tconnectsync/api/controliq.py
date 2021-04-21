@@ -1,6 +1,8 @@
 import requests
 import urllib
 import datetime
+import arrow
+
 from bs4 import BeautifulSoup
 
 from .common import parse_date, base_headers, ApiException, ApiLoginException
@@ -45,6 +47,10 @@ class ControlIQApi:
             self.accessToken = req.cookies['accessToken']
             self.accessTokenExpiresAt = req.cookies['accessTokenExpiresAt']
             return True
+
+    def needs_relogin(self):
+        diff = (arrow.get(self.accessTokenExpiresAt) - arrow.get())
+        return (diff.seconds <= 5 * 60)
 
     def api_headers(self):
         if not self.accessToken:

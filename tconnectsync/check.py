@@ -1,7 +1,4 @@
-from .nightscout import api_status
-
-from .secret import PUMP_SERIAL_NUMBER
-
+from .nightscout import NightscoutApi
 
 """
 Attempts to authenticate with each t:connect API,
@@ -32,16 +29,24 @@ def check_login(tconnect, time_start, time_end):
         summary = tconnect.android.user_profile()
         print("Android user profile: %s" % summary)
 
+        from .secret import PUMP_SERIAL_NUMBER
+
         event = tconnect.android.last_event_uploaded(PUMP_SERIAL_NUMBER)
         print("\nAndroid last uploaded event: %s" % event)
+    except ImportError:
+        print("Error: Unable to load config file.")
     except Exception as e:
         print("Error occurred querying Android API: %s" % e)
         errors += 1
 
     print("\nLogging in to Nightscout...")
     try:
-        status = api_status()
+        from .secret import NS_URL, NS_SECRET
+
+        status = NightscoutApi(NS_URL, NS_SECRET).api_status()
         print("\nNightscout status: %s" % status)
+    except ImportError:
+        print("Error: Unable to load config file.")
     except Exception as e:
         print("Error occurred querying Nightscout API: %s" % e)
         errors += 1

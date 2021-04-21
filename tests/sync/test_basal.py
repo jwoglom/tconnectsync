@@ -18,8 +18,9 @@ class TestBasalSync(unittest.TestCase):
         "pumpFeatures": []
     }
 
-    def test_process_ciq_basal_events(self):
-        data = self.base.copy()
+    @staticmethod
+    def get_example_ciq_basal_events():
+        data = TestBasalSync.base.copy()
         data["basal"]["tempDeliveryEvents"] = [
             {
                 "y": 0.8,
@@ -54,6 +55,11 @@ class TestBasalSync(unittest.TestCase):
                 "x": 1615879821
             },
         ]
+
+        return data
+
+    def test_process_ciq_basal_events(self):
+        data = TestBasalSync.get_example_ciq_basal_events()
 
         basalEvents = process_ciq_basal_events(data)
         self.assertEqual(len(basalEvents), 4)

@@ -18,7 +18,7 @@ class TConnectApi:
 
     @property
     def controliq(self):
-        if self._ciq:
+        if self._ciq and not self._ciq.needs_relogin():
             return self._ciq
 
         self._ciq = ControlIQApi(self.email, self.password)

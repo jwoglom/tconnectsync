@@ -20,7 +20,7 @@ Given a TConnectApi object and start/end range, performs a single
 cycle of synchronizing data within the time range.
 If pretend is true, then doesn't actually write data to Nightscout.
 """
-def process_time_range(tconnect, time_start, time_end, pretend):
+def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
     print("Downloading t:connect ControlIQ data")
     try:
         ciqTherapyTimelineData = tconnect.controliq.therapy_timeline(time_start, time_end)
@@ -51,13 +51,12 @@ def process_time_range(tconnect, time_start, time_end, pretend):
     if csvBasalData:
         add_csv_basal_events(basalEvents, csvBasalData)
 
-    added += ns_write_basal_events(basalEvents, pretend=pretend)
-
+    added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend)
 
     bolusEvents = process_bolus_events(bolusData)
-    added += ns_write_bolus_events(bolusEvents, pretend=pretend)
+    added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend)
 
     iobEvents = process_iob_events(iobData)
-    added += ns_write_iob_events(iobEvents, pretend=pretend)
+    added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
 
     return added
