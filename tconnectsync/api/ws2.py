@@ -1,11 +1,16 @@
 import requests
 import datetime
 import csv
+import logging
 
 from .common import parse_date, base_headers, ApiException
 
+logger = logging.getLogger(__name__)
+
 class WS2Api:
     BASE_URL = 'https://tconnectws2.tandemdiabetes.com/'
+
+    MAX_RETRIES = 3
 
     userGuid = None
 
@@ -54,11 +59,18 @@ class WS2Api:
         return data
 
 
-    def therapy_timeline_csv(self, start=None, end=None):
+    def therapy_timeline_csv(self, start=None, end=None, tries=0):
         startDate = parse_date(start)
         endDate = parse_date(end)
 
-        req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate), {})
+        try:
+            req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate), {})
+        except ApiException as e:
+            if e.status_code == 500:
+                logger.error("HTTP 500 in therapy_timeline_csv (retry count %d): %s" % (tries, e))
+                if tries <= self.MAX_RETRIES:
+                    return self.therapy_timeline_csv(start, end, tries+1)
+            raise e
 
         sections = self._split_empty_sections(req_text)
 
