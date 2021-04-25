@@ -40,3 +40,11 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    - name: Generate Coverage Report
+      run: |
+        pip install coverage
+        coverage run -m unittest
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
