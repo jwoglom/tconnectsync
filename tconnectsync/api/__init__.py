@@ -29,6 +29,10 @@ class TConnectApi:
         if self._ws2:
             return self._ws2
 
+        # Trigger login or re-login via controliq api if necessary
+        # so userGuid can be accessed from it
+        self.controliq
+
         self._ws2 = WS2Api(self._ciq.userGuid)
         return self._ws2
 

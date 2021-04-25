@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class WS2Api:
     BASE_URL = 'https://tconnectws2.tandemdiabetes.com/'
 
-    MAX_RETRIES = 3
+    MAX_RETRIES = 2
 
     userGuid = None
 
@@ -68,7 +68,7 @@ class WS2Api:
         except ApiException as e:
             if e.status_code == 500:
                 logger.error("HTTP 500 in therapy_timeline_csv (retry count %d): %s" % (tries, e))
-                if tries <= self.MAX_RETRIES:
+                if tries < self.MAX_RETRIES:
                     return self.therapy_timeline_csv(start, end, tries+1)
             raise e
 
