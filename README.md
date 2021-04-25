@@ -1,6 +1,7 @@
 # tconnectsync
 
 ![Python Package workflow](https://github.com/jwoglom/tconnectsync/actions/workflows/python-package.yml/badge.svg)
+[![codecov](https://codecov.io/gh/jwoglom/tconnectsync/branch/master/graph/badge.svg)](https://codecov.io/gh/jwoglom/tconnectsync)
 
 Tconnectsync synchronizes data one-way from the Tandem Diabetes t:connect web/mobile application to Nightscout.
 
