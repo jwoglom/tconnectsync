@@ -2,6 +2,7 @@ import requests
 import urllib
 import datetime
 import arrow
+import time
 
 from bs4 import BeautifulSoup
 
@@ -17,6 +18,8 @@ class ControlIQApi:
 
     def __init__(self, email, password):
         self.login(email, password)
+        self._email = email
+        self._password = password
 
     def login(self, email, password):
         with requests.Session() as s:
@@ -57,11 +60,32 @@ class ControlIQApi:
             raise Exception('No access token provided')
         return {'Authorization': 'Bearer %s' % self.accessToken, **base_headers()}
 
-    def get(self, endpoint, query):
+    def _get(self, endpoint, query):
         r = requests.get(self.BASE_URL + endpoint, query, headers=self.api_headers())
+
         if r.status_code != 200:
             raise ApiException(r.status_code, "ControlIQ API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.json()
+
+
+    def get(self, endpoint, query, tries=0):
+        try:
+            return self._get(endpoint, query)
+        except ApiException as e:
+            if tries > 0:
+                raise ApiException(e.status_code, "ControlIQ API HTTP %d on retry #%d: %s", e.status_code, tries, e)
+
+            # Trigger automatic re-login, and try again once
+            if e.status_code == 401:
+                self.accessTokenExpiresAt = time.time()
+                self.login(self._email, self._password)
+
+                return self.get(endpoint, query, tries=tries+1)
+
+            if e.status_code == 500:
+                return self.get(endpoint, query, tries=tries+1)
+
+            raise e
 
     """
     Returns detailed basal event information and reasons for delivery suspension.

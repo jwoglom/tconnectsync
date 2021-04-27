@@ -11,7 +11,7 @@ class ControlIQApi(tconnectsync.api.controliq.ControlIQApi):
     def needs_relogin(self):
         return False
 
-    def get(self, endpoint, query):
+    def _get(self, endpoint, query):
         raise NotImplementedError
 
 class WS2Api(tconnectsync.api.ws2.WS2Api):
