@@ -3,12 +3,120 @@
 import unittest
 import itertools
 import datetime
+import json
+import requests_mock
+
+from bs4 import BeautifulSoup
 
 from .fake import ControlIQApi
 
-from tconnectsync.api.common import ApiException
+from tconnectsync.api.controliq import ControlIQApi as RealControlIQApi
+from tconnectsync.api.common import ApiException, ApiLoginException, base_headers
 
 class TestControlIQApi(unittest.TestCase):
+    LOGIN_HTML = """
+<html>
+<body>
+    <form method="post" action="./login.aspx?ReturnUrl=%2f" onsubmit="javascript:return WebForm_OnSubmit();" id="form1">
+        <div class="aspNetHidden">
+            <input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="" />
+            <input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+            <input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+            <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="AAAAA" />
+        </div>
+        <div class="aspNetHidden">
+            <input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="BBBBB" />
+            <input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="CCCCC" />
+        </div>
+    </form>
+</body>
+</html>
+    """
+
+    LOGIN_POST_DATA = {
+        "__LASTFOCUS": "",
+        "__EVENTTARGET": "ctl00$ContentBody$LoginControl$linkLogin",
+        "__EVENTARGUMENT": "",
+        "__VIEWSTATE": "AAAAA",
+        "__VIEWSTATEGENERATOR": "BBBBB",
+        "__EVENTVALIDATION": "CCCCC",
+        "ctl00$ContentBody$LoginControl$txtLoginEmailAddress": "email@email.com",
+        "txtLoginEmailAddress_ClientState": '{"enabled":true,"emptyMessage":"","validationText":"%s","valueAsString":"%s","lastSetTextBoxValue":"%s"}' % ("email@email.com", "email@email.com", "email@email.com"),
+        "ctl00$ContentBody$LoginControl$txtLoginPassword": "password",
+        "txtLoginPassword_ClientState": '{"enabled":true,"emptyMessage":"","validationText":"%s","valueAsString":"%s","lastSetTextBoxValue":"%s"}' % ("password", "password", "password")
+    }
+
+    def test_build_login_data(self):
+        ciq = ControlIQApi()
+        soup = BeautifulSoup(self.LOGIN_HTML, features='lxml')
+
+        self.assertDictEqual(
+            ciq._build_login_data('email@email.com', 'password', soup),
+            self.LOGIN_POST_DATA)
+
+    def test_login_successful(self):
+        ciq = ControlIQApi()
+        ciq.LOGIN_URL = RealControlIQApi.LOGIN_URL
+        ciq.login = lambda email, password: RealControlIQApi.login(ciq, email, password)
+
+        with requests_mock.Mocker() as m:
+            m.get('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
+                request_headers=base_headers(),
+
+                text=self.LOGIN_HTML)
+
+            def post_callback(request, context):
+                context.status_code = 302
+                context.headers['Location'] = '/newlocation'
+                context.cookies['UserGUID'] = 'user_guid'
+                context.cookies['accessToken'] = 'access_tok'
+                context.cookies['accessTokenExpiresAt'] = 'access_tok_expire'
+                return ''
+
+            m.post('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
+                request_headers={'Referer': ciq.LOGIN_URL, **base_headers()},
+
+                text=post_callback)
+
+            m.post('https://tconnect.tandemdiabetes.com/newlocation',
+                cookies={'cookie': 'value'},
+                headers=base_headers(),
+
+                status_code=200)
+
+            self.assertTrue(ciq.login('email@email.com', 'password'))
+
+            self.assertEqual(ciq.userGuid, 'user_guid')
+            self.assertEqual(ciq.accessToken, 'access_tok')
+            self.assertEqual(ciq.accessTokenExpiresAt, 'access_tok_expire')
+
+
+    def test_login_invalid_credentials(self):
+        ciq = ControlIQApi()
+        ciq.LOGIN_URL = RealControlIQApi.LOGIN_URL
+        ciq.login = lambda email, password: RealControlIQApi.login(ciq, email, password)
+
+        with requests_mock.Mocker() as m:
+            m.get('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
+                request_headers=base_headers(),
+
+                text=self.LOGIN_HTML)
+
+            def post_callback(request, context):
+                context.status_code = 200
+                return '<html><body>...</body></html>'
+
+            m.post('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
+                request_headers={'Referer': ciq.LOGIN_URL, **base_headers()},
+
+                text=post_callback)
+
+            self.assertRaises(ApiLoginException, ciq.login, 'email@email.com', 'password')
+
+            self.assertIsNone(ciq.userGuid)
+            self.assertIsNone(ciq.accessToken)
+            self.assertIsNone(ciq.accessTokenExpiresAt)
+
     def fake_get_with_http_code(self, http_code, expected_endpoint, num_times):
         tries = 0
         def fake_get(endpoint, query):
@@ -42,7 +150,7 @@ class TestControlIQApi(unittest.TestCase):
 
         ciq._get = self.fake_get_with_http_code(500, "therapytimeline/users/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", 2)
 
-        ex = self.assertRaises(ApiException, ciq.therapy_timeline, '2021-04-01', '2021-04-02')
+        self.assertRaises(ApiException, ciq.therapy_timeline, '2021-04-01', '2021-04-02')
 
     def test_therapy_timeline_triggers_relogin_after_single_http_401(self):
         ciq = ControlIQApi()
@@ -84,7 +192,7 @@ class TestControlIQApi(unittest.TestCase):
 
         ciq._get = self.fake_get_with_http_code(401, "therapytimeline/users/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", 2)
 
-        ex = self.assertRaises(ApiException, ciq.therapy_timeline, '2021-04-01', '2021-04-02')
+        self.assertRaises(ApiException, ciq.therapy_timeline, '2021-04-01', '2021-04-02')
 
         self.assertListEqual(hit_login, [
             ('email', 'password')

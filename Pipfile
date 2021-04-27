@@ -11,6 +11,7 @@ bs4 = "*"
 arrow = "*"
 lxml = "*"
 python-dotenv = "*"
+requests-mock = "*"
 
 [scripts]
 tconnectsync = "python3 main.py"

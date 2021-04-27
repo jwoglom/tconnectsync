@@ -11,7 +11,7 @@ def base_headers():
 class ApiException(Exception):
     def __init__(self, status_code, text, *args, **kwargs):
         self.status_code = status_code
-        super().__init__(text, *args, **kwargs)
+        super().__init__('%s (HTTP %s)' % (text, status_code), *args, **kwargs)
 
 class ApiLoginException(ApiException):
     pass

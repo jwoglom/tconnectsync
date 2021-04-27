@@ -25,18 +25,8 @@ class ControlIQApi:
         with requests.Session() as s:
             initial = s.get(self.LOGIN_URL, headers=base_headers())
             soup = BeautifulSoup(initial.content, features='lxml')
-            data = {
-                "__LASTFOCUS": "",
-                "__EVENTTARGET": "ctl00$ContentBody$LoginControl$linkLogin",
-                "__EVENTARGUMENT": "",
-                "__VIEWSTATE": soup.select_one("#__VIEWSTATE")["value"],
-                "__VIEWSTATEGENERATOR": soup.select_one("#__VIEWSTATEGENERATOR")["value"],
-                "__EVENTVALIDATION": soup.select_one("#__EVENTVALIDATION")["value"],
-                "ctl00$ContentBody$LoginControl$txtLoginEmailAddress": email,
-                "txtLoginEmailAddress_ClientState": '{"enabled":true,"emptyMessage":"","validationText":"%s","valueAsString":"%s","lastSetTextBoxValue":"%s"}' % (email, email, email),
-                "ctl00$ContentBody$LoginControl$txtLoginPassword": password,
-                "txtLoginPassword_ClientState": '{"enabled":true,"emptyMessage":"","validationText":"%s","valueAsString":"%s","lastSetTextBoxValue":"%s"}' % (password, password, password)
-            }
+            data = self._build_login_data(email, password, soup)
+
             req = s.post(self.LOGIN_URL, data=data, headers={'Referer': self.LOGIN_URL, **base_headers()}, allow_redirects=False)
             if req.status_code != 302:
                 raise ApiLoginException(req.status_code, 'Error logging in to t:connect. Check your login credentials.')
@@ -50,6 +40,20 @@ class ControlIQApi:
             self.accessToken = req.cookies['accessToken']
             self.accessTokenExpiresAt = req.cookies['accessTokenExpiresAt']
             return True
+
+    def _build_login_data(self, email, password, soup):
+        return {
+            "__LASTFOCUS": "",
+            "__EVENTTARGET": "ctl00$ContentBody$LoginControl$linkLogin",
+            "__EVENTARGUMENT": "",
+            "__VIEWSTATE": soup.select_one("#__VIEWSTATE")["value"],
+            "__VIEWSTATEGENERATOR": soup.select_one("#__VIEWSTATEGENERATOR")["value"],
+            "__EVENTVALIDATION": soup.select_one("#__EVENTVALIDATION")["value"],
+            "ctl00$ContentBody$LoginControl$txtLoginEmailAddress": email,
+            "txtLoginEmailAddress_ClientState": '{"enabled":true,"emptyMessage":"","validationText":"%s","valueAsString":"%s","lastSetTextBoxValue":"%s"}' % (email, email, email),
+            "ctl00$ContentBody$LoginControl$txtLoginPassword": password,
+            "txtLoginPassword_ClientState": '{"enabled":true,"emptyMessage":"","validationText":"%s","valueAsString":"%s","lastSetTextBoxValue":"%s"}' % (password, password, password)
+        }
 
     def needs_relogin(self):
         diff = (arrow.get(self.accessTokenExpiresAt) - arrow.get())
