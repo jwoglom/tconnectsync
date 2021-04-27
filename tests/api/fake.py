@@ -34,7 +34,7 @@ class AndroidApi(tconnectsync.api.android.AndroidApi):
     def needs_relogin(self):
         return False
 
-    def get(self, endpoint, query={}, **kwargs):
+    def _get(self, endpoint, query={}, **kwargs):
         raise NotImplementedError
 
 class TConnectApi(tconnectsync.api.TConnectApi):

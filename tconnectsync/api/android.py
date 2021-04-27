@@ -5,6 +5,7 @@ import datetime
 import csv
 import base64
 import arrow
+import time
 
 from bs4 import BeautifulSoup
 
@@ -34,6 +35,8 @@ class AndroidApi:
 
     def __init__(self, email, password):
         self.login(email, password)
+        self._email = email
+        self._password = password
 
     def login(self, email, password):
         r = requests.post(
@@ -73,11 +76,32 @@ class AndroidApi:
             raise Exception('No access token')
         return {'Authorization': 'Bearer %s' % self.accessToken}
 
-    def get(self, endpoint, query={}, **kwargs):
+    def _get(self, endpoint, query={}, **kwargs):
         r = requests.get(self.BASE_URL + endpoint, query, headers=self.api_headers(), **kwargs)
+
         if r.status_code != 200:
-            raise ApiException(r.status_code, "Internal API HTTP %s response: %s" % (str(r.status_code), r.text))
+            raise ApiException(r.status_code, "Android API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.json()
+
+    def get(self, endpoint, query={}, tries=0, **kwargs):
+        try:
+            return self._get(endpoint, query, **kwargs)
+        except ApiException as e:
+            if tries > 0:
+                raise ApiException(e.status_code, "Android API HTTP %s on retry #%d: %s" % (e.status_code, tries, e))
+
+            # Trigger automatic re-login, and try again once
+            if e.status_code == 401:
+                self.accessTokenExpiresAt = time.time()
+                self.login(self._email, self._password)
+
+                return self.get(endpoint, query, tries=tries+1, **kwargs)
+
+            if e.status_code == 500:
+                return self.get(endpoint, query, tries=tries+1, **kwargs)
+
+            raise e
+
 
     def post(self, endpoint, query={}, **kwargs):
         r = requests.post(self.BASE_URL + endpoint, query, headers=self.api_headers(), **kwargs)
