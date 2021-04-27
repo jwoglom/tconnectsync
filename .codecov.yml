@@ -1,0 +1,11 @@
+  status:
+    patch: no
+    changes: no
+    project:
+      default: false
+      tconnectsync:
+        paths: "tconnectsync/"
+        target: 75%
+      tests:
+        paths: "test/"
+        target: 95%
