@@ -82,7 +82,7 @@ class ControlIQApi:
         try:
             return self._get(endpoint, query)
         except ApiException as e:
-            logger.warn("Received ApiException in ControlIQApi with endpoint '%s' (tries %d): %s" % (endpoint, tries, e))
+            logger.warning("Received ApiException in ControlIQApi with endpoint '%s' (tries %d): %s" % (endpoint, tries, e))
             if tries > 0:
                 raise ApiException(e.status_code, "ControlIQ API HTTP %d on retry #%d: %s", e.status_code, tries, e)
 

@@ -70,7 +70,7 @@ class TestControlIQApi(unittest.TestCase):
                 context.headers['Location'] = '/newlocation'
                 context.cookies['UserGUID'] = 'user_guid'
                 context.cookies['accessToken'] = 'access_tok'
-                context.cookies['accessTokenExpiresAt'] = 'access_tok_expire'
+                context.cookies['accessTokenExpiresAt'] = '2021-05-04T11:18:08.381Z'
                 return ''
 
             m.post('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
@@ -88,7 +88,7 @@ class TestControlIQApi(unittest.TestCase):
 
             self.assertEqual(ciq.userGuid, 'user_guid')
             self.assertEqual(ciq.accessToken, 'access_tok')
-            self.assertEqual(ciq.accessTokenExpiresAt, 'access_tok_expire')
+            self.assertEqual(ciq.accessTokenExpiresAt, '2021-05-04T11:18:08.381Z')
 
 
     def test_login_invalid_credentials(self):

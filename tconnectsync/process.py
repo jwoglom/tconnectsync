@@ -36,7 +36,7 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
         # device in the time range which is queried. Since it launched in early 2020,
         # ignore 404's before February.
         if e.status_code == 404 and time_start.date() < datetime.date(2020, 2, 1):
-            logger.warn("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
+            logger.warning("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
             ciqTherapyTimelineData = None
         else:
             raise e
@@ -55,7 +55,7 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
         logger.debug(readingData[-1])
         logger.info("Last CGM reading from t:connect: %s (%s)" % (lastReading, timeago(lastReading)))
     else:
-        logger.warn("No last CGM reading is able to be determined")
+        logger.warning("No last CGM reading is able to be determined")
 
     added = 0
 
