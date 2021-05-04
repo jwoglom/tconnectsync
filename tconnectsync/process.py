@@ -1,6 +1,9 @@
 import logging
 import datetime
+import arrow
+import time
 
+from .util import timeago
 from .api.common import ApiException
 from .sync.basal import (
     process_ciq_basal_events,
@@ -15,6 +18,7 @@ from .sync.iob import (
     process_iob_events,
     ns_write_iob_events
 )
+from .parser.tconnect import TConnectEntry
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +50,10 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
     bolusData = csvdata["bolusData"]
 
     if readingData and len(readingData) > 0:
-        logger.info("Last CGM reading from t:connect: %s" % (readingData[-1]['EventDateTime'] if 'EventDateTime' in readingData[-1] else readingData))
+        lastReading = readingData[-1]['EventDateTime'] if 'EventDateTime' in readingData[-1] else 0
+        lastReading = TConnectEntry._datetime_parse(lastReading)
+        logger.debug(readingData[-1])
+        logger.info("Last CGM reading from t:connect: %s (%s)" % (lastReading, timeago(lastReading)))
     else:
         logger.warn("No last CGM reading is able to be determined")
 

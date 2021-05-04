@@ -6,10 +6,14 @@ import csv
 import base64
 import arrow
 import time
+import logging
 
 from bs4 import BeautifulSoup
 
+from ..util import timeago
 from .common import ApiException, ApiLoginException
+
+logger = logging.getLogger(__name__)
 
 """
 The AndroidApi class contains methods which are queried in the t:connect
@@ -66,6 +70,8 @@ class AndroidApi:
         self.refreshTokenExpiresAt = j["refreshTokenExpiresAt"]
         self.userId = j["user"]["id"]
         self.patientObjectId = j["user"]["patientObjectId"]
+
+        logger.info("Logged in to AndroidApi successfully (expiration: %s, %s)" % (self.accessTokenExpiresAt, timeago(self.accessTokenExpiresAt)))
 
     def needs_relogin(self):
         diff = (arrow.get(self.accessTokenExpiresAt) - arrow.get())

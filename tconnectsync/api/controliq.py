@@ -7,6 +7,7 @@ import logging
 
 from bs4 import BeautifulSoup
 
+from ..util import timeago
 from .common import parse_date, base_headers, ApiException, ApiLoginException
 
 logger = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ class ControlIQApi:
             self.userGuid = req.cookies['UserGUID']
             self.accessToken = req.cookies['accessToken']
             self.accessTokenExpiresAt = req.cookies['accessTokenExpiresAt']
+            logger.info("Logged in to ControlIQApi successfully (expiration: %s, %s)" % (self.accessTokenExpiresAt, timeago(self.accessTokenExpiresAt)))
             return True
 
     def _build_login_data(self, email, password, soup):

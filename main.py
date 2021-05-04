@@ -4,6 +4,7 @@ import sys
 import datetime
 import arrow
 import argparse
+import logging
 
 from tconnectsync.api import TConnectApi
 from tconnectsync.process import process_time_range
@@ -26,6 +27,7 @@ except Exception:
 def parse_args():
     parser = argparse.ArgumentParser(description="Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.")
     parser.add_argument('--pretend', dest='pretend', action='store_const', const=True, default=False, help='Pretend mode: do not upload any data to Nightscout.')
+    parser.add_argument('-v', '--verbose', dest='verbose', action='store_const', const=True, default=False, help='Verbose mode: show extra logging details')
     parser.add_argument('--start-date', dest='start_date', type=str, default=None, help='The oldest date to process data from. Must be specified with --end-date.')
     parser.add_argument('--end-date', dest='end_date', type=str, default=None, help='The newest date to process data until (inclusive). Must be specified with --start-date.')
     parser.add_argument('--days', dest='days', type=int, default=1, help='The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.')
@@ -36,6 +38,12 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+        logging.root.debug("Set logging level to DEBUG")
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     if args.auto_update and (args.start_date or args.end_date):
         raise Exception('Auto-update cannot be used with start/end date')

@@ -2,6 +2,7 @@ import requests
 import datetime
 import csv
 import logging
+import time
 
 from .common import parse_date, base_headers, ApiException
 
@@ -66,9 +67,12 @@ class WS2Api:
         try:
             req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate), {})
         except ApiException as e:
+            # This seems to occur as some kind of soft rate-limit.
             logger.warn("Received ApiException in therapy_timeline_csv: (retry count %d) %s" % (tries, e))
             if e.status_code == 500:
-                logger.error("HTTP 500 in therapy_timeline_csv (retry count %d): %s" % (tries, e))
+                sleep_seconds = (tries+1) * 60
+                logger.error("Retrying in %d seconds after HTTP 500 in therapy_timeline_csv (retry count %d): %s" % (sleep_seconds, tries, e))
+                time.sleep(sleep_seconds)
                 if tries < self.MAX_RETRIES:
                     return self.therapy_timeline_csv(start, end, tries+1)
             raise e
