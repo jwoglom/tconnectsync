@@ -29,7 +29,7 @@ def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
         last_event = tconnect.android.last_event_uploaded(PUMP_SERIAL_NUMBER)
         if not last_event_index or last_event['maxPumpEventIndex'] > last_event_index:
             now = time.time()
-            logger.info('New reported t:connect data. (event index: %d last: %d)' % (last_event['maxPumpEventIndex'], last_event_index))
+            logger.info('New reported t:connect data. (event index: %s last: %s)' % (last_event['maxPumpEventIndex'], last_event_index))
 
             if pretend:
                 logger.info('Would update now if not in pretend mode')
@@ -51,7 +51,7 @@ def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
             last_event_index = last_event['maxPumpEventIndex']
             last_event_time = now
         else:
-            logger.info('No new reported t:connect data. (last event index: %d)' % last_event['maxPumpEventIndex'])
+            logger.info('No new reported t:connect data. (last event index: %s)' % last_event['maxPumpEventIndex'])
             now = time.time()
 
             if (now - last_event_time) >= 60 * AUTOUPDATE_FAILURE_MINUTES:
