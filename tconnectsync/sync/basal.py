@@ -62,6 +62,7 @@ def add_csv_basal_events(basalEvents, data):
 Given processed basal data, adds basal events to Nightscout.
 """
 def ns_write_basal_events(nightscout, basalEvents, pretend=False):
+    logger.debug("ns_write_basal_events: querying for last uploaded entry")
     last_upload = nightscout.last_uploaded_entry(BASAL_EVENTTYPE)
     last_upload_time = None
     if last_upload:

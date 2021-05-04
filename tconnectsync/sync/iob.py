@@ -25,6 +25,7 @@ def process_iob_events(iobdata):
 Given processed IOB data, creates a single Nightscout activity definition to store IOB.
 """
 def ns_write_iob_events(nightscout, iobEvents, pretend=False):
+    logger.debug("ns_write_iob_events: querying for last uploaded entry")
     last_upload = nightscout.last_uploaded_activity(IOB_ACTIVITYTYPE)
     last_upload_time = None
     if last_upload:

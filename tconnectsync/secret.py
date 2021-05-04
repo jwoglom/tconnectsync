@@ -15,6 +15,9 @@ def get_number(name, default):
         print("Current value: %s" % val)
         sys.exit(1)
 
+def get_bool(name, default):
+    return str(get(name, default) or '').lower() in ('true', '1')
+
 TCONNECT_EMAIL = get('TCONNECT_EMAIL', 'email@email.com')
 TCONNECT_PASSWORD = get('TCONNECT_PASSWORD', 'password')
 
@@ -27,14 +30,17 @@ TIMEZONE_NAME = get('TIMEZONE_NAME', 'America/New_York')
 
 # Optional configuration
 
-AUTOUPDATE_DEFAULT_SLEEP_SECONDS = get_number('AUTOUPDATE_DEFAULT_SLEEP_SECONDS', '60')
-AUTOUPDATE_MAX_SLEEP_SECONDS = get_number('AUTOUPDATE_MAX_SLEEP_SECONDS', '600')
-AUTOUPDATE_USE_FIXED_SLEEP = get_number('AUTOUPDATE_USE_FIXED_SLEEP', '0')
+AUTOUPDATE_DEFAULT_SLEEP_SECONDS = get_number('AUTOUPDATE_DEFAULT_SLEEP_SECONDS', '300') # 5 minutes
+AUTOUPDATE_MAX_SLEEP_SECONDS = get_number('AUTOUPDATE_MAX_SLEEP_SECONDS', '1500') # 25 minutes
+AUTOUPDATE_USE_FIXED_SLEEP = get_bool('AUTOUPDATE_USE_FIXED_SLEEP', 'false')
+AUTOUPDATE_FAILURE_MINUTES = get_number('AUTOUPDATE_FAILURE_MINUTES', '180') # 3 hours
+AUTOUPDATE_RESTART_ON_FAILURE = get_bool('AUTOUPDATE_RESTART_ON_FAILURE', 'false')
 
 _config = ['TCONNECT_EMAIL', 'TCONNECT_PASSWORD', 'PUMP_SERIAL_NUMBER',
           'NS_URL', 'NS_SECRET', 'TIMEZONE_NAME',
           'AUTOUPDATE_DEFAULT_SLEEP_SECONDS', 'AUTOUPDATE_MAX_SLEEP_SECONDS',
-          'AUTOUPDATE_USE_FIXED_SLEEP']
+          'AUTOUPDATE_USE_FIXED_SLEEP', 'AUTOUPDATE_FAILURE_MINUTES',
+          'AUTOUPDATE_RESTART_ON_FAILURE']
 
 if __name__ == '__main__':
     for k in locals():

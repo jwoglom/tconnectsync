@@ -34,6 +34,7 @@ def process_bolus_events(bolusdata):
 Given processed bolus data, adds bolus events to Nightscout.
 """
 def ns_write_bolus_events(nightscout, bolusEvents, pretend=False):
+    logger.debug("ns_write_bolus_events: querying for last uploaded entry")
     last_upload = nightscout.last_uploaded_entry(BOLUS_EVENTTYPE)
     last_upload_time = None
     if last_upload:
