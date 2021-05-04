@@ -36,7 +36,7 @@ def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
             else:
                 added = process_time_range(tconnect, nightscout, time_start, time_end, pretend)
                 logger.info('Added %d items from process_time_range' % added)
-                if len(added) == 0:
+                if added == 0:
                     if last_event_index:
                         logger.error('An event index change was recorded, but no new data was found via the API. ' +
                                      'If this error reoccurs, try restarting tconnectsync.')
