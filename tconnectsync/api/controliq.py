@@ -3,10 +3,13 @@ import urllib
 import datetime
 import arrow
 import time
+import logging
 
 from bs4 import BeautifulSoup
 
 from .common import parse_date, base_headers, ApiException, ApiLoginException
+
+logger = logging.getLogger(__name__)
 
 class ControlIQApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/tconnect/controliq/api/'
@@ -22,6 +25,7 @@ class ControlIQApi:
         self._password = password
 
     def login(self, email, password):
+        logger.info("Logging in to ControlIQApi...")
         with requests.Session() as s:
             initial = s.get(self.LOGIN_URL, headers=base_headers())
             soup = BeautifulSoup(initial.content, features='lxml')
@@ -76,11 +80,13 @@ class ControlIQApi:
         try:
             return self._get(endpoint, query)
         except ApiException as e:
+            logger.warn("Received ApiException in ControlIQApi with endpoint '%s' (tries %d): %s" % (endpoint, tries, e))
             if tries > 0:
                 raise ApiException(e.status_code, "ControlIQ API HTTP %d on retry #%d: %s", e.status_code, tries, e)
 
             # Trigger automatic re-login, and try again once
             if e.status_code == 401:
+                logger.info("Performing automatic re-login after HTTP 401 for ControlIQApi")
                 self.accessTokenExpiresAt = time.time()
                 self.login(self._email, self._password)
 

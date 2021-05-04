@@ -66,6 +66,7 @@ class WS2Api:
         try:
             req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate), {})
         except ApiException as e:
+            logger.warn("Received ApiException in therapy_timeline_csv: (retry count %d) %s" % (tries, e))
             if e.status_code == 500:
                 logger.error("HTTP 500 in therapy_timeline_csv (retry count %d): %s" % (tries, e))
                 if tries < self.MAX_RETRIES:

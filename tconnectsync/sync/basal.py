@@ -1,4 +1,5 @@
 import arrow
+import logging
 
 from ..parser.nightscout import (
     BASAL_EVENTTYPE,
@@ -6,6 +7,7 @@ from ..parser.nightscout import (
 )
 from ..parser.tconnect import TConnectEntry
 
+logger = logging.getLogger(__name__)
 
 """
 Merges together input from the therapy timeline API
@@ -64,13 +66,13 @@ def ns_write_basal_events(nightscout, basalEvents, pretend=False):
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
-    print("Last Nightscout basal upload:", last_upload_time)
+    logger.info("Last Nightscout basal upload: %s" % last_upload_time)
 
     add_count = 0
     for event in basalEvents:
         if last_upload_time and arrow.get(event["time"]) < last_upload_time:
             if pretend:
-                print("Skipping basal event before last upload time:", event)
+                logger.info("Skipping basal event before last upload time: %s" % event)
             continue
 
         recent_needs_update = False
@@ -97,13 +99,14 @@ def ns_write_basal_events(nightscout, basalEvents, pretend=False):
 
         add_count += 1
 
-        print("  Processing basal:", event, "entry:", entry)
+        logger.info("  Processing basal: %s entry: %s" % (event, entry))
         if recent_needs_update:
-            print("Replacing last uploaded entry:", last_upload)
+            logger.info("Replacing last uploaded entry: %s" % last_upload)
             if not pretend:
                 entry['_id'] = last_upload['_id']
                 nightscout.put_entry(entry, entity='treatments')
         elif not pretend:
             nightscout.upload_entry(entry)
 
+    logger.debug("ns_write_basal_events: added %d events" % add_count)
     return add_count

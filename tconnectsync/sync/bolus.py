@@ -1,10 +1,13 @@
 import arrow
+import logging
 
 from ..parser.nightscout import (
     BOLUS_EVENTTYPE,
     NightscoutEntry
 )
 from ..parser.tconnect import TConnectEntry
+
+logger = logging.getLogger(__name__)
 
 """
 Given bolus data input from the therapy timeline CSV, converts it into a digestable format.
@@ -19,7 +22,7 @@ def process_bolus_events(bolusdata):
                 # Count non-completed bolus if any insulin was delivered (vs. the amount of insulin requested)
                 parsed["description"] += " (%s)" % parsed["completion"]
             else:
-                print("Skipping non-completed bolus data:", b, "parsed:", parsed)
+                logger.warn("Skipping non-completed bolus data (was a bolus in progress?): %s parsed: %s" % (b, parsed))
                 continue
         bolusEvents.append(parsed)
 
@@ -35,13 +38,13 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False):
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
-    print("Last Nightscout bolus upload:", last_upload_time)
+    logger.info("Last Nightscout bolus upload: %s" % last_upload_time)
 
     add_count = 0
     for event in bolusEvents:
         if last_upload_time and arrow.get(event["completion_time"]) <= last_upload_time:
             if pretend:
-                print("Skipping basal event before last upload time:", event)
+                logger.info("Skipping basal event before last upload time: %s" % event)
             continue
 
         entry = NightscoutEntry.bolus(
@@ -53,7 +56,7 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False):
 
         add_count += 1
 
-        print("  Processing bolus:", event, "entry:", entry)
+        logger.info("  Processing bolus: %s entry: %s" % (event, entry))
         if not pretend:
             nightscout.upload_entry(entry)
 
