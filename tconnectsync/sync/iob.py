@@ -1,10 +1,13 @@
 import arrow
+import logging
 
 from ..parser.nightscout import (
     IOB_ACTIVITYTYPE,
     NightscoutEntry
 )
 from ..parser.tconnect import TConnectEntry
+
+logger = logging.getLogger(__name__)
 
 """
 Given IOB data input from the therapy timeline CSV, converts it into a digestable format.
@@ -26,15 +29,15 @@ def ns_write_iob_events(nightscout, iobEvents, pretend=False):
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
-    print("Last Nightscout iob upload:", last_upload_time)
+    logger.info("Last Nightscout iob upload: %s" % last_upload_time)
 
     if not iobEvents or len(iobEvents) == 0:
-        print("No IOB events: skipping")
+        logger.info("No IOB events present from API: skipping")
         return 0
 
     event = iobEvents[-1]
     if last_upload_time and arrow.get(event["time"]) <= last_upload_time:
-        print("  Skipping already uploaded iob event:", event)
+        logger.info("  Skipping already uploaded iob event: %s" % event)
         return 0
 
     entry = NightscoutEntry.iob(
@@ -42,13 +45,13 @@ def ns_write_iob_events(nightscout, iobEvents, pretend=False):
         created_at=event["time"]
     )
 
-    print("  Processing iob:", event, "entry:", entry)
+    logger.info("  Processing iob: %s entry: %s" % (event, entry))
     if not pretend:
         nightscout.upload_entry(entry, entity='activity')
 
     # Delete the previous activity
     if last_upload and '_id' in last_upload:
-        print("  Deleting old iob entry:", last_upload)
+        logger.info("  Deleting old iob entry: %s" % last_upload)
         if not pretend:
             nightscout.delete_entry('activity/{}'.format(last_upload['_id']))
 

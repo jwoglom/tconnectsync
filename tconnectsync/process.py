@@ -1,4 +1,5 @@
-from datetime import datetime
+import logging
+import datetime
 
 from .api.common import ApiException
 from .sync.basal import (
@@ -15,13 +16,15 @@ from .sync.iob import (
     ns_write_iob_events
 )
 
+logger = logging.getLogger(__name__)
+
 """
 Given a TConnectApi object and start/end range, performs a single
 cycle of synchronizing data within the time range.
 If pretend is true, then doesn't actually write data to Nightscout.
 """
 def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
-    print("Downloading t:connect ControlIQ data")
+    logger.info("Downloading t:connect ControlIQ data")
     try:
         ciqTherapyTimelineData = tconnect.controliq.therapy_timeline(time_start, time_end)
     except ApiException as e:
@@ -29,12 +32,12 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
         # device in the time range which is queried. Since it launched in early 2020,
         # ignore 404's before February.
         if e.status_code == 404 and time_start.date() < datetime.date(2020, 2, 1):
-            print("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
+            logger.warn("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
             ciqTherapyTimelineData = None
         else:
             raise e
 
-    print("Downloading t:connect CSV data")
+    logger.info("Downloading t:connect CSV data")
     csvdata = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
 
     readingData = csvdata["readingData"]
@@ -43,13 +46,18 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
     bolusData = csvdata["bolusData"]
 
     if readingData and len(readingData) > 0:
-        print("Last CGM reading from t:connect:", readingData[-1]['EventDateTime'] if 'EventDateTime' in readingData[-1] else readingData)
+        logger.info("Last CGM reading from t:connect: %s" % (readingData[-1]['EventDateTime'] if 'EventDateTime' in readingData[-1] else readingData))
+    else:
+        logger.warn("No last CGM reading is able to be determined")
 
     added = 0
 
     basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
     if csvBasalData:
+        logger.debug("CSV basal data found: processing it")
         add_csv_basal_events(basalEvents, csvBasalData)
+    else:
+        logger.debug("No CSV basal data found")
 
     added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend)
 
@@ -59,4 +67,5 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
     iobEvents = process_iob_events(iobData)
     added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
 
+    logger.info("Wrote %d events to Nightscout this process cycle")
     return added

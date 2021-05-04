@@ -1,6 +1,10 @@
+import logging
+
 from .android import AndroidApi
 from .controliq import ControlIQApi
 from .ws2 import WS2Api
+
+logger = logging.getLogger(__name__)
 
 """A wrapper for the three different t:connect API types."""
 class TConnectApi:
@@ -21,6 +25,8 @@ class TConnectApi:
         if self._ciq and not self._ciq.needs_relogin():
             return self._ciq
 
+        logger.debug("Instantiating new ControlIQApi")
+
         self._ciq = ControlIQApi(self.email, self.password)
         return self._ciq
 
@@ -28,6 +34,8 @@ class TConnectApi:
     def ws2(self):
         if self._ws2:
             return self._ws2
+
+        logger.debug("Instantiating new WS2Api")
 
         # Trigger login or re-login via controliq api if necessary
         # so userGuid can be accessed from it
@@ -40,6 +48,8 @@ class TConnectApi:
     def android(self):
         if self._android and not self._android.needs_relogin():
             return self._android
+
+        logger.debug("Instantiating new AndroidApi")
 
         self._android = AndroidApi(self.email, self.password)
         return self._android

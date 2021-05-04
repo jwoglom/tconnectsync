@@ -1,4 +1,5 @@
 import time
+import logging
 
 from .process import process_time_range
 from .secret import (
@@ -7,6 +8,8 @@ from .secret import (
     AUTOUPDATE_MAX_SLEEP_SECONDS,
     AUTOUPDATE_USE_FIXED_SLEEP
 )
+
+logger = logging.getLogger(__name__)
 
 """
 Performs the auto-update functionality. Runs indefinitely in a loop
@@ -18,30 +21,34 @@ def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
 
     last_event_index = None
     last_event_time = None
+    last_process_time_range = None
     time_diffs = []
     while True:
         last_event = tconnect.android.last_event_uploaded(PUMP_SERIAL_NUMBER)
         if not last_event_index or last_event['maxPumpEventIndex'] > last_event_index:
             now = time.time()
-            print('New event index:', last_event['maxPumpEventIndex'], 'last:', last_event_index)
+            logger.info('New reported t:connect data. (event index: %d last: %d)' % (last_event['maxPumpEventIndex'], last_event_index))
 
             if pretend:
-                print('Would update now')
+                logger.info('Would update now if not in pretend mode')
             else:
                 added = process_time_range(tconnect, nightscout, time_start, time_end, pretend)
-                print('Added', added, 'items')
+                logger.info('Added %d items from process_time_range' % added)
+                if len(added) == 0 and last_event_index:
+                    logger.error('An event index change was recorded, but no new data was found via the API.')
+                    logger.error('If this error reoccurs, try restarting tconnectsync.')
 
             if last_event_index:
                 time_diffs.append(now - last_event_time)
-                print('Time diffs:', time_diffs)
+                logger.debug('Updating tracking of time since last update: %s' % time_diffs)
 
             last_event_index = last_event['maxPumpEventIndex']
             last_event_time = now
         else:
-            print('No event index change:', last_event['maxPumpEventIndex'])
+            logger.info('No new reported t:connect data. (last event index: %d)' % last_event['maxPumpEventIndex'])
 
             if len(time_diffs) > 2:
-                print('Sleeping 60 seconds after unexpected no index change')
+                logger.info('Sleeping 60 seconds after unexpected no index change. (New data might be delayed.)')
                 time.sleep(60)
                 continue
 
@@ -57,5 +64,5 @@ def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
                 sleep_secs = AUTOUPDATE_MAX_SLEEP_SECONDS
 
         # Sleep for a rolling average of time between updates
-        print('Sleeping for', sleep_secs, 'sec')
+        logger.info('Sleeping for %d sec' % sleep_secs)
         time.sleep(sleep_secs)
