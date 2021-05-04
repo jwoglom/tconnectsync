@@ -22,7 +22,7 @@ def process_bolus_events(bolusdata):
                 # Count non-completed bolus if any insulin was delivered (vs. the amount of insulin requested)
                 parsed["description"] += " (%s)" % parsed["completion"]
             else:
-                logger.warn("Skipping non-completed bolus data (was a bolus in progress?): %s parsed: %s" % (b, parsed))
+                logger.warning("Skipping non-completed bolus data (was a bolus in progress?): %s parsed: %s" % (b, parsed))
                 continue
         bolusEvents.append(parsed)
 
