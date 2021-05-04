@@ -14,6 +14,7 @@ class NightscoutEntry:
             "reason": reason,
             "duration": float(duration_mins) if duration_mins else None,
             "absolute": float(value),
+            "rate": float(value),
             "created_at": created_at,
             "carbs": None,
             "insulin": None,
