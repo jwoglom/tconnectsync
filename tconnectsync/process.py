@@ -74,5 +74,5 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
     iobEvents = process_iob_events(iobData)
     added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
 
-    logger.info("Wrote %d events to Nightscout this process cycle")
+    logger.info("Wrote %d events to Nightscout this process cycle" % added)
     return added

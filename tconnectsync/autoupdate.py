@@ -1,5 +1,6 @@
 import time
 import logging
+import sys
 
 from .process import process_time_range
 from .secret import (
@@ -54,18 +55,19 @@ def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
             logger.info('No new reported t:connect data. (last event index: %s)' % last_event['maxPumpEventIndex'])
             now = time.time()
 
-            if (now - last_event_time) >= 60 * AUTOUPDATE_FAILURE_MINUTES:
-                logger.error("No new data event indexes have been detected for over %d minutes. " % AUTOUPDATE_FAILURE_MINUTES +
-                             "The t:connect app might no longer be functioning.")
+            if last_event_time and (now - last_event_time) >= 60 * AUTOUPDATE_FAILURE_MINUTES:
+                logger.error(AutoupdateFailureException("No new data event indexes have been detected for over %d minutes. " % AUTOUPDATE_FAILURE_MINUTES +
+                             "The t:connect app might no longer be functioning."))
 
                 if AUTOUPDATE_RESTART_ON_FAILURE:
-                    raise AutoupdateFailureException
-            elif (now - last_process_time_range) >= 60 * AUTOUPDATE_FAILURE_MINUTES:
-                logger.error("No new data has been found via the API for over %d minutes. " % AUTOUPDATE_FAILURE_MINUTES +
-                             "tconnectsync might not be functioning properly.")
+                    sys.exit(1)
+
+            elif last_process_time_range and (now - last_process_time_range) >= 60 * AUTOUPDATE_FAILURE_MINUTES:
+                logger.error(AutoupdateFailureException("No new data has been found via the API for over %d minutes. " % AUTOUPDATE_FAILURE_MINUTES +
+                             "tconnectsync might not be functioning properly."))
 
                 if AUTOUPDATE_RESTART_ON_FAILURE:
-                    raise AutoupdateFailureException
+                    sys.exit(1)
 
 
             if len(time_diffs) > 2:
