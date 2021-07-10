@@ -103,6 +103,24 @@ class WS2Api:
             "basalData": self._csv_to_dict(basalData),
             "bolusData": self._csv_to_dict(bolusData)
         }
+    
+    """
+    Returns information on basal suspension. The filterbasal option only returns site/cartridge changes.
+    SuspendReason values are:
+     - "site-cart"
+     - "basal-profile"
+     - "manual"
+     - "previous"
+     - "alarm"
+
+    {"BasalSuspension":[{"EventDateTime":"/Date(EPOCH_MS-0000)/", "SuspendReason": "reason"}]}
+    """
+    def basalsuspension(self, start=None, end=None, filterbasal=False):
+        startDate = parse_date(start)
+        endDate = parse_date(end)
+        arg = "filterbasal/1" if filterbasal else ""
+
+        return self.get_jsonp('basalsuspension/%s/%s/%s/%s' % (self.userGuid, startDate, endDate, arg))
 
     """
     Returns info on BasalIQ in JSONP format.

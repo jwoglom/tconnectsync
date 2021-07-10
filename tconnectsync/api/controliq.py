@@ -126,3 +126,10 @@ class ControlIQApi:
             "startDate": startDate,
             "endDate": endDate
         })
+    
+    """
+    Returns active account features, including the date when ControlIQ was enabled.
+    [{"serialNumber": "11111111", "features": {"controlIQ": {"feature": 1, "dateTimeFirstDetected": "YYYY-MM-DD:THH:MM:SS", "unixTimestamp": 1111111111}}}]
+    """
+    def pumpfeatures(self):
+        return self.get('pumpfeatures/users/%s' % self.userGuid, {})
