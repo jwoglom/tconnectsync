@@ -43,7 +43,8 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False):
 
     add_count = 0
     for event in bolusEvents:
-        if last_upload_time and arrow.get(event["completion_time"]) <= last_upload_time:
+        created_at = event["completion_time"] if not event["extended_bolus"] else event["bolex_start_time"]
+        if last_upload_time and arrow.get(created_at) <= last_upload_time:
             if pretend:
                 logger.info("Skipping basal event before last upload time: %s" % event)
             continue
@@ -51,7 +52,7 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False):
         entry = NightscoutEntry.bolus(
             bolus=event["insulin"],
             carbs=event["carbs"],
-            created_at=event["completion_time"] if not event["extended_bolus"] else event["bolex_start_time"],
+            created_at=created_at,
             notes="{}{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "", " (Extended)" if event["extended_bolus"] == "1" else "")
         )
 
