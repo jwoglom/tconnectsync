@@ -69,7 +69,6 @@ class AndroidApi:
         self.refreshToken = j["refreshToken"]
         self.refreshTokenExpiresAt = j["refreshTokenExpiresAt"]
         self.userId = j["user"]["id"]
-        self.patientObjectId = j["user"]["patientObjectId"]
 
         logger.info("Logged in to AndroidApi successfully (expiration: %s, %s)" % (self.accessTokenExpiresAt, timeago(self.accessTokenExpiresAt)))
 
