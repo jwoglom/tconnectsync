@@ -20,7 +20,7 @@ def process_bolus_events(bolusdata):
         if parsed["completion"] != "Completed":
             if parsed["insulin"] and float(parsed["insulin"]) > 0:
                 # Count non-completed bolus if any insulin was delivered (vs. the amount of insulin requested)
-                parsed["description"] += " (%s)" % parsed["completion"]
+                parsed["description"] += " (%s: requested %s units)" % (parsed["completion"], parsed["requested_insulin"])
             else:
                 logger.warning("Skipping non-completed bolus data (was a bolus in progress?): %s parsed: %s" % (b, parsed))
                 continue

@@ -85,16 +85,20 @@ class TConnectEntry:
     @staticmethod
     def parse_bolus_entry(data):
         # All DateTime's are stored in the user's timezone.
-        complete = (data["ExtendedBolusIsComplete"] or data["BolusIsComplete"])
+        def is_complete(s):
+            return s and int(s) == 1
+
+        complete = is_complete(data["ExtendedBolusIsComplete"]) or is_complete(data["BolusIsComplete"])
         extended_bolus = ("extended" in data["Description"].lower())
 
         return {
             "description": data["Description"],
             "complete": "1" if complete else "",
             "completion": data["CompletionStatusDesc"] if not extended_bolus else data["BolexCompletionStatusDesc"],
-            "request_time": TConnectEntry._datetime_parse(data["RequestDateTime"]).format() if complete and not extended_bolus else None,
-            "completion_time": TConnectEntry._datetime_parse(data["CompletionDateTime"]).format() if complete and not extended_bolus else None,
+            "request_time": TConnectEntry._datetime_parse(data["RequestDateTime"]).format() if not extended_bolus else None,
+            "completion_time": TConnectEntry._datetime_parse(data["CompletionDateTime"]).format() if not extended_bolus else None,
             "insulin": data["InsulinDelivered"],
+            "requested_insulin": data["ActualTotalBolusRequested"],
             "carbs": data["CarbSize"],
             "user_override": data["UserOverride"],
             "extended_bolus": "1" if extended_bolus else "",

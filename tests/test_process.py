@@ -166,10 +166,11 @@ class TestProcessTimeRange(unittest.TestCase):
 
         tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
 
+        bolusData = TestBolusSync.get_example_csv_bolus_events()
         def fake_therapy_timeline_csv(time_start, time_end):
             return {
                 **self.stub_therapy_timeline_csv(time_start, time_end),
-                "bolusData": TestBolusSync.get_example_csv_bolus_events(),
+                "bolusData": bolusData,
             }
 
         tconnect.ws2.therapy_timeline_csv = fake_therapy_timeline_csv
@@ -182,12 +183,13 @@ class TestProcessTimeRange(unittest.TestCase):
         process_time_range(tconnect, nightscout, start, end, pretend=False)
 
         pprint.pprint(nightscout.uploaded_entries)
-        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 3)
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), len(bolusData))
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
             "treatments": [
                 NightscoutEntry.bolus(13.53, 75, "2021-04-01 12:58:26-04:00", notes="Standard/Correction"),
                 NightscoutEntry.bolus(1.25, 0, "2021-04-01 23:23:17-04:00", notes="Standard (Override)"),
                 NightscoutEntry.bolus(1.7, 0, "2021-04-02 01:00:47-04:00", notes="Automatic Bolus/Correction"),
+                NightscoutEntry.bolus(1.82, 0, "2021-09-06 12:24:47-04:00", notes="Standard/Correction (Terminated by Alarm: requested 2.63 units)"),
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertDictEqual(nightscout.deleted_entries, {})
