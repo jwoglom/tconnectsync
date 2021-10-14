@@ -8,14 +8,14 @@ class NightscoutApi(tconnectsync.nightscout.NightscoutApi):
         self.secret = 'invalid'
 
         self.uploaded_entries = collections.defaultdict(list)
-        self.deleted_entries = collections.defaultdict(list)
+        self.deleted_entries = []
         self.put_entries = collections.defaultdict(list)
 
     def upload_entry(self, ns_format, entity='treatments'):
         self.uploaded_entries[entity].append(ns_format)
 
-    def delete_entry(self, ns_format, entity):
-        self.deleted_entries[entity].append(ns_format)
+    def delete_entry(self, ns_path):
+        self.deleted_entries.append(ns_path)
 
     def put_entry(self, ns_format, entity):
         self.put_entries[entity].append(ns_format)

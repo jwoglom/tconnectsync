@@ -36,7 +36,7 @@ class NightscoutEntry:
     def iob(iob, created_at):
         return {
             "activityType": IOB_ACTIVITYTYPE,
-            "iob": iob,
+            "iob": float(iob),
             "created_at": created_at,
             "enteredBy": ENTERED_BY
         }

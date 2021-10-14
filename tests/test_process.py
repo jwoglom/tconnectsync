@@ -5,12 +5,13 @@ import datetime
 import pprint
 
 from tconnectsync.process import process_time_range
-from tconnectsync.parser.nightscout import NightscoutEntry
+from tconnectsync.parser.nightscout import IOB_ACTIVITYTYPE, NightscoutEntry
 
 from .api.fake import TConnectApi
 from .nightscout_fake import NightscoutApi
 from .sync.test_basal import TestBasalSync
 from .sync.test_bolus import TestBolusSync
+from .sync.test_iob import TestIOBSync
 
 class TestProcessTimeRange(unittest.TestCase):
     maxDiff = None
@@ -36,6 +37,7 @@ class TestProcessTimeRange(unittest.TestCase):
     def test_new_ciq_basal_data(self):
         tconnect = TConnectApi()
 
+        # datetimes are unused by the API fake
         start = datetime.datetime(2021, 4, 20, 12, 0)
         end = datetime.datetime(2021, 4, 21, 12, 0)
 
@@ -64,13 +66,14 @@ class TestProcessTimeRange(unittest.TestCase):
                 NightscoutEntry.basal(0, 2693/60, "2021-03-16 00:30:21-04:00", reason="algorithmDelivery")
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
-        self.assertDictEqual(nightscout.deleted_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
 
 
     """Two basal entries in Nightscout. Two new basal entries in tconnect."""
     def test_partial_ciq_basal_data(self):
         tconnect = TConnectApi()
 
+        # datetimes are unused by the API fake
         start = datetime.datetime(2021, 4, 20, 12, 0)
         end = datetime.datetime(2021, 4, 21, 12, 0)
 
@@ -104,7 +107,7 @@ class TestProcessTimeRange(unittest.TestCase):
                 NightscoutEntry.basal(0, 2693/60, "2021-03-16 00:30:21-04:00", reason="algorithmDelivery")
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
-        self.assertDictEqual(nightscout.deleted_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
 
 
     """
@@ -113,6 +116,7 @@ class TestProcessTimeRange(unittest.TestCase):
     def test_with_updated_duration_ciq_basal_data(self):
         tconnect = TConnectApi()
 
+        # datetimes are unused by the API fake
         start = datetime.datetime(2021, 4, 20, 12, 0)
         end = datetime.datetime(2021, 4, 21, 12, 0)
 
@@ -155,12 +159,13 @@ class TestProcessTimeRange(unittest.TestCase):
                 }
             ]
         })
-        self.assertDictEqual(nightscout.deleted_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
 
     """No data in Nightscout. Uploads all bolus data from tconnect."""
     def test_new_ciq_bolus_data(self):
         tconnect = TConnectApi()
 
+        # datetimes are unused by the API fake
         start = datetime.datetime(2021, 4, 20, 12, 0)
         end = datetime.datetime(2021, 4, 21, 12, 0)
 
@@ -192,7 +197,91 @@ class TestProcessTimeRange(unittest.TestCase):
                 NightscoutEntry.bolus(1.82, 0, "2021-09-06 12:24:47-04:00", notes="Standard/Correction (Terminated by Alarm: requested 2.63 units)"),
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
-        self.assertDictEqual(nightscout.deleted_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """No data in Nightscout. Uploads new iob reading from tconnect."""
+    def test_new_ciq_iob_data(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 4, 20, 12, 0)
+        end = datetime.datetime(2021, 4, 21, 12, 0)
+
+        tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+
+        iobData = TestIOBSync.get_example_csv_iob_events()
+        def fake_therapy_timeline_csv(time_start, time_end):
+            return {
+                **self.stub_therapy_timeline_csv(time_start, time_end),
+                "iobData": iobData,
+            }
+
+        tconnect.ws2.therapy_timeline_csv = fake_therapy_timeline_csv
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False)
+
+        pprint.pprint(nightscout.uploaded_entries)
+        self.assertEqual(len(nightscout.uploaded_entries["activity"]), 1)
+        self.assertDictEqual(dict(nightscout.uploaded_entries), {
+            "activity": [
+                # the most recent IOB entry is added
+                NightscoutEntry.iob(6.80, "2021-10-12 00:10:30-04:00")
+        ]})
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+    
+    """Existing IOB in Nightscout. Uploads new iob reading and deletes old IOB."""
+    def test_updates_ciq_iob_data(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 4, 20, 12, 0)
+        end = datetime.datetime(2021, 4, 21, 12, 0)
+
+        tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+
+        iobData = TestIOBSync.get_example_csv_iob_events()
+        iobData[0]["created_at"] = start
+        iobData[0]["_id"] = "sentinel_existing_iob_id"
+
+        def fake_therapy_timeline_csv(time_start, time_end):
+            return {
+                **self.stub_therapy_timeline_csv(time_start, time_end),
+                "iobData": iobData,
+            }
+
+        tconnect.ws2.therapy_timeline_csv = fake_therapy_timeline_csv
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+
+        def fake_last_uploaded_activity(activityType):
+            if activityType == IOB_ACTIVITYTYPE:
+                return iobData[0]
+            return self.stub_last_uploaded_activity(activityType)
+
+        nightscout.last_uploaded_activity = fake_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False)
+
+        pprint.pprint(nightscout.uploaded_entries)
+        self.assertEqual(len(nightscout.uploaded_entries["activity"]), 1)
+        self.assertDictEqual(dict(nightscout.uploaded_entries), {
+            "activity": [
+                # the most recent IOB entry is added
+                NightscoutEntry.iob(6.80, "2021-10-12 00:10:30-04:00")
+        ]})
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [
+            "activity/sentinel_existing_iob_id"
+        ])
+
 
 
 

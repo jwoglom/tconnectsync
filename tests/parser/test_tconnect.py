@@ -78,18 +78,35 @@ class TestTConnectEntryCGM(unittest.TestCase):
         )
 
 class TestTConnectEntryIOB(unittest.TestCase):
-    def test_parse_iob_entry(self):
+    entry1 = {
+        "Type": "IOB",
+        "EventID": "81",
+        "EventDateTime": "2021-10-12T00:00:30",
+        "IOB": "6.91"
+    }
+    def test_parse_iob_entry1(self):
         self.assertEqual(
-            TConnectEntry.parse_iob_entry({
-                "Type": "IOB",
-                "EventID": "81",
-                "EventDateTime": "2021-10-12T00:00:30",
-                "IOB": "6.91"
-            }),
+            TConnectEntry.parse_iob_entry(self.entry1),
             {
                 "time": "2021-10-12 00:00:30-04:00",
                 "iob": "6.91",
                 "event_id": "81"
+            }
+        )
+
+    entry2 = {
+        "Type": "IOB",
+        "EventID": "9",
+        "EventDateTime": "2021-10-12T00:10:30",
+        "IOB": "6.80"
+    }
+    def test_parse_iob_entry2(self):
+        self.assertEqual(
+            TConnectEntry.parse_iob_entry(self.entry2),
+            {
+                "time": "2021-10-12 00:10:30-04:00",
+                "iob": "6.80",
+                "event_id": "9"
             }
         )
 
