@@ -17,6 +17,7 @@ class ControlIQApi(tconnectsync.api.controliq.ControlIQApi):
 class WS2Api(tconnectsync.api.ws2.WS2Api):
     def __init__(self):
         self.BASE_URL = 'invalid://'
+        self.SLEEP_SECONDS_INCREMENT = 0.01
 
     def get(self, endpoint, query):
         raise NotImplementedError

@@ -33,6 +33,66 @@ class TestTConnectEntryBasal(unittest.TestCase):
             }
         )
 
+class TestTConnectEntrySuspension(unittest.TestCase):
+    def test_parse_suspension_entry(self):
+        self.assertEqual(
+            TConnectEntry.parse_suspension_entry({
+                "suspendReason": "control-iq",
+                "continuation": None,
+                "x": 1615879821
+            }),
+            {
+                "time": "2021-03-16 00:30:21-04:00",
+                "continuation": None,
+                "suspendReason": "control-iq"
+            }
+        )
+        self.assertEqual(
+            TConnectEntry.parse_suspension_entry({
+                "suspendReason": "control-iq",
+                "continuation": "previous",
+                "x": 1634022000
+            }),
+            {
+                "time": "2021-10-12 00:00:00-04:00",
+                "continuation": "previous",
+                "suspendReason": "control-iq"
+            }
+        )
+
+class TestTConnectEntryCGM(unittest.TestCase):
+    def test_parse_cgm_entry(self):
+        self.assertEqual(
+            TConnectEntry.parse_cgm_entry({
+                "DeviceType": "t:slim X2 Insulin Pump",
+                "SerialNumber": "11111111",
+                "Description": "EGV",
+                "EventDateTime": "2021-10-12T00:01:12",
+                "Readings (CGM / BGM)": "131"
+            }),
+            {
+                "time": "2021-10-12 00:01:12-04:00",
+                "reading": "131",
+                "reading_type": "EGV"
+            }
+        )
+
+class TestTConnectEntryIOB(unittest.TestCase):
+    def test_parse_iob_entry(self):
+        self.assertEqual(
+            TConnectEntry.parse_iob_entry({
+                "Type": "IOB",
+                "EventID": "81",
+                "EventDateTime": "2021-10-12T00:00:30",
+                "IOB": "6.91"
+            }),
+            {
+                "time": "2021-10-12 00:00:30-04:00",
+                "iob": "6.91",
+                "event_id": "81"
+            }
+        )
+
 class TestTConnectEntryBolus(unittest.TestCase):
     entryStdCorrection = {
         "Type": "Bolus",
@@ -213,8 +273,6 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "bolex_completion_time": None,
                 "bolex_start_time": None
         })
-
-
 
 if __name__ == '__main__':
     unittest.main()

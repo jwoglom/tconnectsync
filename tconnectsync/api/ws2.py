@@ -12,6 +12,7 @@ class WS2Api:
     BASE_URL = 'https://tconnectws2.tandemdiabetes.com/'
 
     MAX_RETRIES = 2
+    SLEEP_SECONDS_INCREMENT = 60
 
     userGuid = None
 
@@ -60,6 +61,15 @@ class WS2Api:
         return data
 
 
+    """
+    Returns information on therapy, displayed in the therapy timeline on the
+    t:connect website.
+    Contains BG reading (CGM), IOB, basal, and bolus data.
+    
+    Basal data does NOT appear for the specified time range if using Control-IQ.
+    The ControlIQ API endpoints must be used for basal data instead.
+    However, all other fields are still accessed via this endpoint.
+    """
     def therapy_timeline_csv(self, start=None, end=None, tries=0):
         startDate = parse_date(start)
         endDate = parse_date(end)
@@ -70,7 +80,7 @@ class WS2Api:
             # This seems to occur as some kind of soft rate-limit.
             logger.warning("Received ApiException in therapy_timeline_csv: (retry count %d) %s" % (tries, e))
             if e.status_code == 500:
-                sleep_seconds = (tries+1) * 60
+                sleep_seconds = (tries+1) * self.SLEEP_SECONDS_INCREMENT
                 logger.error("Retrying in %d seconds after HTTP 500 in therapy_timeline_csv (retry count %d): %s" % (sleep_seconds, tries, e))
                 time.sleep(sleep_seconds)
                 if tries < self.MAX_RETRIES:
