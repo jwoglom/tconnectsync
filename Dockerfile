@@ -15,20 +15,22 @@ FROM base AS python-deps
 RUN pip install pipenv
 RUN apt-get update && apt-get install -y --no-install-recommends gcc
 
+RUN mkdir -p /base
+WORKDIR /base
+
 # Install python dependencies in /.venv
 COPY Pipfile .
 COPY Pipfile.lock .
 COPY setup.cfg .
 COPY setup.py .
 COPY pyproject.toml .
-COPY tconnectsync .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 
 FROM base AS runtime
 
 # Copy virtualenv from python-deps stage
-COPY --from=python-deps /.venv /.venv
-ENV PATH="/.venv/bin:$PATH"
+COPY --from=python-deps /base/.venv /base/.venv
+ENV PATH="/base/.venv/bin:$PATH"
 
 # Create and switch to a new user
 RUN useradd --create-home appuser
