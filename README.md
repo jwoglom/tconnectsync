@@ -144,11 +144,11 @@ If you receive no errors, then you can move on to the **Running Tconnectsync Con
 
 First, [ensure that you have Docker running and installed](https://docs.docker.com/get-started/#download-and-install-docker).
 
-To download and run the `jwoglom/tconnectsync` prebuilt Docker image from [Docker Hub](https://hub.docker.com/r/jwoglom/tconnectsync):
+To download and run the prebuilt Docker image from GitHub Packages:
 
 ```bash
-$ docker pull jwoglom/tconnectsync:latest
-$ docker run jwoglom/tconnectsync --help
+$ docker pull ghcr.io/jwoglom/tconnectsync/tconnectsync:latest
+$ docker run ghcr.io/jwoglom/tconnectsync/tconnectsync --help
 ```
 
 To instead build the image locally and launch the project:
@@ -266,12 +266,19 @@ exec python3 -u main.py --auto-update
 In the `tconnectsync.conf`, you should set `/path/to/tconnectsync` to the folder
 where you checked-out the GitHub repository.
 
-An example `run.sh` if you installed tconnectsync via Docker:
+An example `run.sh` if you installed tconnectsync via the GitHub Docker Registry:
 
 ```bash
 #!/bin/bash
 
-docker build -t tconnectsync
+docker run ghcr.io/jwoglom/tconnectsync/tconnectsync --auto-update
+```
+
+An example `run.sh` if you built tconnectsync locally:
+
+```bash
+#!/bin/bash
+
 docker run tconnectsync --auto-update
 ```
 
@@ -290,7 +297,7 @@ An example configuration in `/etc/crontab` which runs every 15 minutes:
 0,15,30,45  *  *   *   *   root   /path/to/tconnectsync/run.sh
 ```
 
-You can use one of the same `run.sh` files mentioned above in the Supervisord example, but remove the `--auto-update` flag since you are handling the functionality for running the script periodically yourself.
+You can use one of the same `run.sh` files referenced above, but remove the `--auto-update` flag since you are handling the functionality for running the script periodically yourself.
 
 ## Tandem APIs
 
