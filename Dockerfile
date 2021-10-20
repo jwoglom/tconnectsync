@@ -18,6 +18,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc
 # Install python dependencies in /.venv
 COPY Pipfile .
 COPY Pipfile.lock .
+COPY setup.cfg .
+COPY setup.py .
+COPY pyproject.toml .
+COPY tconnectsync .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 
 FROM base AS runtime
