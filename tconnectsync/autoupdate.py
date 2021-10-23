@@ -3,6 +3,7 @@ import logging
 import sys
 
 from .process import process_time_range
+from .features import DEFAULT_FEATURES
 from .secret import (
     PUMP_SERIAL_NUMBER,
     AUTOUPDATE_DEFAULT_SLEEP_SECONDS,
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 Performs the auto-update functionality. Runs indefinitely in a loop
 until stopped (ctrl+c).
 """
-def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
+def process_auto_update(tconnect, nightscout, time_start, time_end, pretend, features=DEFAULT_FEATURES):
     # Read from android api, find exact interval to cut down on API calls
     # Refresh API token. If failure, die, have wrapper script re-run.
 
@@ -35,7 +36,7 @@ def process_auto_update(tconnect, nightscout, time_start, time_end, pretend):
             if pretend:
                 logger.info('Would update now if not in pretend mode')
             else:
-                added = process_time_range(tconnect, nightscout, time_start, time_end, pretend)
+                added = process_time_range(tconnect, nightscout, time_start, time_end, pretend, features=features)
                 logger.info('Added %d items from process_time_range' % added)
                 if added == 0:
                     if last_event_index:

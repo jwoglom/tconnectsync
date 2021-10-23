@@ -19,6 +19,7 @@ from .sync.iob import (
     ns_write_iob_events
 )
 from .parser.tconnect import TConnectEntry
+from .features import BASAL, BOLUS, IOB, DEFAULT_FEATURES
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ Given a TConnectApi object and start/end range, performs a single
 cycle of synchronizing data within the time range.
 If pretend is true, then doesn't actually write data to Nightscout.
 """
-def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
+def process_time_range(tconnect, nightscout, time_start, time_end, pretend, features=DEFAULT_FEATURES):
     logger.info("Downloading t:connect ControlIQ data")
     try:
         ciqTherapyTimelineData = tconnect.controliq.therapy_timeline(time_start, time_end)
@@ -59,20 +60,23 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend):
 
     added = 0
 
-    basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
-    if csvBasalData:
-        logger.debug("CSV basal data found: processing it")
-        add_csv_basal_events(basalEvents, csvBasalData)
-    else:
-        logger.debug("No CSV basal data found")
+    if BASAL in features:
+        basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
+        if csvBasalData:
+            logger.debug("CSV basal data found: processing it")
+            add_csv_basal_events(basalEvents, csvBasalData)
+        else:
+            logger.debug("No CSV basal data found")
 
-    added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend)
+        added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend)
 
-    bolusEvents = process_bolus_events(bolusData)
-    added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend)
+    if BOLUS in features:
+        bolusEvents = process_bolus_events(bolusData)
+        added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend)
 
-    iobEvents = process_iob_events(iobData)
-    added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
+    if IOB in features:
+        iobEvents = process_iob_events(iobData)
+        added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
 
     logger.info("Wrote %d events to Nightscout this process cycle" % added)
     return added

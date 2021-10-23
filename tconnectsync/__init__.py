@@ -10,6 +10,7 @@ from .process import process_time_range
 from .autoupdate import process_auto_update
 from .check import check_login
 from .nightscout import NightscoutApi
+from .features import DEFAULT_FEATURES, ALL_FEATURES
 
 try:
     from .secret import (
@@ -38,6 +39,7 @@ def parse_args(*args, **kwargs):
     parser.add_argument('--days', dest='days', type=int, default=1, help='The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.')
     parser.add_argument('--auto-update', dest='auto_update', action='store_const', const=True, default=False, help='If set, continuously checks for updates from t:connect and syncs with Nightscout.')
     parser.add_argument('--check-login', dest='check_login', action='store_const', const=True, default=False, help='If set, checks that the provided t:connect credentials can be used to log in.')
+    parser.add_argument('--features', dest='features', nargs='+', default=DEFAULT_FEATURES, choices=ALL_FEATURES, help='Specifies what data should be synchronized between tconnect and Nightscout.')
 
     return parser.parse_args(*args, **kwargs)
 
@@ -76,11 +78,13 @@ def main(*args, **kwargs):
     if args.check_login:
         return check_login(tconnect, time_start, time_end)
 
+    logging.info("Enabled features: " + ", ".join(args.features))
+
     if args.auto_update:
         print("Starting auto-update between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
-        process_auto_update(tconnect, nightscout, time_start, time_end, args.pretend)
+        process_auto_update(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features)
     else:
         print("Processing data between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
-        added = process_time_range(tconnect, nightscout, time_start, time_end, args.pretend)
+        added = process_time_range(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features)
         print("Added", added, "items")
 

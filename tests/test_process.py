@@ -6,6 +6,7 @@ import pprint
 
 from tconnectsync.process import process_time_range
 from tconnectsync.parser.nightscout import IOB_ACTIVITYTYPE, NightscoutEntry
+from tconnectsync.features import BASAL, BOLUS, IOB
 
 from .api.fake import TConnectApi
 from .nightscout_fake import NightscoutApi
@@ -68,6 +69,33 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
 
+    """No data in Nightscout. Nothing should be updated in Nightscout without the BASAL feature."""
+    def test_basal_data_not_updated_without_feature(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 4, 20, 12, 0)
+        end = datetime.datetime(2021, 4, 21, 12, 0)
+
+        def fake_therapy_timeline(time_start, time_end):
+            self.assertEqual(time_start, start)
+            self.assertEqual(time_end, end)
+
+            return TestBasalSync.get_example_ciq_basal_events()
+
+        tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, IOB])
+
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
 
     """Two basal entries in Nightscout. Two new basal entries in tconnect."""
     def test_partial_ciq_basal_data(self):
@@ -199,6 +227,37 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
 
+    """No data in Nightscout. Nothing should be updated in Nightscout without the BOLUS feature."""
+    def test_bolus_data_not_updated_without_feature(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 4, 20, 12, 0)
+        end = datetime.datetime(2021, 4, 21, 12, 0)
+
+        tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+
+        bolusData = TestBolusSync.get_example_csv_bolus_events()
+        def fake_therapy_timeline_csv(time_start, time_end):
+            return {
+                **self.stub_therapy_timeline_csv(time_start, time_end),
+                "bolusData": bolusData,
+            }
+
+        tconnect.ws2.therapy_timeline_csv = fake_therapy_timeline_csv
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BASAL, IOB])
+
+        pprint.pprint(nightscout.uploaded_entries)
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
     """No data in Nightscout. Uploads new iob reading from tconnect."""
     def test_new_ciq_iob_data(self):
         tconnect = TConnectApi()
@@ -232,6 +291,36 @@ class TestProcessTimeRange(unittest.TestCase):
                 # the most recent IOB entry is added
                 NightscoutEntry.iob(6.80, "2021-10-12 00:10:30-04:00")
         ]})
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """No data in Nightscout. Nothing should be updated in Nightscout without the IOB feature."""
+    def test_iob_data_not_updated_without_feature(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 4, 20, 12, 0)
+        end = datetime.datetime(2021, 4, 21, 12, 0)
+
+        tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+
+        iobData = TestIOBSync.get_example_csv_iob_events()
+        def fake_therapy_timeline_csv(time_start, time_end):
+            return {
+                **self.stub_therapy_timeline_csv(time_start, time_end),
+                "iobData": iobData,
+            }
+
+        tconnect.ws2.therapy_timeline_csv = fake_therapy_timeline_csv
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BASAL, BOLUS])
+
+        self.assertEqual(len(nightscout.uploaded_entries["activity"]), 0)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
     
