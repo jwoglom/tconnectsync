@@ -53,7 +53,19 @@ class NightscoutApi:
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 		})
 		if latest.status_code != 200:
-			raise ApiException(latest.status_code, "Nightscout treatments response: %s" % latest.text)
+			raise ApiException(latest.status_code, "Nightscout last_uploaded_entry response: %s" % latest.text)
+
+		j = latest.json()
+		if j and len(j) > 0:
+			return j[0]
+		return None
+	
+	def last_uploaded_bg_entry(self):
+		latest = requests.get(urljoin(self.url, 'api/v1/entries.json?count=1&find[device]=' + urllib.parse.quote(ENTERED_BY) + '&ts=' + str(time.time())), headers={
+			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
+		})
+		if latest.status_code != 200:
+			raise ApiException(latest.status_code, "Nightscout last_uploaded_bg_entry response: %s" % latest.text)
 
 		j = latest.json()
 		if j and len(j) > 0:

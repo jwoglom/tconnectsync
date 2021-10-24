@@ -18,8 +18,12 @@ from .sync.iob import (
     process_iob_events,
     ns_write_iob_events
 )
+from .sync.cgm import (
+    process_cgm_events,
+    ns_write_cgm_events
+)
 from .parser.tconnect import TConnectEntry
-from .features import BASAL, BOLUS, IOB, DEFAULT_FEATURES
+from .features import BASAL, BOLUS, IOB, BOLUS_BG, CGM, DEFAULT_FEATURES
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +64,15 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
 
     added = 0
 
+    cgmData = None
+    if CGM in features or BOLUS_BG in features:
+        logger.debug("Processing CGM events")
+        cgmData = process_cgm_events(readingData)
+    
+    if CGM in features:
+        logger.debug("Writing CGM events")
+        added += ns_write_cgm_events(nightscout, cgmData, pretend)
+
     if BASAL in features:
         basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
         if csvBasalData:
@@ -72,7 +85,7 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
 
     if BOLUS in features:
         bolusEvents = process_bolus_events(bolusData)
-        added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend)
+        added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features))
 
     if IOB in features:
         iobEvents = process_iob_events(iobData)

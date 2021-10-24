@@ -166,6 +166,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "insulin": "13.53",
                 "requested_insulin": "13.53",
                 "carbs": "75",
+                "bg": "141",
                 "user_override": "0",
                 "extended_bolus": "",
                 "bolex_completion_time": None,
@@ -227,6 +228,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "insulin": "1.25",
                 "requested_insulin": "1.25",
                 "carbs": "0",
+                "bg": "159",
                 "user_override": "1",
                 "extended_bolus": "",
                 "bolex_completion_time": None,
@@ -288,6 +290,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "insulin": "1.70",
                 "requested_insulin": "1.70",
                 "carbs": "0",
+                "bg": "",
                 "user_override": "0",
                 "extended_bolus": "",
                 "bolex_completion_time": None,
@@ -349,6 +352,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "insulin": "0.00",
                 "requested_insulin": "0.50",
                 "carbs": "0",
+                "bg": "144",
                 "user_override": "1",
                 "extended_bolus": "",
                 "bolex_completion_time": None,
@@ -410,11 +414,82 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "insulin": "1.82",
                 "requested_insulin": "2.63",
                 "carbs": "0",
+                "bg": "189",
                 "user_override": "0",
                 "extended_bolus": "",
                 "bolex_completion_time": None,
                 "bolex_start_time": None
             })
+
+class TestTConnectEntryReading(unittest.TestCase):
+    entry1 = {
+        "DeviceType": "t:slim X2 Insulin Pump",
+        "SerialNumber": "90556643",
+        "Description": "EGV",
+        "EventDateTime": "2021-10-23T12:55:53",
+        "Readings (CGM / BGM)": "135"
+    }
+    def test_parse_reading_entry1(self):
+        self.assertEqual(
+            TConnectEntry.parse_reading_entry(self.entry1),
+            {
+                "time": "2021-10-23 12:55:53-04:00",
+                "bg": "135",
+                "type": "EGV"
+            }
+        )
+
+    entry2 = {
+        "DeviceType": "t:slim X2 Insulin Pump",
+        "SerialNumber": "90556643",
+        "Description": "EGV",
+        "EventDateTime": "2021-10-23T16:15:52",
+        "Readings (CGM / BGM)": "93"
+    }
+    def test_parse_reading_entry2(self):
+        self.assertEqual(
+            TConnectEntry.parse_reading_entry(self.entry2),
+            {
+                "time": "2021-10-23 16:15:52-04:00",
+                "bg": "93",
+                "type": "EGV"
+            }
+        )
+
+    entry3 = {
+        "DeviceType": "t:slim X2 Insulin Pump",
+        "SerialNumber": "90556643",
+        "Description": "EGV",
+        "EventDateTime": "2021-10-23T16:20:52",
+        "Readings (CGM / BGM)": "100"
+    }
+    def test_parse_reading_entry3(self):
+        self.assertEqual(
+            TConnectEntry.parse_reading_entry(self.entry3),
+            {
+                "time": "2021-10-23 16:20:52-04:00",
+                "bg": "100",
+                "type": "EGV"
+            }
+        )
+
+    entry4 = {
+        "DeviceType": "t:slim X2 Insulin Pump",
+        "SerialNumber": "90556643",
+        "Description": "EGV",
+        "EventDateTime": "2021-10-23T16:25:52",
+        "Readings (CGM / BGM)": "107"
+    }
+    def test_parse_reading_entry4(self):
+        self.assertEqual(
+            TConnectEntry.parse_reading_entry(self.entry4),
+            {
+                "time": "2021-10-23 16:25:52-04:00",
+                "bg": "107",
+                "type": "EGV"
+            }
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

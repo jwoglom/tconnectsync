@@ -1,6 +1,8 @@
 import arrow
 import logging
 
+from tconnectsync.sync.cgm import find_event_at
+
 from ..parser.nightscout import (
     BOLUS_EVENTTYPE,
     NightscoutEntry
@@ -12,7 +14,7 @@ logger = logging.getLogger(__name__)
 """
 Given bolus data input from the therapy timeline CSV, converts it into a digestable format.
 """
-def process_bolus_events(bolusdata):
+def process_bolus_events(bolusdata, cgmEvents=None):
     bolusEvents = []
 
     for b in bolusdata:
@@ -24,16 +26,37 @@ def process_bolus_events(bolusdata):
             else:
                 logger.warning("Skipping non-completed bolus data (was a bolus in progress?): %s parsed: %s" % (b, parsed))
                 continue
+
+        if parsed["bg"] and cgmEvents:
+            requested_at = parsed["request_time"] if not parsed["extended_bolus"] else parsed["bolex_start_time"]
+            parsed["bg_type"] = guess_bolus_bg_type(parsed["bg"], requested_at, cgmEvents)
+
         bolusEvents.append(parsed)
 
-    bolusEvents.sort(key=lambda event: arrow.get(event["completion_time"] if not event["extended_bolus"] else event["bolex_start_time"]))
+    bolusEvents.sort(key=lambda event: arrow.get(event["request_time"] if not event["extended_bolus"] else event["bolex_start_time"]))
 
     return bolusEvents
 
 """
+Determine whether the given BG specified in the bolus is identical to the
+most recent CGM reading at that time. If it is, return SENSOR.
+Otherwise, return FINGER.
+"""
+def guess_bolus_bg_type(bg, created_at, cgmEvents):
+    if not cgmEvents:
+        return NightscoutEntry.FINGER
+
+    event = find_event_at(cgmEvents, created_at)
+    if event and str(event["bg"]) == str(bg):
+        return NightscoutEntry.SENSOR
+    
+    return NightscoutEntry.FINGER
+
+
+"""
 Given processed bolus data, adds bolus events to Nightscout.
 """
-def ns_write_bolus_events(nightscout, bolusEvents, pretend=False):
+def ns_write_bolus_events(nightscout, bolusEvents, pretend=False, include_bg=False, reading_events=None):
     logger.debug("ns_write_bolus_events: querying for last uploaded entry")
     last_upload = nightscout.last_uploaded_entry(BOLUS_EVENTTYPE)
     last_upload_time = None
@@ -49,12 +72,22 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False):
                 logger.info("Skipping basal event before last upload time: %s" % event)
             continue
 
-        entry = NightscoutEntry.bolus(
-            bolus=event["insulin"],
-            carbs=event["carbs"],
-            created_at=created_at,
-            notes="{}{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "", " (Extended)" if event["extended_bolus"] == "1" else "")
-        )
+        if include_bg and event["bg"]:
+            entry = NightscoutEntry.bolus(
+                bolus=event["insulin"],
+                carbs=event["carbs"],
+                created_at=created_at,
+                notes="{}{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "", " (Extended)" if event["extended_bolus"] == "1" else ""),
+                bg=event["bg"],
+                bg_type=event["bg_type"]
+            )
+        else:
+            entry = NightscoutEntry.bolus(
+                bolus=event["insulin"],
+                carbs=event["carbs"],
+                created_at=created_at,
+                notes="{}{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "", " (Extended)" if event["extended_bolus"] == "1" else "")
+            )
 
         add_count += 1
 

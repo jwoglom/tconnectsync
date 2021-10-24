@@ -100,8 +100,17 @@ class TConnectEntry:
             "insulin": data["InsulinDelivered"],
             "requested_insulin": data["ActualTotalBolusRequested"],
             "carbs": data["CarbSize"],
+            "bg": data["BG"], # Note: can be empty string for automatic Control-IQ boluses
             "user_override": data["UserOverride"],
             "extended_bolus": "1" if extended_bolus else "",
             "bolex_completion_time": TConnectEntry._datetime_parse(data["BolexCompletionDateTime"]).format() if complete and extended_bolus else None,
             "bolex_start_time": TConnectEntry._datetime_parse(data["BolexStartDateTime"]).format() if complete and extended_bolus else None,
+        }
+    
+    @staticmethod
+    def parse_reading_entry(data):
+        return {
+            "time": TConnectEntry._datetime_parse(data["EventDateTime"]).format(),
+            "bg": data["Readings (CGM / BGM)"],
+            "type": data["Description"]
         }
