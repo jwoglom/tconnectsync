@@ -60,6 +60,26 @@ class TestTConnectEntrySuspension(unittest.TestCase):
             }
         )
 
+class TestTConnectEntrySuspensionToBasal(unittest.TestCase):
+    def test_manual_suspension_to_basal_entry(self):
+        suspension = {
+            "time": "2021-03-16 00:30:21-04:00",
+            "continuation": None,
+            "suspendReason": "manual"
+        }
+
+        self.assertEqual(
+            TConnectEntry.manual_suspension_to_basal_entry(
+                suspension,
+                seconds=300
+            ), {
+                "time": "2021-03-16 00:30:21-04:00",
+                "delivery_type": "manual suspension",
+                "duration_mins": 5.0,
+                "basal_rate": 0.0
+            }
+        )
+
 class TestTConnectEntryCGM(unittest.TestCase):
     def test_parse_cgm_entry(self):
         self.assertEqual(

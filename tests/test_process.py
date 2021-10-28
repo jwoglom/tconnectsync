@@ -64,7 +64,7 @@ class TestProcessTimeRange(unittest.TestCase):
                 NightscoutEntry.basal(0.8, 20.35, "2021-03-16 00:00:00-04:00", reason="tempDelivery"),
                 NightscoutEntry.basal(0.799, 5.0, "2021-03-16 00:20:21-04:00", reason="profileDelivery"),
                 NightscoutEntry.basal(0.797, 5.0, "2021-03-16 00:25:21-04:00", reason="algorithmDelivery"),
-                NightscoutEntry.basal(0, 2693/60, "2021-03-16 00:30:21-04:00", reason="algorithmDelivery")
+                NightscoutEntry.basal(0, 2693/60, "2021-03-16 00:30:21-04:00", reason="algorithmDelivery (control-iq suspension)")
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
@@ -132,7 +132,7 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
             "treatments": [
                 NightscoutEntry.basal(0.797, 5.0, "2021-03-16 00:25:21-04:00", reason="algorithmDelivery"),
-                NightscoutEntry.basal(0, 2693/60, "2021-03-16 00:30:21-04:00", reason="algorithmDelivery")
+                NightscoutEntry.basal(0, 2693/60, "2021-03-16 00:30:21-04:00", reason="algorithmDelivery (control-iq suspension)")
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
@@ -176,7 +176,7 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertDictEqual(nightscout.uploaded_entries, {
             "treatments": [
                 NightscoutEntry.basal(0.797, 5.0, "2021-03-16 00:25:21-04:00", reason="algorithmDelivery"),
-                NightscoutEntry.basal(0, 2693/60, "2021-03-16 00:30:21-04:00", reason="algorithmDelivery")
+                NightscoutEntry.basal(0, 2693/60, "2021-03-16 00:30:21-04:00", reason="algorithmDelivery (control-iq suspension)")
         ]})
         self.assertEqual(len(nightscout.put_entries["treatments"]), 1)
         self.assertDictEqual(dict(nightscout.put_entries), {

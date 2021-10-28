@@ -40,6 +40,16 @@ class TConnectEntry:
             "duration_mins": duration_mins,
             "basal_rate": basal_rate,
         }
+    
+    @staticmethod
+    def manual_suspension_to_basal_entry(parsedSuspension, seconds):
+        duration_mins = seconds / 60
+        return {
+            "time": parsedSuspension["time"],
+            "delivery_type": "%s suspension" % parsedSuspension["suspendReason"],
+            "duration_mins": duration_mins,
+            "basal_rate": 0.0
+        }
 
     @staticmethod
     def parse_suspension_entry(data):
