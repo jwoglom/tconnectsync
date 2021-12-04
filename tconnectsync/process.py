@@ -22,8 +22,12 @@ from .sync.cgm import (
     process_cgm_events,
     ns_write_cgm_events
 )
+from .sync.pump_events import (
+    process_ciq_activity_events,
+    ns_write_pump_events
+)
 from .parser.tconnect import TConnectEntry
-from .features import BASAL, BOLUS, IOB, BOLUS_BG, CGM, DEFAULT_FEATURES
+from .features import BASAL, BOLUS, IOB, BOLUS_BG, CGM, DEFAULT_FEATURES, PUMP_EVENTS
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +86,12 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
             logger.debug("No CSV basal data found")
 
         added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend)
+    
+    if PUMP_EVENTS in features:
+        pumpEvents = process_ciq_activity_events(ciqTherapyTimelineData)
+        logger.info("CIQ activity events: %s" % pumpEvents)
+
+        added += ns_write_pump_events(nightscout, pumpEvents, pretend=pretend)
 
     if BOLUS in features:
         bolusEvents = process_bolus_events(bolusData)

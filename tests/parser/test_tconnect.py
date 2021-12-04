@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from tconnectsync.parser.tconnect import TConnectEntry
+from tconnectsync.parser.tconnect import TConnectEntry, UnknownCIQActivityEventException
 
 class TestTConnectEntryBasal(unittest.TestCase):
     def test_parse_ciq_basal_entry(self):
@@ -510,6 +510,52 @@ class TestTConnectEntryReading(unittest.TestCase):
             }
         )
 
+
+class TestTConnectEntryCIQEvent(unittest.TestCase):
+    def test_parse_ciq_activity_event_sleep(self):
+        self.assertEqual(
+            TConnectEntry.parse_ciq_activity_event({
+                "continuation": None,
+                "duration": 30661,
+                "eventType": 1,
+                "timeZoneId": "America/Los_Angeles",
+                "x": 1638091836
+            }),
+            {
+                "time": "2021-11-28 01:30:36-05:00",
+                "duration_mins": (30661 / 60),
+                "event_type": "Sleep"
+            }
+        )
+
+    def test_parse_ciq_activity_event_exercise(self):
+        self.assertEqual(
+            TConnectEntry.parse_ciq_activity_event({
+                "duration": 1200,
+                "eventType": 2,
+                "continuation": None, 
+                "timeZoneId": "America/Los_Angeles",
+                "x": 1619901912
+            }),
+            {
+                "time": "2021-05-01 13:45:12-04:00",
+                "duration_mins": 20,
+                "event_type": "Exercise"
+            }
+        )
+    
+    def test_parse_ciq_activity_event_unknown_id(self):
+        self.assertRaises(
+            UnknownCIQActivityEventException, 
+            TConnectEntry.parse_ciq_activity_event,
+            {
+                "duration": 1200,
+                "eventType": 5,
+                "continuation": None, 
+                "timeZoneId": "America/Los_Angeles",
+                "x": 1619901912
+            }
+        )
 
 if __name__ == '__main__':
     unittest.main()

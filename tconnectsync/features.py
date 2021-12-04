@@ -6,6 +6,7 @@ BOLUS = "BOLUS"
 IOB = "IOB"
 BOLUS_BG = "BOLUS_BG"
 CGM = "CGM"
+PUMP_EVENTS = "PUMP_EVENTS"
 
 DEFAULT_FEATURES = [
     BASAL,
@@ -24,5 +25,6 @@ ALL_FEATURES = [
 if ENABLE_TESTING_MODES:
     ALL_FEATURES += [
         BOLUS_BG,
-        CGM
+        CGM,
+        PUMP_EVENTS
     ]

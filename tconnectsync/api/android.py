@@ -11,7 +11,7 @@ import logging
 from bs4 import BeautifulSoup
 
 from ..util import timeago
-from .common import ApiException, ApiLoginException
+from .common import ApiException, ApiLoginException, parse_date
 
 logger = logging.getLogger(__name__)
 
@@ -154,3 +154,16 @@ class AndroidApi:
     """
     def user_profile(self):
         return self.get('cloud/usersettings/api/UserProfile?userId=%s' % self.userId)
+    
+    """
+    Returns therapy events, used by the webui Therapy Timeline.
+    {'event': [
+      {'type': 'Basal', 'basalRate': ...}, 
+      {'type': 'Bolus', 'standard': ...},
+      {'type': 'CGM', 'egv': ...}
+    ]}
+    """
+    def therapy_events(self, start_date=None, end_date=None):
+        startDate = parse_date(start_date)
+        endDate = parse_date(end_date)
+        return self.get('tconnect/therapyevents/api/TherapyEvents/%s/%s/false?userId=%s' % (startDate, endDate, self.userId))

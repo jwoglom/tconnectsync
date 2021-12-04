@@ -13,7 +13,6 @@ a more digestable format, which is used internally.
 """
 class TConnectEntry:
     BASAL_EVENTS = { 0: "Suspension", 1: "Profile", 2: "TempRate", 3: "Algorithm" }
-    ACTIVITY_EVENTS = { 1: "Sleep", 2: "Exercise", 3: "AutoBolus", 4: "CarbOnly" }
 
     @staticmethod
     def _epoch_parse(x):
@@ -124,3 +123,23 @@ class TConnectEntry:
             "bg": data["Readings (CGM / BGM)"],
             "type": data["Description"]
         }
+
+    ACTIVITY_EVENTS = { 1: "Sleep", 2: "Exercise", 3: "AutoBolus", 4: "CarbOnly" }
+
+    @staticmethod
+    def parse_ciq_activity_event(data):
+        if data["eventType"] not in TConnectEntry.ACTIVITY_EVENTS.keys():
+            raise UnknownCIQActivityEventException(data)
+
+        time = TConnectEntry._epoch_parse(data["x"])
+        return {
+            "time": time.format(),
+            "duration_mins": data["duration"] / 60,
+            "event_type": TConnectEntry.ACTIVITY_EVENTS[data["eventType"]]
+        }
+
+
+
+class UnknownCIQActivityEventException(Exception):
+    def __init__(self, data):
+        super().__init__("Unknown CIQ activity event type: %s" % data)
