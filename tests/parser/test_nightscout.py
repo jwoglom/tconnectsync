@@ -162,6 +162,34 @@ class TestNightscoutEntry(unittest.TestCase):
                 "device": "Pump (tconnectsync)",
             }
         )
+    
+    def test_sitechange(self):
+        self.assertEqual(
+            NightscoutEntry.sitechange(
+                created_at="2021-12-05T00:16:35.058Z",
+                reason="reason"),
+            {
+                "eventType": "Site Change",
+                "reason": "reason",
+                "notes": "reason",
+                "created_at": "2021-12-05T00:16:35.058Z",
+                "enteredBy": "Pump (tconnectsync)"
+            }
+        )
+    
+    def test_basalsuspension(self):
+        self.assertEqual(
+            NightscoutEntry.basalsuspension(
+                created_at="2021-12-05T00:16:35.058Z",
+                reason="reason"),
+            {
+                "eventType": "Basal Suspension",
+                "reason": "reason",
+                "notes": "reason",
+                "created_at": "2021-12-05T00:16:35.058Z",
+                "enteredBy": "Pump (tconnectsync)"
+            }
+        )
 
 
 if __name__ == '__main__':

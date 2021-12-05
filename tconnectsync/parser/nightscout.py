@@ -1,8 +1,15 @@
 import arrow
 
 ENTERED_BY = "Pump (tconnectsync)"
+
 BASAL_EVENTTYPE = "Temp Basal"
 BOLUS_EVENTTYPE = "Combo Bolus"
+SITECHANGE_EVENTTYPE = "Site Change"
+BASALSUSPENSION_EVENTTYPE = "Basal Suspension"
+ACTIVITY_EVENTTYPE = "Activity"
+EXERCISE_EVENTTYPE = "Exercise"
+SLEEP_EVENTTYPE = "Sleep"
+
 IOB_ACTIVITYTYPE = "tconnect_iob"
 
 
@@ -67,6 +74,37 @@ class NightscoutEntry:
             "dateString": arrow.get(created_at).strftime('%Y-%m-%dT%H:%M:%S%z'),
             "device": ENTERED_BY,
             # delta, direction are undefined
+        }
+
+    @staticmethod
+    def sitechange(created_at, reason=""):
+        return {
+            "eventType": SITECHANGE_EVENTTYPE,
+            "reason": reason,
+            "notes": reason,
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY
+        }
+
+    @staticmethod
+    def basalsuspension(created_at, reason=""):
+        return {
+            "eventType": BASALSUSPENSION_EVENTTYPE,
+            "reason": reason,
+            "notes": reason,
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY
+        }
+
+    @staticmethod
+    def activity(created_at, duration, reason="", event_type=ACTIVITY_EVENTTYPE):
+        return {
+            "eventType": event_type,
+            "reason": reason,
+            "notes": reason,
+            "duration": float(duration),
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY
         }
 
 class InvalidBolusTypeException(RuntimeError):
