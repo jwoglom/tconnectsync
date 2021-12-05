@@ -17,7 +17,8 @@ DEFAULT_FEATURES = [
 ALL_FEATURES = [
     BASAL,
     BOLUS,
-    IOB
+    IOB,
+    PUMP_EVENTS
 ]
 
 
@@ -25,6 +26,5 @@ ALL_FEATURES = [
 if ENABLE_TESTING_MODES:
     ALL_FEATURES += [
         BOLUS_BG,
-        CGM,
-        PUMP_EVENTS
+        CGM
     ]
