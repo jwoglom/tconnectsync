@@ -3,6 +3,7 @@
 import unittest
 import datetime
 import pprint
+import copy
 
 from tconnectsync.process import process_time_range
 from tconnectsync.parser.nightscout import EXERCISE_EVENTTYPE, IOB_ACTIVITYTYPE, SLEEP_EVENTTYPE, NightscoutEntry
@@ -18,7 +19,7 @@ class TestProcessTimeRange(unittest.TestCase):
     maxDiff = None
 
     def stub_therapy_timeline(self, time_start, time_end):
-        pass
+        return copy.deepcopy(TestBasalSync.base)
 
     def stub_therapy_timeline_csv(self, time_start, time_end):
         return {
@@ -505,7 +506,6 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-
         def fake_last_uploaded_entry(event_type):
             if event_type == "Sleep":
                 return {
@@ -540,6 +540,161 @@ class TestProcessTimeRange(unittest.TestCase):
             "treatments/old_sleep"
         ])
 
+    """No pump activity events in Nightscout. New WS2 activity events."""
+    def test_new_ws2_activity_events(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+        tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
+
+        def fake_basalsuspension(time_start, time_end):            
+            self.assertEqual(time_start, start)
+            self.assertEqual(time_end, end)
+
+            return {"BasalSuspension": [
+                {
+                    'EventDateTime': '/Date(1638663490000-0000)/',
+                    'SuspendReason': 'site-cart'
+                },
+                {
+                    'EventDateTime': '/Date(1637863616000-0000)/',
+                    'SuspendReason': 'alarm'
+                },
+                {
+                    'EventDateTime': '/Date(1638662852000-0000)/',
+                    'SuspendReason': 'manual'
+                }
+            ]}
+
+        tconnect.ws2.basalsuspension = fake_basalsuspension
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 3)
+        self.assertDictEqual(dict(nightscout.uploaded_entries), {
+            "treatments": [
+                NightscoutEntry.sitechange(created_at="2021-12-04 16:18:10-05:00", reason="Site/Cartridge Change"),
+                NightscoutEntry.basalsuspension(created_at="2021-11-25 10:06:56-05:00", reason="Empty Cartridge/Pump Shutdown"),
+                NightscoutEntry.basalsuspension(created_at="2021-12-04 16:07:32-05:00", reason="User Suspended")
+        ]})
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """Existing pump activity events in Nightscout. New WS2 activity events. Only adds new events."""
+    def test_existing_ws2_activity_events(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+        tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
+
+        def fake_basalsuspension(time_start, time_end):            
+            self.assertEqual(time_start, start)
+            self.assertEqual(time_end, end)
+
+            return {"BasalSuspension": [
+                {
+                    'EventDateTime': '/Date(1638663490000-0000)/',
+                    'SuspendReason': 'site-cart'
+                },
+                {
+                    'EventDateTime': '/Date(1637863616000-0000)/',
+                    'SuspendReason': 'alarm'
+                },
+                {
+                    'EventDateTime': '/Date(1638662852000-0000)/',
+                    'SuspendReason': 'manual'
+                },
+                # This event is new:
+                {
+                    'EventDateTime': '/Date(1638672852000-0000)/',
+                    'SuspendReason': 'manual'
+                }
+            ]}
+
+        tconnect.ws2.basalsuspension = fake_basalsuspension
+
+        nightscout = NightscoutApi()
+
+        def fake_last_uploaded_entry(event_type):
+            if event_type == "Site Change":
+                return {
+                    "created_at": "2021-12-04 16:18:10-05:00"
+                }
+            elif event_type == "Basal Suspension":
+                return {
+                    "created_at": "2021-12-04 16:07:32-05:00"
+                }
+            return self.stub_last_uploaded_entry()
+
+        nightscout.last_uploaded_entry = fake_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 1)
+        self.assertDictEqual(dict(nightscout.uploaded_entries), {
+            "treatments": [
+                NightscoutEntry.basalsuspension(created_at="2021-12-04 18:54:12-05:00", reason="User Suspended")
+        ]})
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """No pump activity events in nightscout. New WS2 activity events, but only of skipped types. None should be added."""
+    def test_skipped_ws2_activity_events(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+        tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
+
+        def fake_basalsuspension(time_start, time_end):            
+            self.assertEqual(time_start, start)
+            self.assertEqual(time_end, end)
+
+            return {"BasalSuspension": [
+                {
+                    'EventDateTime': '/Date(1638659343000-0000)/',
+                    'SuspendReason': 'basal-profile',
+                },
+                {
+                    'Continuation': 'continuation',
+                    'EventDateTime': '/Date(1638604800000-0000)/',
+                    'SuspendReason': 'previous',
+                },
+                {
+                    'EventDateTime': '/Date(1638659343000-0000)/',
+                    'SuspendReason': 'basal-profile',
+                }
+            ]}
+
+        tconnect.ws2.basalsuspension = fake_basalsuspension
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
 
 
 if __name__ == '__main__':

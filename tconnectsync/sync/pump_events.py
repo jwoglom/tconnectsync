@@ -94,7 +94,8 @@ def ns_write_pump_sitechange_events(nightscout, siteChangeEvents, pretend=False)
         nightscout, 
         siteChangeEvents, 
         lambda event: NightscoutEntry.sitechange(
-            created_at=event["time"]
+            created_at=event["time"],
+            reason=event["event_type"]
         ),
         SITECHANGE_EVENTTYPE,
         pretend=pretend)
