@@ -10,6 +10,7 @@ from ..parser.nightscout import (
     NightscoutEntry
 )
 from ..parser.tconnect import TConnectEntry
+from ..secret import SKIP_NS_LAST_UPLOADED_CHECK
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +172,11 @@ def _ns_write_pump_events(nightscout, events, buildNsEventFunc, eventType, prete
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
     logger.info("Last Nightscout %s: %s" % (eventType, last_upload_time))
+
+    if SKIP_NS_LAST_UPLOADED_CHECK:
+        logger.warning("Overriding last upload check")
+        last_upload = None
+        last_upload_time = None
 
     add_count = 0
     for event in events:

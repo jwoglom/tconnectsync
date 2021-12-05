@@ -37,6 +37,7 @@ AUTOUPDATE_FAILURE_MINUTES = get_number('AUTOUPDATE_FAILURE_MINUTES', '180') # 3
 AUTOUPDATE_RESTART_ON_FAILURE = get_bool('AUTOUPDATE_RESTART_ON_FAILURE', 'false')
 
 ENABLE_TESTING_MODES = get_bool('ENABLE_TESTING_MODES', 'false')
+SKIP_NS_LAST_UPLOADED_CHECK = get_bool('SKIP_NS_LAST_UPLOADED_CHECK', 'false')
 
 if __name__ == '__main__':
     for k in locals():

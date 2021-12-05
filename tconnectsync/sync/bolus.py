@@ -8,6 +8,7 @@ from ..parser.nightscout import (
     NightscoutEntry
 )
 from ..parser.tconnect import TConnectEntry
+from ..secret import SKIP_NS_LAST_UPLOADED_CHECK
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,11 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False, include_bg=Fal
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])
     logger.info("Last Nightscout bolus upload: %s" % last_upload_time)
+
+    if SKIP_NS_LAST_UPLOADED_CHECK:
+        logger.warning("Overriding last upload check")
+        last_upload = None
+        last_upload_time = None
 
     add_count = 0
     for event in bolusEvents:
