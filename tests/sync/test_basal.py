@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import unittest
+from copy import deepcopy
+
 from tconnectsync.sync.basal import process_ciq_basal_events
 from tconnectsync.parser.tconnect import TConnectEntry
 
@@ -22,7 +24,7 @@ class TestBasalSync(unittest.TestCase):
 
     @staticmethod
     def get_example_ciq_basal_events():
-        data = TestBasalSync.base.copy()
+        data = deepcopy(TestBasalSync.base)
         data["basal"]["tempDeliveryEvents"] = [
             {
                 "y": 0.8,
@@ -83,7 +85,7 @@ class TestBasalSync(unittest.TestCase):
 
     @staticmethod
     def get_example_ciq_basal_events_with_manual_suspension():
-        data = TestBasalSync.base.copy()
+        data = deepcopy(TestBasalSync.base)
         data["basal"]["tempDeliveryEvents"] = []
         data["basal"]["algorithmDeliveryEvents"] = [
             {
