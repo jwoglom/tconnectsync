@@ -24,6 +24,7 @@ from .sync.cgm import (
 )
 from .sync.pump_events import (
     process_ciq_activity_events,
+    process_basalsuspension_events,
     ns_write_pump_events
 )
 from .parser.tconnect import TConnectEntry
@@ -89,7 +90,14 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
     
     if PUMP_EVENTS in features:
         pumpEvents = process_ciq_activity_events(ciqTherapyTimelineData)
-        logger.info("CIQ activity events: %s" % pumpEvents)
+        logger.debug("CIQ activity events: %s" % pumpEvents)
+
+        ws2BasalSuspension = tconnect.ws2.basalsuspension(time_start, time_end)
+        
+        bsPumpEvents = process_basalsuspension_events(ws2BasalSuspension)
+        logger.debug("basalsuspension events: %s" % bsPumpEvents)
+
+        pumpEvents += bsPumpEvents
 
         added += ns_write_pump_events(nightscout, pumpEvents, pretend=pretend)
 

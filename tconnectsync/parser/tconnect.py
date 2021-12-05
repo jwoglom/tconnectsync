@@ -1,3 +1,4 @@
+from os import stat
 import sys
 import arrow
 
@@ -26,6 +27,10 @@ class TConnectEntry:
         # is overwritten with America/New_York, resulting in 2020-09-01T06:00:00-04:00, the
         # correct timestamp.
         return arrow.get(x, tzinfo="America/Los_Angeles").replace(tzinfo=TIMEZONE_NAME)
+    
+    @staticmethod
+    def _jsonp_epoch_parse(x):
+        return TConnectEntry._epoch_parse(int(x.replace('/Date(', '').replace('-0000)/', '')))
 
     @staticmethod
     def parse_ciq_basal_entry(data, delivery_type=""):
@@ -137,9 +142,52 @@ class TConnectEntry:
             "duration_mins": data["duration"] / 60,
             "event_type": TConnectEntry.ACTIVITY_EVENTS[data["eventType"]]
         }
+    
+    BASALSUSPENSION_EVENTS = {
+        # site-cart corresponds to a Site or Cartridge change,
+        # specifically a Tubing Filled: Norm AND a Cannula Filled: Norm alert.
+        # (This means that a typical changing of a cartridge and then a site
+        # will result in two consecutive events of this type.)
+        "site-cart": "Site/Cartridge Change",
 
+        # alarm corresponds to one of the following:
+        # - an Empty Cartridge alarm
+        # - a Pump shutdown
+        "alarm": "Empty Cartridge/Pump Shutdown",
+
+        # manual corresponds to a Pumping Suspended by User event
+        "manual": "User Suspended"
+    }
+
+    BASALSUSPENSION_SKIPPED_EVENTS = {
+        # basal-profile events are not very useful; with ControlIQ enabled,
+        # Tandem does not show them in the tconnect UI.
+        "basal-profile",
+
+        # If an event continues to occur after the date switches over to the next
+        # day, then the pump generates a "previous" event. This isn't useful to
+        # us, so we skip them.
+        "previous",
+    }
+    @staticmethod
+    def parse_basalsuspension_event(data):
+        if data["SuspendReason"] in TConnectEntry.BASALSUSPENSION_SKIPPED_EVENTS:
+            return None
+
+        if data["SuspendReason"] not in TConnectEntry.BASALSUSPENSION_EVENTS.keys():
+            raise UnknownBasalSuspensionEventException(data)
+
+        time = TConnectEntry._jsonp_epoch_parse(data["EventDateTime"])
+        return {
+            "time": time.format(),
+            "event_type": TConnectEntry.BASALSUSPENSION_EVENTS[data["SuspendReason"]]
+        }
 
 
 class UnknownCIQActivityEventException(Exception):
     def __init__(self, data):
         super().__init__("Unknown CIQ activity event type: %s" % data)
+
+class UnknownBasalSuspensionEventException(Exception):
+    def __init__(self, data):
+        super().__init__("Unknown basal suspension event type: %s" % data)

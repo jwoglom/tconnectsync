@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from tconnectsync.parser.tconnect import TConnectEntry, UnknownCIQActivityEventException
+from tconnectsync.parser.tconnect import TConnectEntry, UnknownBasalSuspensionEventException, UnknownCIQActivityEventException
 
 class TestTConnectEntryBasal(unittest.TestCase):
     def test_parse_ciq_basal_entry(self):
@@ -556,6 +556,71 @@ class TestTConnectEntryCIQEvent(unittest.TestCase):
                 "x": 1619901912
             }
         )
+
+class TestTConnectEntryBasalSuspensionEvent(unittest.TestCase):
+    def test_parse_basalsuspension_event_sitecart(self):
+        self.assertEqual(
+            TConnectEntry.parse_basalsuspension_event({
+                'EventDateTime': '/Date(1638663490000-0000)/',
+                'SuspendReason': 'site-cart'
+            }),
+            {
+                "time": "2021-12-04 16:18:10-05:00",
+                "event_type": "Site/Cartridge Change"
+            }
+        )
+
+    def test_parse_basalsuspension_event_alarm(self):
+        self.assertEqual(
+            TConnectEntry.parse_basalsuspension_event({
+                'EventDateTime': '/Date(1637863616000-0000)/',
+                'SuspendReason': 'alarm'
+            }),
+            {
+                "time": "2021-11-25 10:06:56-05:00",
+                "event_type": "Empty Cartridge/Pump Shutdown"
+            }
+        )
+
+    def test_parse_basalsuspension_event_manual(self):
+        self.assertEqual(
+            TConnectEntry.parse_basalsuspension_event({
+                'EventDateTime': '/Date(1638662852000-0000)/',
+                'SuspendReason': 'manual'
+            }),
+            {
+                "time": "2021-12-04 16:07:32-05:00",
+                "event_type": "User Suspended"
+            }
+        )
+
+    def test_parse_basalsuspension_event_basalprofile_skipped(self):
+        self.assertIsNone(
+            TConnectEntry.parse_basalsuspension_event({
+                'EventDateTime': '/Date(1638659343000-0000)/',
+                'SuspendReason': 'basal-profile',
+            })
+        )
+
+    def test_parse_basalsuspension_event_previous_skipped(self):
+        self.assertIsNone(
+            TConnectEntry.parse_basalsuspension_event({
+                'Continuation': 'continuation',
+                'EventDateTime': '/Date(1638604800000-0000)/',
+                'SuspendReason': 'previous',
+            })
+        )
+    
+    def test_parse_basalsuspension_event_unknown_suspendreason(self):
+        self.assertRaises(
+            UnknownBasalSuspensionEventException, 
+            TConnectEntry.parse_basalsuspension_event,
+            {
+                'EventDateTime': '/Date(1638604800000-0000)/',
+                'SuspendReason': 'unknown',
+            }
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

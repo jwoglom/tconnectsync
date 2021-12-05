@@ -3,6 +3,7 @@ import datetime
 import csv
 import logging
 import time
+import json
 
 from .common import parse_date, base_headers, ApiException
 
@@ -36,7 +37,7 @@ class WS2Api:
         if t.endswith(')'):
             t = t[:-1]
 
-        return t
+        return json.loads(t)
 
     def _split_empty_sections(self, text):
         sections = [[]]
