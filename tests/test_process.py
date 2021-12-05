@@ -5,8 +5,8 @@ import datetime
 import pprint
 
 from tconnectsync.process import process_time_range
-from tconnectsync.parser.nightscout import IOB_ACTIVITYTYPE, NightscoutEntry
-from tconnectsync.features import BASAL, BOLUS, IOB
+from tconnectsync.parser.nightscout import EXERCISE_EVENTTYPE, IOB_ACTIVITYTYPE, SLEEP_EVENTTYPE, NightscoutEntry
+from tconnectsync.features import BASAL, BOLUS, IOB, PUMP_EVENTS
 
 from .api.fake import TConnectApi
 from .nightscout_fake import NightscoutApi
@@ -27,6 +27,9 @@ class TestProcessTimeRange(unittest.TestCase):
             "basalData": [],
             "bolusData": []
         }
+    
+    def stub_ws2_basalsuspension(self, time_start, time_end):
+        return {"BasalSuspension": []}
 
     def stub_last_uploaded_entry(self, event_type):
         return None
@@ -56,7 +59,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False)
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 4)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -126,7 +129,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False)
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 2)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -170,7 +173,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False)
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 2)
         self.assertDictEqual(nightscout.uploaded_entries, {
@@ -213,7 +216,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False)
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         pprint.pprint(nightscout.uploaded_entries)
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), len(bolusData))
@@ -282,7 +285,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False)
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL, IOB])
 
         pprint.pprint(nightscout.uploaded_entries)
         self.assertEqual(len(nightscout.uploaded_entries["activity"]), 1)
@@ -357,7 +360,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout.last_uploaded_activity = fake_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False)
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[IOB])
 
         pprint.pprint(nightscout.uploaded_entries)
         self.assertEqual(len(nightscout.uploaded_entries["activity"]), 1)
@@ -370,7 +373,172 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertListEqual(nightscout.deleted_entries, [
             "activity/sentinel_existing_iob_id"
         ])
+    
+    """No pump activity events in Nightscout. New CIQ activity events."""
+    def test_new_ciq_activity_events(self):
+        tconnect = TConnectApi()
 
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        def fake_therapy_timeline(time_start, time_end):
+            self.assertEqual(time_start, start)
+            self.assertEqual(time_end, end)
+
+            return {
+                **TestBasalSync.base,
+                "events": [{
+                    "duration": 1200,
+                    "eventType": 2, # Exercise
+                    "continuation": None, 
+                    "timeZoneId": "America/Los_Angeles",
+                    "x": 1619901912 # 2021-05-01 13:45:12-04:00
+                }, {
+                    "duration": 30661,
+                    "eventType": 1, # Sleep
+                    "continuation": None,
+                    "timeZoneId": "America/Los_Angeles",
+                    "x": 1619992000 # 2021-05-02 14:46:40-04:00
+                }]
+            }
+
+        tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
+        tconnect.ws2.basalsuspension = self.stub_ws2_basalsuspension
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 2)
+        self.assertDictEqual(dict(nightscout.uploaded_entries), {
+            "treatments": [
+                NightscoutEntry.activity(created_at="2021-05-01 13:45:12-04:00", duration=20, reason="Exercise", event_type=EXERCISE_EVENTTYPE),
+                NightscoutEntry.activity(created_at="2021-05-02 14:46:40-04:00", duration=30661/60, reason="Sleep", event_type=SLEEP_EVENTTYPE),
+        ]})
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """No pump activity events in Nightscout. New CIQ activity events, but feature is disabled."""
+    def test_no_ciq_activity_events_without_feature(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        def fake_therapy_timeline(time_start, time_end):
+            self.assertEqual(time_start, start)
+            self.assertEqual(time_end, end)
+
+            return {
+                **TestBasalSync.base,
+                "events": [{
+                    "duration": 1200,
+                    "eventType": 2, # Exercise
+                    "continuation": None, 
+                    "timeZoneId": "America/Los_Angeles",
+                    "x": 1619901912 # 2021-05-01 13:45:12-04:00
+                }, {
+                    "duration": 30661,
+                    "eventType": 1, # Sleep
+                    "continuation": None,
+                    "timeZoneId": "America/Los_Angeles",
+                    "x": 1619992000 # 2021-05-02 14:46:40-04:00
+                }]
+            }
+
+        tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
+        tconnect.ws2.basalsuspension = self.stub_ws2_basalsuspension
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL, IOB])
+
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    
+    """
+    Existing Sleep event in Nightscout with shorter duration than current, as well as a past Exercise event.
+    Ensures that the old sleep event is deleted and a new one is created with the correct duration."""
+    def test_existing_ciq_activity_events(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        def fake_therapy_timeline(time_start, time_end):
+            self.assertEqual(time_start, start)
+            self.assertEqual(time_end, end)
+
+            return {
+                **TestBasalSync.base,
+                "events": [{
+                    "duration": 1200,
+                    "eventType": 2, # Exercise
+                    "continuation": None, 
+                    "timeZoneId": "America/Los_Angeles",
+                    "x": 1619901912 # 2021-05-01 13:45:12-04:00
+                }, {
+                    "duration": 4200, # Currently 60 mins (3600), changing to 70 mins (4200)
+                    "eventType": 1, # Sleep
+                    "continuation": None,
+                    "timeZoneId": "America/Los_Angeles",
+                    "x": 1619992000 # 2021-05-02 14:46:40-04:00
+                }]
+            }
+
+        tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
+        tconnect.ws2.basalsuspension = self.stub_ws2_basalsuspension
+
+        nightscout = NightscoutApi()
+
+
+        def fake_last_uploaded_entry(event_type):
+            if event_type == "Sleep":
+                return {
+                    "created_at": "2021-05-02 14:46:40-04:00",
+                    "duration": 60,
+                    "_id": "old_sleep"
+                }
+            elif event_type == "Exercise":
+                return {
+                    "created_at": "2021-05-01 13:45:12-04:00",
+                    "duration": 20,
+                    "_id": "exercise"
+                }
+            return self.stub_last_uploaded_entry()
+
+        nightscout.last_uploaded_entry = fake_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 1)
+        self.assertDictEqual(dict(nightscout.uploaded_entries), {
+            "treatments": [
+                # Already exists:
+                # NightscoutEntry.activity(created_at="2021-05-01 13:45:12-04:00", duration=20, reason="Exercise", event_type=EXERCISE_EVENTTYPE),
+                # Updated event duration:
+                NightscoutEntry.activity(created_at="2021-05-02 14:46:40-04:00", duration=70, reason="Sleep", event_type=SLEEP_EVENTTYPE),
+        ]})
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertEqual(len(nightscout.deleted_entries), 1)
+        self.assertListEqual(nightscout.deleted_entries, [
+            "treatments/old_sleep"
+        ])
 
 
 

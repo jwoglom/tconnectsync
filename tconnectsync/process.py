@@ -93,7 +93,7 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
         logger.debug("CIQ activity events: %s" % pumpEvents)
 
         ws2BasalSuspension = tconnect.ws2.basalsuspension(time_start, time_end)
-        
+
         bsPumpEvents = process_basalsuspension_events(ws2BasalSuspension)
         logger.debug("basalsuspension events: %s" % bsPumpEvents)
 
