@@ -23,6 +23,21 @@ If run with the `--auto-update` flag, then the application performs the followin
 * Queries an API endpoint used only by the t:connect mobile app which returns an internal event ID, corresponding to the most recent event published by the mobile app.
 * Whenever the internal event ID changes (denoting that the mobile app uploaded new data to synchronize), perform all of the above mentioned steps to synchronize data.
 
+The following synchronization features are enabled by default:
+
+* `BASAL`: Basal data
+* `BOLUS`: Bolus data
+* `IOB`: Insulin-on-board data. Only the most recent IOB entry is saved to Nightscout, as an "activity"
+
+The following synchronization feature is disabled by default, but can be enabled via the `--features` flag:
+
+* `PUMP_EVENTS`: Events reported by the pump. Includes support for the following:
+  * Site/Cartridge Change (occurs for both a site change and a cartridge change)
+  * Empty Cartridge/Pump Shutdown (from my investigation, occurs either when the cartridge runs out of insulin OR you hard-shut off the pump)
+  * User Suspended (occurs when you manually disable insulin delivery)
+  * Exercise Mode (in Nightscout, appears with a start and end time)
+  * Sleep Mode (in Nightscout, appears with a start and end time)
+
 ## Setup
 
 **To get started,** you need to choose whether to install the application via
@@ -71,6 +86,7 @@ After this, you should be able to view tconnectsync's help with:
 ```
 $ tconnectsync --help
 usage: tconnectsync [-h] [--version] [--pretend] [-v] [--start-date START_DATE] [--end-date END_DATE] [--days DAYS] [--auto-update] [--check-login]
+               [--features {BASAL,BOLUS,IOB,PUMP_EVENTS} [{BASAL,BOLUS,IOB,PUMP_EVENTS} ...]]
 
 Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.
 
@@ -85,6 +101,8 @@ optional arguments:
   --days DAYS           The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.
   --auto-update         If set, continuously checks for updates from t:connect and syncs with Nightscout.
   --check-login         If set, checks that the provided t:connect credentials can be used to log in.
+  --features {BASAL,BOLUS,IOB,PUMP_EVENTS} [{BASAL,BOLUS,IOB,PUMP_EVENTS} ...]
+                        Specifies what data should be synchronized between tconnect and Nightscout.
 ```
 
 Go to the folder where you created the `.env` file, and run:
@@ -116,6 +134,7 @@ $ pip3 install pipenv
 $ pipenv install
 $ pipenv run tconnectsync --help
 usage: main.py [-h] [--version] [--pretend] [-v] [--start-date START_DATE] [--end-date END_DATE] [--days DAYS] [--auto-update] [--check-login]
+               [--features {BASAL,BOLUS,IOB,PUMP_EVENTS} [{BASAL,BOLUS,IOB,PUMP_EVENTS} ...]]
 
 Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.
 
@@ -130,6 +149,8 @@ optional arguments:
   --days DAYS           The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.
   --auto-update         If set, continuously checks for updates from t:connect and syncs with Nightscout.
   --check-login         If set, checks that the provided t:connect credentials can be used to log in.
+  --features {BASAL,BOLUS,IOB,PUMP_EVENTS} [{BASAL,BOLUS,IOB,PUMP_EVENTS} ...]
+                        Specifies what data should be synchronized between tconnect and Nightscout.
 ```
 
 
