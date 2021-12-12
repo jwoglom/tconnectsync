@@ -117,8 +117,9 @@ class TConnectEntry:
             "bg": data["BG"], # Note: can be empty string for automatic Control-IQ boluses
             "user_override": data["UserOverride"],
             "extended_bolus": "1" if extended_bolus else "",
-            "bolex_completion_time": TConnectEntry._datetime_parse(data["BolexCompletionDateTime"]).format() if complete and extended_bolus else None,
-            "bolex_start_time": TConnectEntry._datetime_parse(data["BolexStartDateTime"]).format() if complete and extended_bolus else None,
+            # Note: completion time can be empty if the extended bolus is in progress
+            "bolex_completion_time": TConnectEntry._datetime_parse(data["BolexCompletionDateTime"]).format() if data["BolexCompletionDateTime"] and complete and extended_bolus else None,
+            "bolex_start_time": TConnectEntry._datetime_parse(data["BolexStartDateTime"]).format() if data["BolexStartDateTime"] and complete and extended_bolus else None,
         }
     
     @staticmethod
