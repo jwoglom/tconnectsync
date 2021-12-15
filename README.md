@@ -46,6 +46,9 @@ The following synchronization feature is disabled by default, but can be enabled
 After that, you can choose to run the program continuously via **Supervisord**
 or on a regular interval with **Cron**.
 
+**NOTE:** If you fork the tconnectsync repository on GitHub, **do not commit your .env file**.
+If pushed to GitHub, this will make your tconnect and Nightscout passwords publicly visible and put your data at risk.
+
 ## Installation
 
 First, create a file named `.env` containing configuration values.
