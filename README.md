@@ -218,6 +218,8 @@ Move the `.env` file you created earlier into this folder, and run:
 $ docker run --env-file=.env tconnectsync --check-login
 ```
 
+**NOTE:** If using the `--env-file` option to `docker run`, you may need to remove all quotation marks (`'` and `"`s) around values in the `.env` file for Docker to propagate the variables correctly.
+
 If you receive no errors, then you can move on to the **Running Tconnectsync Continuously** section.
 
 ## Running Tconnectsync Continuously
