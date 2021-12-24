@@ -13,8 +13,8 @@ elif os.path.exists(global_path):
 else:
     values = dotenv_values()
 
-def get(*args):
-    return values.get(args[0], os.environ.get(*args))
+def get(val, default=None):
+    return os.environ.get(val, values.get(val, default))
 
 def get_number(name, default):
     val = get(name, default)

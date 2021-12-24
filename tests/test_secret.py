@@ -66,5 +66,34 @@ NS_URL=http://test_%s_url
                 self.assertEqual(secret.TCONNECT_EMAIL, environ["TCONNECT_EMAIL"])
                 self.assertEqual(secret.NS_URL, environ["NS_URL"])
 
+    def test_environment_merges_with_dotenv_file(self):
+        with tempfile.TemporaryDirectory(prefix='env_plus_environ') as dir, chdir(dir):
+            self.write_test_dotenv_file(dir, "dotenv_cwd_defaults")
+
+            environ = {
+                "TCONNECT_EMAIL": "test_environ_override_email@email.com"
+            }
+
+            with unittest.mock.patch.dict(os.environ, environ):
+                secret = self.import_secret()
+                self.assertEqual(secret.TCONNECT_EMAIL, "test_environ_override_email@email.com")
+                self.assertEqual(secret.NS_URL, "http://test_dotenv_cwd_defaults_url")
+
+    def test_dotenv_in_current_working_directory_overrides_homedir_config(self):
+        with tempfile.TemporaryDirectory(prefix='dotenv_cwd') as dir, chdir(dir):
+            self.write_test_dotenv_file(dir, "dotenv_cwd")
+
+            config_dir = os.path.join(dir, '.config/tconnectsync')
+            os.makedirs(config_dir)
+
+            self.write_test_dotenv_file(config_dir, "dotenv_homedir_config")
+
+            with unittest.mock.patch.object(pathlib.Path, "home") as mock_home:
+                mock_home.return_value = dir
+
+                secret = self.import_secret()
+                self.assertEqual(secret.TCONNECT_EMAIL, "test_dotenv_cwd_email@email.com")
+                self.assertEqual(secret.NS_URL, "http://test_dotenv_cwd_url")
+
 if __name__ == '__main__':
     unittest.main()
