@@ -215,7 +215,7 @@ $ docker run tconnectsync --help
 
 Move the `.env` file you created earlier into this folder, and run:
 ```
-$ docker run tconnectsync --check-login
+$ docker run --env-file=.env tconnectsync --check-login
 ```
 
 If you receive no errors, then you can move on to the **Running Tconnectsync Continuously** section.
