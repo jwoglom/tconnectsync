@@ -51,7 +51,9 @@ If pushed to GitHub, this will make your tconnect and Nightscout passwords publi
 
 ## Installation
 
-First, create a file named `.env` containing configuration values.
+First, you need to create a file containing configuration values.
+The name of this file will be `.env`, and its location will be dependent on which
+method of installation you choose.
 You should specify the following parameters:
 
 ```bash
@@ -70,20 +72,30 @@ NS_SECRET='apisecret'
 TIMEZONE_NAME='America/New_York'
 ```
 
-These values can alternatively be specified via environment variables.
+This file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect).
 
-The .env file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect).
+(Alternatively, these values can be specified via environment variables.)
 
 ### Installation via Pip
 
 This is the easiest method to install.
 
-First, ensure that you have **Python 3** with **Pip** installed on your
-Linux machine. Then, install tconnectsync from pip:
+First, ensure that you have **Python 3** with **Pip** installed:
+
+* **On MacOS:** Open Terminal. Install [Homebrew](https://brew.sh/), and then run `brew install python3`
+* **On Linux:** Follow your distribution's specific instructions.
+  For Debian/Ubuntu based distros, `sudo apt install python3 python3-pip`
+* **On Windows:** Install Ubuntu under the [Windows Subsystem for Linux](https://ubuntu.com/wsl).
+  Open the Ubuntu Terminal, then run `sudo apt install python3 python3-pip`.
+  Perform the remainder of the steps under the Ubuntu environment.
+
+Now install the `tconnectsync` package with pip:
 
 ```
 $ pip3 install tconnectsync
 ```
+
+If the pip3 command is not found, run `python3 -m pip install tconnectsync` instead.
 
 After this, you should be able to view tconnectsync's help with:
 ```
@@ -108,7 +120,12 @@ optional arguments:
                         Specifies what data should be synchronized between tconnect and Nightscout.
 ```
 
-Go to the folder where you created the `.env` file, and run:
+Move the `.env` file you created to the following folder:
+
+* **MacOS:** `/Users/<username>/.config/tconnectsync/.env`
+* **Linux:** `$HOME/.config/tconnectsync/.env`
+* **Windows:** `$HOME/.config/tconnectsync/.env` (inside WSL)
+
 ```
 $ tconnectsync --check-login
 ```
@@ -157,7 +174,8 @@ optional arguments:
 ```
 
 
-Move the `.env` file you created earlier into this folder, and run:
+Move the `.env` file you created earlier into the `tconnectsync` folder, and run:
+
 ```
 $ pipenv run tconnectsync --check-login
 ```
@@ -174,6 +192,17 @@ To download and run the prebuilt Docker image from GitHub Packages:
 $ docker pull ghcr.io/jwoglom/tconnectsync/tconnectsync:latest
 $ docker run ghcr.io/jwoglom/tconnectsync/tconnectsync --help
 ```
+
+Move the `.env` file you created earlier into the current folder, and run:
+
+```
+$ docker run tconnectsync --check-login
+```
+
+If you receive no errors, then you can move on to the **Running Tconnectsync Continuously** section.
+
+
+#### Building Locally
 
 To instead build the image locally and launch the project:
 

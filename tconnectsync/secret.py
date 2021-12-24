@@ -1,10 +1,20 @@
-import os, sys
-from dotenv import load_dotenv
+import os, sys, pathlib
+from dotenv import dotenv_values
 
-load_dotenv()
+cwd_path = os.path.join(os.getcwd(), '.env')
+global_path = os.path.join(pathlib.Path.home(), '.config/tconnectsync/.env')
+
+values = {}
+
+if os.path.exists(cwd_path):
+    values = dotenv_values(cwd_path)
+elif os.path.exists(global_path):
+    values = dotenv_values(global_path)
+else:
+    values = dotenv_values()
 
 def get(*args):
-    return os.environ.get(*args)
+    return values.get(args[0], os.environ.get(*args))
 
 def get_number(name, default):
     val = get(name, default)
