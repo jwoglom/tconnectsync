@@ -157,7 +157,10 @@ class TConnectEntry:
         "alarm": "Empty Cartridge/Pump Shutdown",
 
         # manual corresponds to a Pumping Suspended by User event
-        "manual": "User Suspended"
+        "manual": "User Suspended",
+
+        # temp-profile corresponds to a Basal Rate Change event to 0u/hr
+        "temp-profile": "Basal Rate Change"
     }
 
     BASALSUSPENSION_SKIPPED_EVENTS = {

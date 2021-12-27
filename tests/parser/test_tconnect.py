@@ -594,6 +594,18 @@ class TestTConnectEntryBasalSuspensionEvent(unittest.TestCase):
             }
         )
 
+    def test_parse_basalsuspension_event_tempprofile(self):
+        self.assertEqual(
+            TConnectEntry.parse_basalsuspension_event({
+                'EventDateTime': '/Date(1640541521000-0000)/',
+                'SuspendReason': 'temp-profile'
+            }),
+            {
+                "time": "2021-12-26 09:58:41-05:00",
+                "event_type": "Basal Rate Change"
+            }
+        )
+
     def test_parse_basalsuspension_event_basalprofile_skipped(self):
         self.assertIsNone(
             TConnectEntry.parse_basalsuspension_event({
