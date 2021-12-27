@@ -30,7 +30,7 @@ except Exception:
     __version__ = "UNKNOWN"
 
 def parse_args(*args, **kwargs):
-    parser = argparse.ArgumentParser(description="Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.")
+    parser = argparse.ArgumentParser(description="Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.", epilog="Version %s" % __version__)
     parser.add_argument('--version', action='version', version='tconnectsync %s' % __version__)
     parser.add_argument('--pretend', dest='pretend', action='store_const', const=True, default=False, help='Pretend mode: do not upload any data to Nightscout.')
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_const', const=True, default=False, help='Verbose mode: show extra logging details')
