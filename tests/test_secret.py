@@ -21,6 +21,13 @@ def chdir(dir):
 class TestSecretDotEnv(unittest.TestCase):
     maxDiff = None
 
+    def setUp(self):
+        if 'TCONNECT_EMAIL' in os.environ:
+            del os.environ['TCONNECT_EMAIL']
+
+        if 'NS_URL' in os.environ:
+            del os.environ['NS_URL']
+
     def write_test_dotenv_file(self, path, type):
         with open(os.path.join(path, ".env"), "w") as f:
             f.write("""
