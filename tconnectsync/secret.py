@@ -38,6 +38,10 @@ NS_SECRET = get('NS_SECRET', 'apisecret')
 
 TIMEZONE_NAME = get('TIMEZONE_NAME', 'America/New_York')
 
+if not get('TIMEZONE_NAME') and get('TZ'):
+    print('TZ environment variable is set, overriding TIMEZONE_NAME')
+    TIMEZONE_NAME = get('TZ')
+
 # Optional configuration
 
 AUTOUPDATE_DEFAULT_SLEEP_SECONDS = get_number('AUTOUPDATE_DEFAULT_SLEEP_SECONDS', '300') # 5 minutes
