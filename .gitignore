@@ -7,3 +7,4 @@ build
 *.swa
 *.egg-info
 .env
+tconnectsync-check-output.log
