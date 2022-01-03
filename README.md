@@ -40,7 +40,10 @@ The following synchronization feature is disabled by default, but can be enabled
 
 ## Setup
 
-**To get started,** you need to choose whether to install the application via
+The following setup instructions assume that you have a Linux, MacOS, or Windows (with WSL) machine that will run the application continuously.
+If you've configured Nightscout before, you may be familiar with Heroku. [You can opt to run tconnectsync with Heroku by following these instructions.](https://github.com/jwoglom/tconnectsync-heroku)
+
+**To get started,** you need to choose whether to install the application on your computer via
 **Pip**, **Pipenv**, or **Docker**.
 
 After that, you can choose to run the program continuously via **Supervisord**
@@ -72,7 +75,7 @@ NS_SECRET='apisecret'
 TIMEZONE_NAME='America/New_York'
 ```
 
-This file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect).
+This file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect). When specifying the timezone, enter a [TZ database name value](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
 (Alternatively, these values can be specified via environment variables.)
 
