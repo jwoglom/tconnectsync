@@ -2,9 +2,12 @@ import time
 import logging
 import sys
 
+from .api import TConnectApi
 from .process import process_time_range
 from .features import DEFAULT_FEATURES
 from .secret import (
+    TCONNECT_EMAIL,
+    TCONNECT_PASSWORD,
     PUMP_SERIAL_NUMBER,
     AUTOUPDATE_DEFAULT_SLEEP_SECONDS,
     AUTOUPDATE_MAX_SLEEP_SECONDS,
@@ -42,6 +45,9 @@ def process_auto_update(tconnect, nightscout, time_start, time_end, pretend, fea
                     if last_event_index:
                         logger.error('An event index change was recorded, but no new data was found via the API. ' +
                                      'If this error reoccurs, try restarting tconnectsync.')
+
+                        logger.info('Resetting TConnectApi')
+                        tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
                 else:
                     last_process_time_range = now
 
