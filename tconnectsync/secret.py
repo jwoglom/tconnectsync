@@ -36,6 +36,10 @@ PUMP_SERIAL_NUMBER = get_number('PUMP_SERIAL_NUMBER', '11111111')
 NS_URL = get('NS_URL', 'https://yournightscouturl/')
 NS_SECRET = get('NS_SECRET', 'apisecret')
 
+if not get('NS_SECRET') and get('API_SECRET'):
+    print('API_SECRET environment variable is set, overriding NS_SECRET')
+    NS_SECRET = get('API_SECRET')
+
 TIMEZONE_NAME = get('TIMEZONE_NAME', 'America/New_York')
 
 if not get('TIMEZONE_NAME') and get('TZ'):

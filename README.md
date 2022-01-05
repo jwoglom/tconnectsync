@@ -41,6 +41,7 @@ The following synchronization feature is disabled by default, but can be enabled
 ## Setup
 
 The following setup instructions assume that you have a Linux, MacOS, or Windows (with WSL) machine that will run the application continuously.
+
 If you've configured Nightscout before, you may be familiar with Heroku. [You can opt to run tconnectsync with Heroku by following these instructions.](https://github.com/jwoglom/tconnectsync-heroku)
 
 **To get started,** you need to choose whether to install the application on your computer via
@@ -67,8 +68,9 @@ TCONNECT_PASSWORD='password'
 # Your pump's serial number (numeric)
 PUMP_SERIAL_NUMBER=11111111
 
-# URL and API secret for Nightscout
+# URL of your Nightscout site
 NS_URL='https://yournightscouturl/'
+# Your Nightscout API_SECRET value
 NS_SECRET='apisecret'
 
 # Current timezone of the pump
