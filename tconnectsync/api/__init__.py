@@ -11,13 +11,12 @@ class TConnectApi:
     email = None
     password = None
 
-    _ciq = None
-    _ws2 = None
-    _android = None
-
     def __init__(self, email, password):
         self.email = email
         self.password = password
+        self._ciq = None
+        self._ws2 = None
+        self._android = None
 
 
     @property

@@ -19,7 +19,7 @@ def get(val, default=None):
 def get_number(name, default):
     val = get(name, default)
     try:
-        return int(val)
+        return float(val)
     except ValueError:
         print("Error: %s must be a number." % name)
         print("Current value: %s" % val)
@@ -50,9 +50,12 @@ if not get('TIMEZONE_NAME') and get('TZ'):
 
 AUTOUPDATE_DEFAULT_SLEEP_SECONDS = get_number('AUTOUPDATE_DEFAULT_SLEEP_SECONDS', '300') # 5 minutes
 AUTOUPDATE_MAX_SLEEP_SECONDS = get_number('AUTOUPDATE_MAX_SLEEP_SECONDS', '1500') # 25 minutes
+AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS = get_number('AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS', '60') # 1 minute
 AUTOUPDATE_USE_FIXED_SLEEP = get_bool('AUTOUPDATE_USE_FIXED_SLEEP', 'false')
-AUTOUPDATE_FAILURE_MINUTES = get_number('AUTOUPDATE_FAILURE_MINUTES', '180') # 3 hours
-AUTOUPDATE_RESTART_ON_FAILURE = get_bool('AUTOUPDATE_RESTART_ON_FAILURE', 'false')
+AUTOUPDATE_NO_DATA_FAILURE_MINUTES = get_number('AUTOUPDATE_NO_DATA_FAILURE_MINUTES', '180') # 3 hours
+AUTOUPDATE_FAILURE_MINUTES = get_number('AUTOUPDATE_FAILURE_MINUTES', '15') # 15 minutes
+AUTOUPDATE_RESTART_ON_FAILURE = get_bool('AUTOUPDATE_RESTART_ON_FAILURE', 'true')
+AUTOUPDATE_MAX_LOOP_INVOCATIONS = get_number('AUTOUPDATE_MAX_LOOP_INVOCATIONS', '-1')
 
 ENABLE_TESTING_MODES = get_bool('ENABLE_TESTING_MODES', 'false')
 SKIP_NS_LAST_UPLOADED_CHECK = get_bool('SKIP_NS_LAST_UPLOADED_CHECK', 'false')

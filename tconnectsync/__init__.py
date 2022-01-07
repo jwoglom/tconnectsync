@@ -7,7 +7,7 @@ import pkg_resources
 
 from .api import TConnectApi
 from .process import process_time_range
-from .autoupdate import process_auto_update
+from .autoupdate import Autoupdate
 from .check import check_login
 from .nightscout import NightscoutApi
 from .features import DEFAULT_FEATURES, ALL_FEATURES
@@ -19,6 +19,7 @@ try:
         NS_URL,
         NS_SECRET
     )
+    from . import secret
 except Exception:
     print('Unable to read secret.py')
     sys.exit(1)
@@ -82,7 +83,8 @@ def main(*args, **kwargs):
 
     if args.auto_update:
         print("Starting auto-update between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
-        process_auto_update(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features)
+        u = Autoupdate(secret)
+        sys.exit(u.process(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features))
     else:
         print("Processing data between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
         added = process_time_range(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features)

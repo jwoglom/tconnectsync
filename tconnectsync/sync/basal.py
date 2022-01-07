@@ -69,7 +69,7 @@ def process_ciq_basal_events(data):
             seconds = (existingTime - unprocessedTime).seconds
 
             newEvent = TConnectEntry.manual_suspension_to_basal_entry(suspension, seconds)
-            logger.debug("Creating basal event for unprocessed suspension: %s" % newEvent)
+            logger.debug("Adding basal event for unprocessed suspension: %s" % newEvent)
             newEvents.append(newEvent)
 
     # Any remaining suspensions which have not been processed have not ended,
