@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "413f8bbd66e702656262deda1b6586d42b5a2e9fa52f6d23416b1ea1efbc2591"
+            "sha256": "84349eb022c87848b29854316de1740d1223d444f06eb9dcbf7df92aa98475e2"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -175,16 +175,16 @@
             "version": "==2.3.1"
         },
         "tconnectsync": {
-            "editable": true,
-            "path": "."
+            "path": ".",
+            "version": "==0.6.4"
         },
         "urllib3": {
             "hashes": [
-                "sha256:4987c65554f7a2dbf30c18fd48778ef124af6fab771a377103da0585e2336ece",
-                "sha256:c4fdf4019605b6e5423637e01bc9fe4daef873709a7973e195ceba0a62bbc844"
+                "sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed",
+                "sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
-            "version": "==1.26.7"
+            "version": "==1.26.8"
         }
     },
     "develop": {

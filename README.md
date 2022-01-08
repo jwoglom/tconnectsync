@@ -21,20 +21,29 @@ When you run the program with no arguments, it performs a single cycle of the fo
 * Merges the basal information received from the two APIs. (If using ControlIQ, then basal information appears only on the ControlIQ API. If not using ControlIQ, it appears only on the legacy API.)
 * Queries Nightscout for the most recently created Temp Basal object by tconnectsync, and uploads all data newer than that.
 * Queries Nightscout for the most recently created Bolus object by tconnectsync, and uploads all data newer than that.
-* Uploads a single Nightscout Activity object representing the current IOB as reported by the pump.
 
 If run with the `--auto-update` flag, then the application performs the following steps:
 
 * Queries an API endpoint used only by the t:connect mobile app which returns an internal event ID, corresponding to the most recent event published by the mobile app.
 * Whenever the internal event ID changes (denoting that the mobile app uploaded new data to synchronize), perform all of the above mentioned steps to synchronize data.
 
-The following synchronization features are enabled by default:
+## What Gets Synced
+
+Tconnectsync is composed of individual so-called _synchronization features_, which are elements of data that can be
+synchronized between t:connect data from the pump and Nightscout.
+When setting up tconnectsync, you can choose to configure which synchronization features are enabled and disabled.
+
+Here are a few examples of reasons why you might want to adjust the enabled synchronization features:
+
+* If you currently input boluses into Nightscout manually with comments, then you may wish to _disable the `BOLUS` synchronization feature_ so that there are no duplicated boluses in Nightscout.
+* If you want to see Sleep and Exercise Mode data appear in Nightscout, then you may with to _enable the `PUMP_EVENTS` synchronization feature_.
+
+These synchronization features are enabled by default:
 
 * `BASAL`: Basal data
 * `BOLUS`: Bolus data
-* `IOB`: Insulin-on-board data. Only the most recent IOB entry is saved to Nightscout, as an "activity"
 
-The following synchronization feature is disabled by default, but can be enabled via the `--features` flag:
+The following synchronization features can be optionally enabled:
 
 * `PUMP_EVENTS`: Events reported by the pump. Includes support for the following:
   * Site/Cartridge Change (occurs for both a site change and a cartridge change)
@@ -42,6 +51,19 @@ The following synchronization feature is disabled by default, but can be enabled
   * User Suspended (occurs when you manually disable insulin delivery)
   * Exercise Mode (in Nightscout, appears with a start and end time)
   * Sleep Mode (in Nightscout, appears with a start and end time)
+* `IOB`: Insulin-on-board data. Only the most recent IOB entry is saved to Nightscout, as an "activity". The Nightscout UI does not currently display this information. In order to read this value, you need to query the Nightscout activity API endpoint. If you don't know what that means, then there is no reason to enable this option.
+
+The following synchronization features are under development, [**but are not yet ready for use**](https://github.com/jwoglom/tconnectsync/issues/16):
+* `BOLUS_BG`: Adds BG readings which are associated with boluses on the pump into the Nightscout treatment object. It will determine whether the BG reading was automatically filled via the Dexcom connection on the pump or was manually entered by seeing if the BG reading matches the current CGM reading as known to the pump at that time. Support for this is nearly complete.
+* `CGM`: Adds Dexcom CGM readings from the pump to Nightscout as SGV (sensor glucose value) entries. This should only be used in a situation where xDrip/Dexcom Share/etc. is not used and the pump connection to the CGM will be the only source of CGM data to Nightscout. This requires additional testing before it should be considered ready.
+
+To specify custom synchronization features, pass the names of the desired features to the `--features` flag, e.g.:
+
+```bash
+$ tconnectsync --features BASAL BOLUS PUMP_EVENTS
+```
+
+If you're using tconnectsync-heroku, see [this section in its README](https://github.com/jwoglom/tconnectsync-heroku#Updating-synchronization-features).
 
 ## Setup
 

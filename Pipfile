@@ -7,7 +7,7 @@ verify_ssl = true
 ptpython = "*"
 
 [packages]
-tconnectsync = {editable = true, path = "."}
+tconnectsync = {path = "."}
 requests = "*"
 bs4 = "*"
 arrow = "*"
