@@ -3,6 +3,7 @@ import logging
 from .android import AndroidApi
 from .controliq import ControlIQApi
 from .ws2 import WS2Api
+from .webui import WebUIScraper
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class TConnectApi:
         self._ciq = None
         self._ws2 = None
         self._android = None
+        self._webui = None
 
 
     @property
@@ -52,4 +54,14 @@ class TConnectApi:
 
         self._android = AndroidApi(self.email, self.password)
         return self._android
+    
+    @property
+    def webui(self):
+        if self._webui and not self._webui.needs_relogin():
+            return self._webui
+        
+        logger.debug("Instantiating new WebUIScraper")
+
+        self._webui = WebUIScraper(self.controliq)
+        return self._webui
 

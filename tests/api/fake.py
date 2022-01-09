@@ -38,6 +38,10 @@ class AndroidApi(tconnectsync.api.android.AndroidApi):
     def _get(self, endpoint, query={}, **kwargs):
         raise NotImplementedError
 
+class WebUIScraper(tconnectsync.api.webui.WebUIScraper):
+    def __init__(self, controliq):
+        self.controliq = controliq
+
 class TConnectApi(tconnectsync.api.TConnectApi):
     def __init__(self, email=None, password=None):
         if email is not None and password is not None:

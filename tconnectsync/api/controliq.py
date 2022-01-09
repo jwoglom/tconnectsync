@@ -45,6 +45,7 @@ class ControlIQApi:
             self.accessToken = req.cookies['accessToken']
             self.accessTokenExpiresAt = req.cookies['accessTokenExpiresAt']
             logger.info("Logged in to ControlIQApi successfully (expiration: %s, %s)" % (self.accessTokenExpiresAt, timeago(self.accessTokenExpiresAt)))
+            self.loginSession = s
             return True
 
     def _build_login_data(self, email, password, soup):
