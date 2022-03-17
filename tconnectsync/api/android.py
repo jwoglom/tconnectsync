@@ -29,6 +29,8 @@ class AndroidApi:
     ANDROID_API_USERNAME = base64.b64decode('QzIzMzFDRDYtRDQ1MC00OTVFLTlDMTktNjcyMTUyMzBDODVD').decode()
     ANDROID_API_PASSWORD = base64.b64decode('dHo0MzNLVzVRREM5VjdmIXo2QF4ybyZZNlNHR1lo').decode()
 
+    ANDROID_USER_AGENT = 'Dalvik/2.1.0 (Linux; U; Android 12; Pixel 4a Build/SP2A.220305.012)'
+
     # These tokens are separate from the "standard" tdcservices API
     accessToken = None
     accessTokenExpiresAt = None
@@ -51,7 +53,10 @@ class AndroidApi:
                 'grant_type': 'password',
                 'scope': self.OAUTH_SCOPES
             },
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            headers={
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'User-Agent': self.ANDROID_USER_AGENT
+            },
             auth=requests.auth.HTTPBasicAuth(self.ANDROID_API_USERNAME, self.ANDROID_API_PASSWORD)
         )
 
@@ -154,16 +159,3 @@ class AndroidApi:
     """
     def user_profile(self):
         return self.get('cloud/usersettings/api/UserProfile?userId=%s' % self.userId)
-    
-    """
-    Returns therapy events, used by the webui Therapy Timeline.
-    {'event': [
-      {'type': 'Basal', 'basalRate': ...}, 
-      {'type': 'Bolus', 'standard': ...},
-      {'type': 'CGM', 'egv': ...}
-    ]}
-    """
-    def therapy_events(self, start_date=None, end_date=None):
-        startDate = parse_date(start_date)
-        endDate = parse_date(end_date)
-        return self.get('tconnect/therapyevents/api/TherapyEvents/%s/%s/false?userId=%s' % (startDate, endDate, self.userId))

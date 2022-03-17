@@ -13,7 +13,7 @@ from .common import parse_date, base_headers, ApiException, ApiLoginException
 logger = logging.getLogger(__name__)
 
 class ControlIQApi:
-    BASE_URL = 'https://tdcservices.tandemdiabetes.com/tconnect/controliq/api/'
+    BASE_URL = 'https://tdcservices.tandemdiabetes.com/'
     LOGIN_URL = 'https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f'
 
     userGuid = None
@@ -107,7 +107,7 @@ class ControlIQApi:
         startDate = parse_date(start)
         endDate = parse_date(end)
 
-        return self.get('therapytimeline/users/%s' % (self.userGuid), {
+        return self.get('tconnect/controliq/api/therapytimeline/users/%s' % (self.userGuid), {
             "startDate": startDate,
             "endDate": endDate
         })
@@ -123,7 +123,7 @@ class ControlIQApi:
         startDate = parse_date(start)
         endDate = parse_date(end)
 
-        return self.get('summary/users/%s' % (self.userGuid), {
+        return self.get('tconnect/controliq/api/summary/users/%s' % (self.userGuid), {
             "startDate": startDate,
             "endDate": endDate
         })
@@ -133,4 +133,17 @@ class ControlIQApi:
     [{"serialNumber": "11111111", "features": {"controlIQ": {"feature": 1, "dateTimeFirstDetected": "YYYY-MM-DD:THH:MM:SS", "unixTimestamp": 1111111111}}}]
     """
     def pumpfeatures(self):
-        return self.get('pumpfeatures/users/%s' % self.userGuid, {})
+        return self.get('tconnect/controliq/api/pumpfeatures/users/%s' % self.userGuid, {})
+
+    """
+    Returns therapy events, used by the webui Therapy Timeline.
+    {'event': [
+      {'type': 'Basal', 'basalRate': ...}, 
+      {'type': 'Bolus', 'standard': ...},
+      {'type': 'CGM', 'egv': ...}
+    ]}
+    """
+    def therapy_events(self, start_date=None, end_date=None):
+        startDate = parse_date(start_date)
+        endDate = parse_date(end_date)
+        return self.get('tconnect/therapyevents/api/TherapyEvents/%s/%s/false?userId=%s' % (startDate, endDate, self.userGuid), {})
