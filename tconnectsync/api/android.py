@@ -87,7 +87,11 @@ class AndroidApi:
         return {'Authorization': 'Bearer %s' % self.accessToken}
 
     def _get(self, endpoint, query={}, **kwargs):
-        r = requests.get(self.BASE_URL + endpoint, query, headers=self.api_headers(), **kwargs)
+        r = requests.get(self.BASE_URL + endpoint, query, headers={
+            'User-Agent': self.ANDROID_USER_AGENT,
+            'Content-Type': 'application/json',
+            **self.api_headers()
+        }, **kwargs)
 
         if r.status_code != 200:
             raise ApiException(r.status_code, "Android API HTTP %s response: %s" % (str(r.status_code), r.text))
@@ -139,6 +143,9 @@ class AndroidApi:
     # TODO: these methods are used in the web app, not the Android app,
     # but support the same auth tokens and are on this domain. They should
     # be moved to a new Api class.
+    # 3/17/2022: the API appears to be more stringently checking scopes,
+    # and some of these endpoints no longer work with the API token scoped
+    # to the Android app.
 
     """
     Returns BG and pump threshold values.
