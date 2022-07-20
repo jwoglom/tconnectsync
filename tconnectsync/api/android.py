@@ -40,10 +40,10 @@ class AndroidApi:
     patientObjectId = None
 
     def __init__(self, email, password):
+        self.session = base_session()
         self.login(email, password)
         self._email = email
         self._password = password
-        self.session = base_session()
 
     def login(self, email, password):
         r = self.session.post(
