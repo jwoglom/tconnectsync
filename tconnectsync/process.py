@@ -76,7 +76,7 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
     
     if CGM in features:
         logger.debug("Writing CGM events")
-        added += ns_write_cgm_events(nightscout, cgmData, pretend)
+        added += ns_write_cgm_events(nightscout, cgmData, pretend, time_start=time_start, time_end=time_end)
 
     if BASAL in features:
         basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
@@ -99,11 +99,11 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
 
         pumpEvents += bsPumpEvents
 
-        added += ns_write_pump_events(nightscout, pumpEvents, pretend=pretend)
+        added += ns_write_pump_events(nightscout, pumpEvents, pretend=pretend, time_start=time_start, time_end=time_end)
 
     if BOLUS in features:
         bolusEvents = process_bolus_events(bolusData)
-        added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features))
+        added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features), time_start=time_start, time_end=time_end)
 
     if IOB in features:
         iobEvents = process_iob_events(iobData)

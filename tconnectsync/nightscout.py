@@ -68,8 +68,9 @@ class NightscoutApi:
 			return j[0]
 		return None
 	
-	def last_uploaded_bg_entry(self):
-		latest = requests.get(urljoin(self.url, 'api/v1/entries.json?count=1&find[device]=' + urllib.parse.quote(ENTERED_BY) + '&ts=' + str(time.time())), headers={
+	def last_uploaded_bg_entry(self, time_start=None, time_end=None):
+		dateFilter = time_range('dateString', time_start, time_end)
+		latest = requests.get(urljoin(self.url, 'api/v1/entries.json?count=1&find[device]=' + urllib.parse.quote(ENTERED_BY) + dateFilter + '&ts=' + str(time.time())), headers={
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 		})
 		if latest.status_code != 200:
@@ -80,8 +81,9 @@ class NightscoutApi:
 			return j[0]
 		return None
 
-	def last_uploaded_activity(self, activityType):
-		latest = requests.get(urljoin(self.url, 'api/v1/activity?find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[activityType]=' + urllib.parse.quote(activityType) + '&ts=' + str(time.time())), headers={
+	def last_uploaded_activity(self, activityType, time_start=None, time_end=None):
+		dateFilter = time_range('created_at', time_start, time_end)
+		latest = requests.get(urljoin(self.url, 'api/v1/activity?find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[activityType]=' + urllib.parse.quote(activityType) + dateFilter + '&ts=' + str(time.time())), headers={
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 		})
 		if latest.status_code != 200:

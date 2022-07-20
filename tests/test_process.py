@@ -35,7 +35,7 @@ class TestProcessTimeRange(unittest.TestCase):
     def stub_last_uploaded_entry(self, event_type, **kwargs):
         return None
 
-    def stub_last_uploaded_activity(self, activity_type):
+    def stub_last_uploaded_activity(self, activity_type, **kwargs):
         return None
 
     """No data in Nightscout. Uploads all basal data from tconnect."""
@@ -354,7 +354,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
 
-        def fake_last_uploaded_activity(activityType):
+        def fake_last_uploaded_activity(activityType, **kwargs):
             if activityType == IOB_ACTIVITYTYPE:
                 return iobData[0]
             return self.stub_last_uploaded_activity(activityType)

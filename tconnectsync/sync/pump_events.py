@@ -49,7 +49,7 @@ def process_basalsuspension_events(data):
 """
 Given processed pump event data (of various types), write them to Nightscout
 """
-def ns_write_pump_events(nightscout, pumpEvents, pretend=False):
+def ns_write_pump_events(nightscout, pumpEvents, pretend=False, time_start=None, time_end=None):
     count = 0
 
     siteChangeEvents = []
@@ -80,17 +80,17 @@ def ns_write_pump_events(nightscout, pumpEvents, pretend=False):
     logger.debug("sleepEvents: %s" % sleepEvents)
     logger.debug("activityEvents: %s" % activityEvents)
     
-    count += ns_write_pump_sitechange_events(nightscout, siteChangeEvents, pretend=pretend)
-    count += ns_write_empty_cart_events(nightscout, emptyCartEvents, pretend=pretend)
-    count += ns_write_user_suspended_events(nightscout, userSuspendedEvents, pretend=pretend)
+    count += ns_write_pump_sitechange_events(nightscout, siteChangeEvents, pretend=pretend, time_start=time_start, time_end=time_end)
+    count += ns_write_empty_cart_events(nightscout, emptyCartEvents, pretend=pretend, time_start=time_start, time_end=time_end)
+    count += ns_write_user_suspended_events(nightscout, userSuspendedEvents, pretend=pretend, time_start=time_start, time_end=time_end)
 
-    count += ns_write_exercise_activity_events(nightscout, exerciseEvents, pretend=pretend)
-    count += ns_write_sleep_activity_events(nightscout, sleepEvents, pretend=pretend)
-    count += ns_write_activity_events(nightscout, activityEvents, pretend=pretend)
+    count += ns_write_exercise_activity_events(nightscout, exerciseEvents, pretend=pretend, time_start=time_start, time_end=time_end)
+    count += ns_write_sleep_activity_events(nightscout, sleepEvents, pretend=pretend, time_start=time_start, time_end=time_end)
+    count += ns_write_activity_events(nightscout, activityEvents, pretend=pretend, time_start=time_start, time_end=time_end)
 
     return count
 
-def ns_write_pump_sitechange_events(nightscout, siteChangeEvents, pretend=False):
+def ns_write_pump_sitechange_events(nightscout, siteChangeEvents, pretend=False, time_start=None, time_end=None):
     return _ns_write_pump_events(
         nightscout, 
         siteChangeEvents, 
@@ -99,9 +99,11 @@ def ns_write_pump_sitechange_events(nightscout, siteChangeEvents, pretend=False)
             reason=event["event_type"]
         ),
         SITECHANGE_EVENTTYPE,
-        pretend=pretend)
+        pretend=pretend,
+        time_start=time_start,
+        time_end=time_end)
 
-def ns_write_empty_cart_events(nightscout, emptyCartEvents, pretend=False):
+def ns_write_empty_cart_events(nightscout, emptyCartEvents, pretend=False, time_start=None, time_end=None):
     return _ns_write_pump_events(
         nightscout, 
         emptyCartEvents, 
@@ -110,9 +112,11 @@ def ns_write_empty_cart_events(nightscout, emptyCartEvents, pretend=False):
             reason=event["event_type"]
         ),
         BASALSUSPENSION_EVENTTYPE,
-        pretend=pretend)
+        pretend=pretend,
+        time_start=time_start,
+        time_end=time_end)
 
-def ns_write_user_suspended_events(nightscout, userSuspendedEvents, pretend=False):
+def ns_write_user_suspended_events(nightscout, userSuspendedEvents, pretend=False, time_start=None, time_end=None):
     return _ns_write_pump_events(
         nightscout, 
         userSuspendedEvents, 
@@ -121,9 +125,11 @@ def ns_write_user_suspended_events(nightscout, userSuspendedEvents, pretend=Fals
             reason=event["event_type"]
         ),
         BASALSUSPENSION_EVENTTYPE,
-        pretend=pretend)
+        pretend=pretend,
+        time_start=time_start,
+        time_end=time_end)
 
-def ns_write_exercise_activity_events(nightscout, exerciseEvents, pretend=False):
+def ns_write_exercise_activity_events(nightscout, exerciseEvents, pretend=False, time_start=None, time_end=None):
     return _ns_write_pump_events(
         nightscout, 
         exerciseEvents, 
@@ -134,9 +140,11 @@ def ns_write_exercise_activity_events(nightscout, exerciseEvents, pretend=False)
             event_type=EXERCISE_EVENTTYPE
         ),
         EXERCISE_EVENTTYPE,
-        pretend=pretend)
+        pretend=pretend,
+        time_start=time_start,
+        time_end=time_end)
 
-def ns_write_sleep_activity_events(nightscout, sleepEvents, pretend=False):
+def ns_write_sleep_activity_events(nightscout, sleepEvents, pretend=False, time_start=None, time_end=None):
     return _ns_write_pump_events(
         nightscout, 
         sleepEvents, 
@@ -147,9 +155,11 @@ def ns_write_sleep_activity_events(nightscout, sleepEvents, pretend=False):
             event_type=SLEEP_EVENTTYPE
         ),
         SLEEP_EVENTTYPE,
-        pretend=pretend)
+        pretend=pretend,
+        time_start=time_start,
+        time_end=time_end)
 
-def ns_write_activity_events(nightscout, activityEvents, pretend=False):
+def ns_write_activity_events(nightscout, activityEvents, pretend=False, time_start=None, time_end=None):
     return _ns_write_pump_events(
         nightscout, 
         activityEvents, 
@@ -159,7 +169,9 @@ def ns_write_activity_events(nightscout, activityEvents, pretend=False):
             duration=event["duration_mins"]
         ),
         ACTIVITY_EVENTTYPE,
-        pretend=pretend)
+        pretend=pretend,
+        time_start=time_start,
+        time_end=time_end)
 
 def _ns_write_pump_events(nightscout, events, buildNsEventFunc, eventType, pretend=False, time_start=None, time_end=None):
     if len(events) == 0:
@@ -192,7 +204,7 @@ def _ns_write_pump_events(nightscout, events, buildNsEventFunc, eventType, prete
             
             if skip:
                 if pretend:
-                    logger.info("Skipping %s event before last upload time: %s" % (eventType, event))
+                    logger.info("Skipping %s pump event before last upload time: %s (time range: %s - %s)" % (eventType, event, time_start, time_end))
                 continue
 
         entry = buildNsEventFunc(event)

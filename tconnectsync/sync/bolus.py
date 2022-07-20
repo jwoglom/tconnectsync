@@ -75,7 +75,7 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False, include_bg=Fal
         created_at = event["completion_time"] if not event["extended_bolus"] else event["bolex_start_time"]
         if last_upload_time and arrow.get(created_at) <= last_upload_time:
             if pretend:
-                logger.info("Skipping basal event before last upload time: %s" % event)
+                logger.info("Skipping basal event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
             continue
 
         if include_bg and event["bg"]:

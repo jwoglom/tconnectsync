@@ -121,7 +121,7 @@ def ns_write_basal_events(nightscout, basalEvents, pretend=False, time_start=Non
     for event in basalEvents:
         if last_upload_time and arrow.get(event["time"]) < last_upload_time:
             if pretend:
-                logger.info("Skipping basal event before last upload time: %s" % event)
+                logger.info("Skipping basal event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
             continue
 
         recent_needs_update = False

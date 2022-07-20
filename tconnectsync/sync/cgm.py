@@ -39,9 +39,9 @@ def find_event_at(cgmEvents, find_time):
 """
 Given processed CGM data, adds reading entries to Nightscout.
 """
-def ns_write_cgm_events(nightscout, cgmEvents, pretend=False):
+def ns_write_cgm_events(nightscout, cgmEvents, pretend=False, time_start=None, time_end=None):
     logger.debug("ns_write_cgm_events: querying for last uploaded entry")
-    last_upload = nightscout.last_uploaded_bg_entry()
+    last_upload = nightscout.last_uploaded_bg_entry(time_start=time_start, time_end=time_end)
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["dateString"])
@@ -52,7 +52,7 @@ def ns_write_cgm_events(nightscout, cgmEvents, pretend=False):
         created_at = event["time"]
         if last_upload_time and arrow.get(created_at) <= last_upload_time:
             if pretend:
-                logger.info("Skipping CGM event before last upload time: %s" % event)
+                logger.info("Skipping CGM event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
             continue
 
         entry = NightscoutEntry.entry(
