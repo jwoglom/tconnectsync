@@ -10,21 +10,14 @@ from urllib.parse import urljoin
 from .api.common import ApiException
 from .parser.nightscout import ENTERED_BY
 
-def format_datetime(date, day_delta=0):
-	d = arrow.get(date)
-	if day_delta:
-		d += datetime.timedelta(days=day_delta)
-	
-	return d.strftime('%Y-%m-%d %H:%M:%S')
+def format_datetime(date):
+	return arrow.get(date).strftime('%Y-%m-%d %H:%M:%S')
 
 def time_range(field_name, start_time, end_time):
 	arg = ''
 	if start_time:
-		# $gte on a date means that the entire day is included starting at 00:00
 		arg += '&find[%s][$gte]=%s' % (field_name, format_datetime(start_time))
 	if end_time:
-		# $lte on a date refers to 00:00 midnight on that day, aka anything from
-		# that day is EXCLUDED. so we increment by one day.
 		arg += '&find[%s][$lte]=%s' % (field_name, format_datetime(end_time))
 	return arg
 
@@ -63,8 +56,7 @@ class NightscoutApi:
 			raise ApiException(r.status_code, "Nightscout put response: %s" % r.text)
 
 	def last_uploaded_entry(self, eventType, time_start=None, time_end=None):
-		#dateFilter = time_range('created_at', time_start, time_end)
-		dateFilter = ''
+		dateFilter = time_range('created_at', time_start, time_end)
 		latest = requests.get(urljoin(self.url, 'api/v1/treatments?count=1&find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[eventType]=' + urllib.parse.quote(eventType) + dateFilter + '&ts=' + str(time.time())), headers={
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 		})

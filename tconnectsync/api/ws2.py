@@ -71,6 +71,9 @@ class WS2Api:
     Basal data does NOT appear for the specified time range if using Control-IQ.
     The ControlIQ API endpoints must be used for basal data instead.
     However, all other fields are still accessed via this endpoint.
+
+    This has its own built-in retry logic because Tandem's frontend serving
+    the API returns 500s when its backend times out.
     """
     def therapy_timeline_csv(self, start=None, end=None, tries=0):
         startDate = parse_date(start)
@@ -125,7 +128,7 @@ class WS2Api:
      - "previous"
      - "alarm"
     
-    The start date includes all events on the given day, and stops at 00:00 midnight on the end day.
+    End-date inclusive: Returns data from 00:00 on start date to 23:59 on end date.
 
     {"BasalSuspension":[{"EventDateTime":"/Date(EPOCH_MS-0000)/", "SuspendReason": "reason"}]}
     """

@@ -105,6 +105,7 @@ class ControlIQApi:
 
     """
     Returns detailed basal event information and reasons for delivery suspension.
+    End-date inclusive: Returns data from 00:00 on start date to 23:59 on end date.
     """
     def therapy_timeline(self, start=None, end=None):
         startDate = parse_date(start)
