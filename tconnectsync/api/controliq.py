@@ -19,14 +19,13 @@ class ControlIQApi:
     accessTokenExpiresAt = None
 
     def __init__(self, email, password):
-        self.session = base_session()
         self.login(email, password)
         self._email = email
         self._password = password
 
     def login(self, email, password):
         logger.info("Logging in to ControlIQApi...")
-        with self.session as s:
+        with base_session() as s:
             initial = s.get(self.LOGIN_URL, headers=base_headers())
             soup = BeautifulSoup(initial.content, features='lxml')
             data = self._build_login_data(email, password, soup)
@@ -68,10 +67,15 @@ class ControlIQApi:
     def api_headers(self):
         if not self.accessToken:
             raise Exception('No access token provided')
-        return {'Authorization': 'Bearer %s' % self.accessToken, **base_headers()}
+        return {
+            'Authorization': 'Bearer %s' % self.accessToken,
+            'Origin': 'https://tconnect.tandemdiabetes.com',
+            'Referer': 'https://tconnect.tandemdiabetes.com/',
+            **base_headers()
+        }
 
     def _get(self, endpoint, query):
-        r = self.session.get(self.BASE_URL + endpoint, data=query, headers=self.api_headers())
+        r = base_session().get(self.BASE_URL + endpoint, data=query, headers=self.api_headers())
 
         if r.status_code != 200:
             raise ApiException(r.status_code, "ControlIQ API HTTP %s response: %s" % (str(r.status_code), r.text))
@@ -106,10 +110,9 @@ class ControlIQApi:
         startDate = parse_date(start)
         endDate = parse_date(end)
 
-        return self.get('tconnect/controliq/api/therapytimeline/users/%s' % (self.userGuid), {
-            "startDate": startDate,
-            "endDate": endDate
-        })
+        # Microsoft-Azure-Application-Gateway/v2 WAF error message appears
+        # if startDate and endDate are not specified in exactly this order.
+        return self.get('tconnect/controliq/api/therapytimeline/users/%s?startDate=%s&endDate=%s' % (self.userGuid, startDate, endDate), {})
 
     """
     Returns a summary of pump and cgm activity.
