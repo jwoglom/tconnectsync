@@ -75,8 +75,11 @@ USER_AGENTS = [
     'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0',
     'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:101.0) Gecko/20100101 Firefox/101.0'
 ]
+
+# Consistent for entire runtime
+random_ua = random.choice(USER_AGENTS)
 def base_headers():
-    return {'user-agent': random.choice(USER_AGENTS)}
+    return {'user-agent': random_ua}
 
 def base_session():
     s = requests.Session()
