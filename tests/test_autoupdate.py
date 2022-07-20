@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 
-import os
 import logging
-import time
 import unittest
 import datetime
-import importlib
 import contextlib
 
 from unittest.mock import patch
 
 from tconnectsync.autoupdate import Autoupdate, AutoupdateFailureError, AutoupdateFailureWarning, AutoupdateNoEventIndexesDetectedError, AutoupdateNoIndexChangeWarning
-from tconnectsync.secret import AUTOUPDATE_FAILURE_MINUTES, AUTOUPDATE_NO_DATA_FAILURE_MINUTES, AUTOUPDATE_RESTART_ON_FAILURE, TCONNECT_PASSWORD
 
 from .api.fake import TConnectApi
 from .nightscout_fake import NightscoutApi
+from .secrets import build_secrets
 
 logger = logging.getLogger(__name__)
 
@@ -69,20 +66,6 @@ class TestAutoupdate(unittest.TestCase):
         
         return fake
     
-    def build_secrets(self, **kwargs):
-        secret = importlib.reload(importlib.import_module("tconnectsync.secret"))
-        class FakeSecret(object):
-            pass
-
-        fake = FakeSecret()
-        for k in dir(secret):
-            setattr(fake, k, getattr(secret, k))
-
-        for k, v in kwargs.items():
-            setattr(fake, k, v)
-        
-        return fake
-    
     """process_time_range should always be invoked the first time"""
     def test_process_time_range_called_on_start(self):
         tconnect = TConnectApi()
@@ -90,7 +73,7 @@ class TestAutoupdate(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=1,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0
@@ -116,7 +99,7 @@ class TestAutoupdate(unittest.TestCase):
         nightscout = NightscoutApi()
 
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=1,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0
@@ -144,7 +127,7 @@ class TestAutoupdate(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=2,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0,
@@ -174,7 +157,7 @@ class TestAutoupdate(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=1,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0
@@ -204,7 +187,7 @@ class TestAutoupdate(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=2,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0,
@@ -236,7 +219,7 @@ class TestAutoupdate(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=3,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0,
@@ -265,7 +248,7 @@ class TestAutoupdate(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=1,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0
@@ -292,7 +275,7 @@ class TestAutoupdate(unittest.TestCase):
         nightscout = NightscoutApi()
 
         sleep_length = 3 # sentinel
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=1,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=sleep_length
@@ -324,7 +307,7 @@ class TestAutoupdate(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=100,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0.1,
@@ -356,7 +339,7 @@ class TestAutoupdate(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        secret = self.build_secrets(
+        secret = build_secrets(
             AUTOUPDATE_MAX_LOOP_INVOCATIONS=5,
             AUTOUPDATE_USE_FIXED_SLEEP=True,
             AUTOUPDATE_DEFAULT_SLEEP_SECONDS=0.1,
