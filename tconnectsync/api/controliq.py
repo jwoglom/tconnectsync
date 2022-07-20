@@ -1,6 +1,4 @@
-import requests
 import urllib
-import datetime
 import arrow
 import time
 import logging
@@ -8,7 +6,7 @@ import logging
 from bs4 import BeautifulSoup
 
 from ..util import timeago
-from .common import parse_date, base_headers, ApiException, ApiLoginException
+from .common import parse_date, base_headers, base_session, ApiException, ApiLoginException
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +22,11 @@ class ControlIQApi:
         self.login(email, password)
         self._email = email
         self._password = password
+        self.session = base_session()
 
     def login(self, email, password):
         logger.info("Logging in to ControlIQApi...")
-        with requests.Session() as s:
+        with self.session as s:
             initial = s.get(self.LOGIN_URL, headers=base_headers())
             soup = BeautifulSoup(initial.content, features='lxml')
             data = self._build_login_data(email, password, soup)
@@ -72,7 +71,7 @@ class ControlIQApi:
         return {'Authorization': 'Bearer %s' % self.accessToken, **base_headers()}
 
     def _get(self, endpoint, query):
-        r = requests.get(self.BASE_URL + endpoint, query, headers=self.api_headers())
+        r = self.session.get(self.BASE_URL + endpoint, query, headers=self.api_headers())
 
         if r.status_code != 200:
             raise ApiException(r.status_code, "ControlIQ API HTTP %s response: %s" % (str(r.status_code), r.text))

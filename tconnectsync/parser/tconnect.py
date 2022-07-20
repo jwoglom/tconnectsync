@@ -175,6 +175,9 @@ class TConnectEntry:
     }
     @staticmethod
     def parse_basalsuspension_event(data):
+        if not data or "SuspendReason" not in data:
+            return None
+
         if data["SuspendReason"] in TConnectEntry.BASALSUSPENSION_SKIPPED_EVENTS:
             return None
 

@@ -1,9 +1,11 @@
 import tconnectsync.api
+import requests
 
 class ControlIQApi(tconnectsync.api.controliq.ControlIQApi):
     def __init__(self):
         self.BASE_URL = 'invalid://'
         self.LOGIN_URL = 'invalid://'
+        self.session = requests.Session() # mocked in tests
 
     def login(self, email, password):
         raise NotImplementedError

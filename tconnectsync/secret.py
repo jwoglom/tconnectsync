@@ -59,6 +59,7 @@ AUTOUPDATE_MAX_LOOP_INVOCATIONS = get_number('AUTOUPDATE_MAX_LOOP_INVOCATIONS', 
 
 ENABLE_TESTING_MODES = get_bool('ENABLE_TESTING_MODES', 'false')
 SKIP_NS_LAST_UPLOADED_CHECK = get_bool('SKIP_NS_LAST_UPLOADED_CHECK', 'false')
+REQUESTS_PROXY = get('REQUESTS_PROXY', '')
 
 if __name__ == '__main__':
     for k in locals():

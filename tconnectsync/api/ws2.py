@@ -5,7 +5,7 @@ import logging
 import time
 import json
 
-from .common import parse_date, base_headers, ApiException
+from .common import base_session, parse_date, base_headers, ApiException
 
 logger = logging.getLogger(__name__)
 
@@ -19,15 +19,16 @@ class WS2Api:
 
     def __init__(self, userGuid):
         self.userGuid = userGuid
+        self.session = base_session()
 
     def get(self, endpoint, query):
-        r = requests.get(self.BASE_URL + endpoint, query, headers=base_headers())
+        r = self.session.get(self.BASE_URL + endpoint, query, headers=base_headers())
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.text
 
     def get_jsonp(self, endpoint):
-        r = requests.get(self.BASE_URL + endpoint, {'callback': 'cb'}, headers=base_headers())
+        r = self.session.get(self.BASE_URL + endpoint, {'callback': 'cb'}, headers=base_headers())
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
 

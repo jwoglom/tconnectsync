@@ -11,7 +11,7 @@ import logging
 from bs4 import BeautifulSoup
 
 from ..util import timeago
-from .common import ApiException, ApiLoginException, parse_date
+from .common import ApiException, ApiLoginException, parse_date, base_session
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +43,10 @@ class AndroidApi:
         self.login(email, password)
         self._email = email
         self._password = password
+        self.session = base_session()
 
     def login(self, email, password):
-        r = requests.post(
+        r = self.session.post(
             self.BASE_URL + self.OAUTH_TOKEN_PATH,
             {
                 'username': email,
@@ -87,7 +88,7 @@ class AndroidApi:
         return {'Authorization': 'Bearer %s' % self.accessToken}
 
     def _get(self, endpoint, query={}, **kwargs):
-        r = requests.get(self.BASE_URL + endpoint, query, headers={
+        r = self.session.get(self.BASE_URL + endpoint, query, headers={
             'User-Agent': self.ANDROID_USER_AGENT,
             'Content-Type': 'application/json',
             **self.api_headers()
@@ -118,7 +119,7 @@ class AndroidApi:
 
 
     def post(self, endpoint, query={}, **kwargs):
-        r = requests.post(self.BASE_URL + endpoint, query, headers=self.api_headers(), **kwargs)
+        r = self.session.post(self.BASE_URL + endpoint, query, headers=self.api_headers(), **kwargs)
         if r.status_code != 200:
             raise ApiException(r.status_code, "Internal API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.json()
