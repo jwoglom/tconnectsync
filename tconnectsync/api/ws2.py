@@ -22,13 +22,13 @@ class WS2Api:
         self.session = base_session()
 
     def get(self, endpoint, query):
-        r = self.session.get(self.BASE_URL + endpoint, query, headers=base_headers())
+        r = self.session.get(self.BASE_URL + endpoint, data=query, headers=base_headers())
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.text
 
     def get_jsonp(self, endpoint):
-        r = self.session.get(self.BASE_URL + endpoint, {'callback': 'cb'}, headers=base_headers())
+        r = self.session.get(self.BASE_URL + endpoint, data={'callback': 'cb'}, headers=base_headers())
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
 

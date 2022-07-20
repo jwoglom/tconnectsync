@@ -71,7 +71,7 @@ class ControlIQApi:
         return {'Authorization': 'Bearer %s' % self.accessToken, **base_headers()}
 
     def _get(self, endpoint, query):
-        r = self.session.get(self.BASE_URL + endpoint, query, headers=self.api_headers())
+        r = self.session.get(self.BASE_URL + endpoint, data=query, headers=self.api_headers())
 
         if r.status_code != 200:
             raise ApiException(r.status_code, "ControlIQ API HTTP %s response: %s" % (str(r.status_code), r.text))

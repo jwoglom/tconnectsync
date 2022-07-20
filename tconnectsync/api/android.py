@@ -88,7 +88,7 @@ class AndroidApi:
         return {'Authorization': 'Bearer %s' % self.accessToken}
 
     def _get(self, endpoint, query={}, **kwargs):
-        r = self.session.get(self.BASE_URL + endpoint, query, headers={
+        r = self.session.get(self.BASE_URL + endpoint, data=query, headers={
             'User-Agent': self.ANDROID_USER_AGENT,
             'Content-Type': 'application/json',
             **self.api_headers()
