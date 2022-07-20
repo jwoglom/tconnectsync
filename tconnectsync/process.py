@@ -86,7 +86,7 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
         else:
             logger.debug("No CSV basal data found")
 
-        added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend)
+        added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend, time_start=time_start, time_end=time_end)
     
     if PUMP_EVENTS in features:
         pumpEvents = process_ciq_activity_events(ciqTherapyTimelineData)

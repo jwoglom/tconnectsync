@@ -57,9 +57,9 @@ def guess_bolus_bg_type(bg, created_at, cgmEvents):
 """
 Given processed bolus data, adds bolus events to Nightscout.
 """
-def ns_write_bolus_events(nightscout, bolusEvents, pretend=False, include_bg=False, reading_events=None):
+def ns_write_bolus_events(nightscout, bolusEvents, pretend=False, include_bg=False, reading_events=None, time_start=None, time_end=None):
     logger.debug("ns_write_bolus_events: querying for last uploaded entry")
-    last_upload = nightscout.last_uploaded_entry(BOLUS_EVENTTYPE)
+    last_upload = nightscout.last_uploaded_entry(BOLUS_EVENTTYPE, time_start=time_start, time_end=time_end)
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])

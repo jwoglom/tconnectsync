@@ -161,13 +161,13 @@ def ns_write_activity_events(nightscout, activityEvents, pretend=False):
         ACTIVITY_EVENTTYPE,
         pretend=pretend)
 
-def _ns_write_pump_events(nightscout, events, buildNsEventFunc, eventType, pretend=False):
+def _ns_write_pump_events(nightscout, events, buildNsEventFunc, eventType, pretend=False, time_start=None, time_end=None):
     if len(events) == 0:
         logger.debug("No %s events to process" % eventType)
         return 0
 
     logger.debug("ns_write_pump_events: querying for last %s" % eventType)
-    last_upload = nightscout.last_uploaded_entry(eventType)
+    last_upload = nightscout.last_uploaded_entry(eventType, time_start=time_start, time_end=time_end)
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])

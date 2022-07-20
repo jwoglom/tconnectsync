@@ -104,9 +104,9 @@ def add_csv_basal_events(basalEvents, data):
 """
 Given processed basal data, adds basal events to Nightscout.
 """
-def ns_write_basal_events(nightscout, basalEvents, pretend=False):
+def ns_write_basal_events(nightscout, basalEvents, pretend=False, time_start=None, time_end=None):
     logger.debug("ns_write_basal_events: querying for last uploaded entry")
-    last_upload = nightscout.last_uploaded_entry(BASAL_EVENTTYPE)
+    last_upload = nightscout.last_uploaded_entry(BASAL_EVENTTYPE, time_start=time_start, time_end=time_end)
     last_upload_time = None
     if last_upload:
         last_upload_time = arrow.get(last_upload["created_at"])

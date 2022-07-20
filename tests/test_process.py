@@ -32,7 +32,7 @@ class TestProcessTimeRange(unittest.TestCase):
     def stub_ws2_basalsuspension(self, time_start, time_end):
         return {"BasalSuspension": []}
 
-    def stub_last_uploaded_entry(self, event_type):
+    def stub_last_uploaded_entry(self, event_type, **kwargs):
         return None
 
     def stub_last_uploaded_activity(self, activity_type):
@@ -120,7 +120,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        def fake_last_uploaded_entry(event_type):
+        def fake_last_uploaded_entry(event_type, **kwargs):
             if event_type == "Temp Basal":
                 return {
                     "created_at": "2021-03-16 00:20:21-04:00",
@@ -163,7 +163,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        def fake_last_uploaded_entry(event_type):
+        def fake_last_uploaded_entry(event_type, **kwargs):
             if event_type == "Temp Basal":
                 return {
                     "created_at": "2021-03-16 00:20:21-04:00",
@@ -506,7 +506,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        def fake_last_uploaded_entry(event_type):
+        def fake_last_uploaded_entry(event_type, **kwargs):
             if event_type == "Sleep":
                 return {
                     "created_at": "2021-05-02 14:46:40-04:00",
@@ -519,7 +519,7 @@ class TestProcessTimeRange(unittest.TestCase):
                     "duration": 20,
                     "_id": "exercise"
                 }
-            return self.stub_last_uploaded_entry()
+            return self.stub_last_uploaded_entry(**kwargs)
 
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
@@ -628,7 +628,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout = NightscoutApi()
 
-        def fake_last_uploaded_entry(event_type):
+        def fake_last_uploaded_entry(event_type, **kwargs):
             if event_type == "Site Change":
                 return {
                     "created_at": "2021-12-04 16:18:10-05:00"
@@ -637,7 +637,7 @@ class TestProcessTimeRange(unittest.TestCase):
                 return {
                     "created_at": "2021-12-04 16:07:32-05:00"
                 }
-            return self.stub_last_uploaded_entry()
+            return self.stub_last_uploaded_entry(**kwargs)
 
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity

@@ -124,6 +124,8 @@ class WS2Api:
      - "manual"
      - "previous"
      - "alarm"
+    
+    The start date includes all events on the given day, and stops at 00:00 midnight on the end day.
 
     {"BasalSuspension":[{"EventDateTime":"/Date(EPOCH_MS-0000)/", "SuspendReason": "reason"}]}
     """
