@@ -14,10 +14,17 @@ def base_headers():
 def base_session():
     s = requests.Session()
     if secret.REQUESTS_PROXY:
-        s.request = functools.partial(s.request, proxies={
-            'http': secret.REQUESTS_PROXY,
-            'https': secret.REQUESTS_PROXY
-        })
+        def wrapped_request(self, *args, **kwargs):
+            if not kwargs:
+                kwargs = {}
+            kwargs['proxies'] = {
+                'http': secret.REQUESTS_PROXY,
+                'https': secret.REQUESTS_PROXY
+            }
+            return self._original_request(*args, **kwargs)
+
+        s._original_request = s.request
+        s.request = wrapped_request.__get__(s, requests.Session)
     return s
 
 class ApiException(Exception):
