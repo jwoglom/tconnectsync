@@ -21,14 +21,14 @@ class WS2Api:
         self.userGuid = userGuid
         self.session = base_session()
 
-    def get(self, endpoint, query):
-        r = self.session.get(self.BASE_URL + endpoint, data=query, headers=base_headers())
+    def get(self, endpoint):
+        r = self.session.get(self.BASE_URL + endpoint, headers=base_headers())
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.text
 
     def get_jsonp(self, endpoint):
-        r = self.session.get(self.BASE_URL + endpoint, data={'callback': 'cb'}, headers=base_headers())
+        r = self.session.get(self.BASE_URL + endpoint + '?callback=cb', headers=base_headers())
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
 
@@ -77,7 +77,7 @@ class WS2Api:
         endDate = parse_date(end)
 
         try:
-            req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate), {})
+            req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate))
         except ApiException as e:
             # This seems to occur as some kind of soft rate-limit.
             logger.warning("Received ApiException in therapy_timeline_csv: (retry count %d) %s" % (tries, e))
