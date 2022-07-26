@@ -50,33 +50,40 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
             ciqTherapyTimelineData = None
         else:
             raise e
+    
+    csvReadingData = None
+    csvIobData = None
+    csvBasalData = None
+    csvBolusData = None
 
-    logger.info("Downloading t:connect CSV data")
-    csvdata = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
+    if CGM in features or BOLUS in features or BOLUS_BG in features or IOB in features:
+        logger.info("Downloading t:connect CSV data")
+        csvdata = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
 
-    readingData = csvdata["readingData"]
-    iobData = csvdata["iobData"]
-    csvBasalData = csvdata["basalData"]
-    bolusData = csvdata["bolusData"]
+        csvReadingData = csvdata["readingData"]
+        csvIobData = csvdata["iobData"]
+        csvBasalData = csvdata["basalData"]
+        csvBolusData = csvdata["bolusData"]
 
-    if readingData and len(readingData) > 0:
-        lastReading = readingData[-1]['EventDateTime'] if 'EventDateTime' in readingData[-1] else 0
-        lastReading = TConnectEntry._datetime_parse(lastReading)
-        logger.debug(readingData[-1])
-        logger.info("Last CGM reading from t:connect: %s (%s)" % (lastReading, timeago(lastReading)))
-    else:
-        logger.warning("No last CGM reading is able to be determined")
+        if csvReadingData and len(csvReadingData) > 0:
+            lastReading = csvReadingData[-1]['EventDateTime'] if 'EventDateTime' in csvReadingData[-1] else 0
+            lastReading = TConnectEntry._datetime_parse(lastReading)
+            logger.debug(csvReadingData[-1])
+            logger.info("Last CGM reading from t:connect: %s (%s)" % (lastReading, timeago(lastReading)))
+        else:
+            logger.warning("No last CGM reading is able to be determined")
 
     added = 0
 
-    cgmData = None
-    if CGM in features or BOLUS_BG in features:
-        logger.debug("Processing CGM events")
-        cgmData = process_cgm_events(readingData)
-    
-    if CGM in features:
-        logger.debug("Writing CGM events")
-        added += ns_write_cgm_events(nightscout, cgmData, pretend, time_start=time_start, time_end=time_end)
+    if csvReadingData:
+        cgmData = None
+        if CGM in features or BOLUS_BG in features:
+            logger.debug("Processing CGM events")
+            cgmData = process_cgm_events(csvReadingData)
+        
+        if CGM in features:
+            logger.debug("Writing CGM events")
+            added += ns_write_cgm_events(nightscout, cgmData, pretend, time_start=time_start, time_end=time_end)
 
     if BASAL in features:
         basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
@@ -101,13 +108,15 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
 
         added += ns_write_pump_events(nightscout, pumpEvents, pretend=pretend, time_start=time_start, time_end=time_end)
 
-    if BOLUS in features:
-        bolusEvents = process_bolus_events(bolusData)
-        added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features), time_start=time_start, time_end=time_end)
+    if csvBolusData:
+        if BOLUS in features:
+            bolusEvents = process_bolus_events(csvBolusData)
+            added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features), time_start=time_start, time_end=time_end)
 
-    if IOB in features:
-        iobEvents = process_iob_events(iobData)
-        added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
+    if csvIobData:
+        if IOB in features:
+            iobEvents = process_iob_events(csvIobData)
+            added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
 
     logger.info("Wrote %d events to Nightscout this process cycle" % added)
     return added

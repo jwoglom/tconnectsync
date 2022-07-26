@@ -8,3 +8,4 @@ build
 *.egg-info
 .env
 tconnectsync-check-output.log
+ignore_*
