@@ -6,7 +6,9 @@ from ..secret import TIMEZONE_NAME
 
 
 def _datetime_parse(date):
-    return arrow.get(date, tzinfo=TIMEZONE_NAME).format()
+    # consistent format with ws2 endpoint
+    return arrow.get(date, tzinfo=TIMEZONE_NAME).format("YYYY-MM-DD HH:mm:ssZZ")
+
 class TherapyEvent:
     type = None
     eventDateTime = None
@@ -96,7 +98,7 @@ class BolusTherapyEvent(TherapyEvent):
         self.bg = json.get("bg")
         self.user_override = json.get("userOverride")
         self.extended_bolus = json.get("bolusRequestOptions") == "Extended"
-        if self.extended_bolus:
+        if self.extended_bolus and self.complete:
             # TODO(https://github.com/jwoglom/tconnectsync/issues/19): read more extended bolus info
             self.complete = json.get("bolex", {}).get("extendedBolusIsComplete")
             self.completion = json.get("bolex", {}).get("completionStatusDesc")
@@ -116,7 +118,7 @@ class BolusTherapyEvent(TherapyEvent):
             completion_time=_datetime_parse(self.completion_time),
             insulin=str(self.insulin),
             requested_insulin=str(self.requested_insulin),
-            carbs=str(self.carbs or ""),
+            carbs=str(self.carbs or "0"), # Nightscout expects non-empty carbs
             bg=str(self.bg or ""),
             user_override=str(self.user_override),
             extended_bolus="1" if self.extended_bolus else "0",

@@ -180,7 +180,7 @@ class TestBolusTherapyEvent(unittest.TestCase):
             completion_time="2022-07-21 11:55:24-04:00",
             insulin="2.9",
             requested_insulin="2.9",
-            carbs="",
+            carbs="0",
             bg="254",
             user_override="0",
             extended_bolus="0",
@@ -263,7 +263,7 @@ class TestBolusTherapyEvent(unittest.TestCase):
             completion_time="2022-08-09 23:20:04-04:00",
             insulin="0.2",
             requested_insulin="0.2",
-            carbs="",
+            carbs="0",
             bg="131",
             user_override="1",
             extended_bolus="1",
@@ -351,10 +351,17 @@ class TestBolusTherapyEvent(unittest.TestCase):
             completion_time="2022-08-09 23:20:04-04:00",
             insulin="0.2",
             requested_insulin="0.2",
-            carbs="",
+            carbs="0",
             bg="131",
             user_override="1",
             extended_bolus="1",
             bolex_completion_time="2022-08-09 23:35:03-04:00",
             bolex_start_time="2022-08-09 23:20:04-04:00"
         )))
+
+
+BOLUS_FULL_EXAMPLES = [
+    TestBolusTherapyEvent.standardJson,
+    TestBolusTherapyEvent.correctionJson,
+    TestBolusTherapyEvent.extendedBolusJson
+]

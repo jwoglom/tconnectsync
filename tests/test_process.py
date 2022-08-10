@@ -8,6 +8,7 @@ import copy
 from tconnectsync.process import process_time_range
 from tconnectsync.parser.nightscout import EXERCISE_EVENTTYPE, IOB_ACTIVITYTYPE, SLEEP_EVENTTYPE, NightscoutEntry
 from tconnectsync.features import BASAL, BOLUS, IOB, PUMP_EVENTS
+from tests.domain.test_therapy_event import BOLUS_FULL_EXAMPLES, TestCGMTherapyEvent
 
 from .api.fake import TConnectApi
 from .nightscout_fake import NightscoutApi
@@ -20,6 +21,11 @@ class TestProcessTimeRange(unittest.TestCase):
 
     def stub_therapy_timeline(self, time_start, time_end):
         return copy.deepcopy(TestBasalSync.base)
+    
+    def stub_ciq_therapy_events(self, time_start, time_end):
+        return {
+            "event": []
+        }
 
     def stub_therapy_timeline_csv(self, time_start, time_end):
         return {
@@ -53,6 +59,7 @@ class TestProcessTimeRange(unittest.TestCase):
             return TestBasalSync.get_example_ciq_basal_events()
 
         tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.controliq.therapy_events = self.stub_ciq_therapy_events
         tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
 
         nightscout = NightscoutApi()
@@ -88,6 +95,7 @@ class TestProcessTimeRange(unittest.TestCase):
             return TestBasalSync.get_example_ciq_basal_events()
 
         tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.controliq.therapy_events = self.stub_ciq_therapy_events
         tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
 
         nightscout = NightscoutApi()
@@ -116,6 +124,7 @@ class TestProcessTimeRange(unittest.TestCase):
             return TestBasalSync.get_example_ciq_basal_events()
 
         tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.controliq.therapy_events = self.stub_ciq_therapy_events
         tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
 
         nightscout = NightscoutApi()
@@ -159,6 +168,7 @@ class TestProcessTimeRange(unittest.TestCase):
             return TestBasalSync.get_example_ciq_basal_events()
 
         tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.controliq.therapy_events = self.stub_ciq_therapy_events
         tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
 
         nightscout = NightscoutApi()
@@ -193,8 +203,8 @@ class TestProcessTimeRange(unittest.TestCase):
         })
         self.assertListEqual(nightscout.deleted_entries, [])
 
-    """No data in Nightscout. Uploads all bolus data from tconnect."""
-    def test_new_ciq_bolus_data(self):
+    """No data in Nightscout. Uploads all bolus data from tconnect via the WS2 API."""
+    def test_new_ciq_bolus_data_from_ws2(self):
         tconnect = TConnectApi()
 
         # datetimes are unused by the API fake
@@ -202,6 +212,7 @@ class TestProcessTimeRange(unittest.TestCase):
         end = datetime.datetime(2021, 4, 21, 12, 0)
 
         tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+        tconnect.controliq.therapy_events = self.stub_ciq_therapy_events
 
         bolusData = TestBolusSync.get_example_csv_bolus_events()
         def fake_therapy_timeline_csv(time_start, time_end):
@@ -227,6 +238,46 @@ class TestProcessTimeRange(unittest.TestCase):
                 NightscoutEntry.bolus(1.25, 0, "2021-04-01 23:23:17-04:00", notes="Standard (Override)"),
                 NightscoutEntry.bolus(1.7, 0, "2021-04-02 01:00:47-04:00", notes="Automatic Bolus/Correction"),
                 NightscoutEntry.bolus(1.82, 0, "2021-09-06 12:24:47-04:00", notes="Standard/Correction (Terminated by Alarm: requested 2.63 units)"),
+        ]})
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """No data in Nightscout. Uploads all bolus data from tconnect via CIQ therapy_events."""
+    def test_new_ciq_bolus_data_from_ciq_therapy_events(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2022, 8, 9, 12, 0)
+        end = datetime.datetime(2021, 8, 10, 12, 0)
+
+        tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+
+        def fake_ciq_therapy_events(time_start, time_end):
+            return {
+                "event": BOLUS_FULL_EXAMPLES
+            }
+        tconnect.controliq.therapy_events = fake_ciq_therapy_events
+
+        tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
+
+        nightscout = NightscoutApi()
+
+        nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
+        nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
+
+        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
+
+        pprint.pprint(nightscout.uploaded_entries)
+        self.assertEqual(len(nightscout.uploaded_entries["treatments"]), len(BOLUS_FULL_EXAMPLES))
+        self.assertDictEqual(dict(nightscout.uploaded_entries), {
+            "treatments": [
+                # BGs are excluded because BG is not enabled in features for this test
+                NightscoutEntry.bolus(2.9, 0, "2022-07-21 11:55:24-04:00", notes="Automatic Bolus/Correction"),
+                NightscoutEntry.bolus(4.17, 25, "2022-07-21 12:29:21-04:00", notes="Standard"),
+                # NOTE: the extended bolus is 0.2+0.2 but we currently only surface standard
+                # BUG: inconsistency: we use the completion timestamp as the event timestamp for standard boluses,
+                # but the standard strand time for extended
+                NightscoutEntry.bolus(0.2, 0, "2022-08-09 23:20:04-04:00", notes="Extended 50.00%/0.00 (Override) (Extended)"),
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
@@ -271,6 +322,7 @@ class TestProcessTimeRange(unittest.TestCase):
         end = datetime.datetime(2021, 4, 21, 12, 0)
 
         tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+        tconnect.controliq.therapy_events = self.stub_ciq_therapy_events
 
         iobData = TestIOBSync.get_example_csv_iob_events()
         def fake_therapy_timeline_csv(time_start, time_end):
@@ -307,6 +359,7 @@ class TestProcessTimeRange(unittest.TestCase):
         end = datetime.datetime(2021, 4, 21, 12, 0)
 
         tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
+        tconnect.controliq.therapy_events = self.stub_ciq_therapy_events
 
         iobData = TestIOBSync.get_example_csv_iob_events()
         def fake_therapy_timeline_csv(time_start, time_end):
@@ -454,6 +507,7 @@ class TestProcessTimeRange(unittest.TestCase):
             }
 
         tconnect.controliq.therapy_timeline = fake_therapy_timeline
+        tconnect.controliq.therapy_events = self.stub_ciq_therapy_events
         tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
         tconnect.ws2.basalsuspension = self.stub_ws2_basalsuspension
 

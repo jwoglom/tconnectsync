@@ -1,5 +1,6 @@
 import arrow
 import logging
+from tconnectsync.domain.bolus import Bolus
 
 from tconnectsync.sync.cgm import find_event_at
 
@@ -15,17 +16,23 @@ logger = logging.getLogger(__name__)
 """
 Given bolus data input from the therapy timeline CSV, converts it into a digestable format.
 """
-def process_bolus_events(bolusdata, cgmEvents=None):
+def process_bolus_events(bolusdata, cgmEvents=None, source=""):
     bolusEvents = []
 
     for b in bolusdata:
-        parsed = TConnectEntry.parse_bolus_entry(b)
+        parsed = None
+        if source == "ciq":
+            parsed = b.to_bolus()
+        else:
+            parsed = TConnectEntry.parse_bolus_entry(b)
+        
+        assert type(parsed) == Bolus
         if parsed.completion != "Completed":
             if parsed.insulin and float(parsed.insulin) > 0:
                 # Count non-completed bolus if any insulin was delivered (vs. the amount of insulin requested)
                 parsed.description += " (%s: requested %s units)" % (parsed.completion, parsed.requested_insulin)
             else:
-                logger.warning("Skipping non-completed bolus data (was a bolus in progress?): %s parsed: %s" % (b, parsed))
+                logger.warning("Skipping non-completed %s bolus data (was a bolus in progress?): %s parsed: %s" % (source, b, parsed))
                 continue
 
         if parsed.bg and cgmEvents:
@@ -34,7 +41,7 @@ def process_bolus_events(bolusdata, cgmEvents=None):
 
         bolusEvents.append(parsed)
 
-    bolusEvents.sort(key=lambda event: arrow.get(event.request_time if not event.extended_bolus else event.bolex_start_time))
+    bolusEvents.sort(key=lambda event: arrow.get(event.request_time if not event.is_extended_bolus else event.bolex_start_time))
 
     return bolusEvents
 
@@ -72,7 +79,7 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False, include_bg=Fal
 
     add_count = 0
     for event in bolusEvents:
-        created_at = event.completion_time if not event.extended_bolus else event.bolex_start_time
+        created_at = event.completion_time if not event.is_extended_bolus else event.bolex_start_time
         if last_upload_time and arrow.get(created_at) <= last_upload_time:
             if pretend:
                 logger.info("Skipping basal event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))

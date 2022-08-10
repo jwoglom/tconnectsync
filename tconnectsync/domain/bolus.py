@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 
 @dataclass
@@ -16,3 +16,10 @@ class Bolus:
     extended_bolus: str # "1" / "0"
     bolex_completion_time: str
     bolex_start_time: str
+
+    def to_dict(self):
+        return asdict(self)
+    
+    @property
+    def is_extended_bolus(self):
+        return self.extended_bolus == "1"

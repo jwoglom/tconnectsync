@@ -131,10 +131,10 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
     if BOLUS in features:
         bolusEvents = []
         if ciqBolusData:
-            bolusEvents = process_bolus_therapy_events(ciqBolusData)
+            bolusEvents = process_bolus_events(ciqBolusData, source="ciq")
 
         if csvBolusData and not bolusEvents:
-            bolusEvents = process_bolus_events(csvBolusData)
+            bolusEvents = process_bolus_events(csvBolusData, source="csv")
         added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features), time_start=time_start, time_end=time_end)
 
     if csvIobData:

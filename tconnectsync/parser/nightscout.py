@@ -48,7 +48,7 @@ class NightscoutEntry:
         }
         if bg:
             if bg_type not in (NightscoutEntry.SENSOR, NightscoutEntry.FINGER):
-                raise InvalidBolusTypeException
+                raise InvalidBolusTypeException("bg_type: %s (%s)" % (bg_type, data))
 
             data.update({
                 "glucose": str(bg),
