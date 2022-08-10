@@ -87,17 +87,18 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
        BOLUS_BG in features or \
        IOB in features:
         logger.warn("Downloading t:connect CSV data")
-        logger.warn("<!!> This data source is unreliable and may prevent timely synchronization")
         if bolusFallingBack:
-            logger.warn("Falling back on WS2 data source because BOLUS is an enabled feature and CIQ bolus data was empty!!")
+            logger.warn("Falling back on WS2 CSV data source because BOLUS is an enabled feature and CIQ bolus data was empty!!")
         if ciqFallingBack:
-            logger.warn("Falling back on WS2 data source because CGM is an enabled feature and CIQ cgm data was empty!!")
+            logger.warn("Falling back on WS2 CSV data source because CGM is an enabled feature and CIQ cgm data was empty!!")
         if BOLUS_BG in features:
-            logger.warn("<!!> Falling back on WS2 data source because BOLUS_BG is an enabled feature. " +
+            logger.warn("Falling back on WS2 CSV data source because BOLUS_BG is an enabled feature. " +
                         "Please consider disabling this feature to improve synchronization reliability.")
         if IOB in features:
-            logger.warn("<!!> Falling back on WS2 data source because IOB is an enabled feature. " +
+            logger.warn("Falling back on WS2 CSV data source because IOB is an enabled feature. " +
                         "Please consider disabling this feature to improve synchronization reliability.")
+        
+        logger.warn("<!!> The WS2 data source is unreliable and may prevent timely synchronization")
         csvdata = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
 
         csvReadingData = csvdata["readingData"]
@@ -125,6 +126,7 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
         if CGM in features:
             logger.debug("Writing CGM events")
             added += ns_write_cgm_events(nightscout, cgmData, pretend, time_start=time_start, time_end=time_end)
+            logger.debug("Finished writing CGM events")
 
     if BASAL in features:
         basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
@@ -137,12 +139,16 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
         if basalEvents and len(basalEvents) > 0:
             logger.info("Last basal event from CIQ: %s" % basalEvents[-1])
 
+        logger.debug("Writing basal events")
         added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend, time_start=time_start, time_end=time_end)
+        logger.debug("Finished writing basal events")
     
     if PUMP_EVENTS in features:
         pumpEvents = process_ciq_activity_events(ciqTherapyTimelineData)
         logger.debug("CIQ activity events: %s" % pumpEvents)
 
+        logger.warn("Using WS2 data source for basalsuspension because PUMP_EVENTS is an enabled feature")
+        logger.warn("<!!> The WS2 data source is unreliable and may prevent timely synchronization")
         ws2BasalSuspension = tconnect.ws2.basalsuspension(time_start, time_end)
 
         bsPumpEvents = process_basalsuspension_events(ws2BasalSuspension)
@@ -150,7 +156,9 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
 
         pumpEvents += bsPumpEvents
 
+        logger.debug("Writing pump events")
         added += ns_write_pump_events(nightscout, pumpEvents, pretend=pretend, time_start=time_start, time_end=time_end)
+        logger.debug("Finished writing basal events")
 
     if BOLUS in features:
         bolusEvents = []
@@ -164,12 +172,16 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
             logger.debug("ciq bolusEvents: %s" % bolusEvents)
         
         logger.info("finalized bolusEvents: %s" % bolusEvents)
+        logger.debug("Writing bolus events")
         added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features), time_start=time_start, time_end=time_end)
+        logger.debug("Finished writing bolus events")
 
     if csvIobData:
         if IOB in features:
             iobEvents = process_iob_events(csvIobData)
+            logger.debug("Writing iob events")
             added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
+            logger.debug("Finished writing iob events")
 
     logger.info("Wrote %d events to Nightscout this process cycle" % added)
     return added
