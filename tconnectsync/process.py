@@ -31,6 +31,7 @@ from .sync.pump_events import (
 )
 from .parser.tconnect import TConnectEntry
 from .features import BASAL, BOLUS, IOB, BOLUS_BG, CGM, DEFAULT_FEATURES, PUMP_EVENTS
+from tconnectsync.sync import basal
 
 logger = logging.getLogger(__name__)
 
@@ -72,11 +73,31 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
             logger.info("Last CGM reading from t:connect CIQ: %s (%s)" % (lastReading, timeago(lastReading)))
         else:
             logger.warning("No last CGM reading is able to be determined from CIQ")
+        
+        if ciqBolusData and len(ciqBolusData) > 0:
+            lastBolus = ciqBolusData[-1].eventDateTime
+            lastReading = TConnectEntry._datetime_parse(lastBolus)
+            logger.debug(ciqBolusData[-1].to_bolus())
+            logger.info("Last bolus from t:connect CIQ: %s (%s)" % (lastBolus, timeago(lastBolus)))
 
-    if (BOLUS in features and not ciqBolusData) or \
-       (CGM in features and not ciqReadingData) or \
-       BOLUS_BG in features or IOB in features:
-        logger.info("Downloading t:connect CSV data")
+    bolusFallingBack = (BOLUS in features and not ciqBolusData)
+    ciqFallingBack = (CGM in features and not ciqReadingData)
+    if bolusFallingBack or \
+       ciqFallingBack or \
+       BOLUS_BG in features or \
+       IOB in features:
+        logger.warn("Downloading t:connect CSV data")
+        logger.warn("<!!> This data source is unreliable and may prevent timely synchronization")
+        if bolusFallingBack:
+            logger.warn("Falling back on WS2 data source because BOLUS is an enabled feature and CIQ bolus data was empty!!")
+        if ciqFallingBack:
+            logger.warn("Falling back on WS2 data source because CGM is an enabled feature and CIQ cgm data was empty!!")
+        if BOLUS_BG in features:
+            logger.warn("<!!> Falling back on WS2 data source because BOLUS_BG is an enabled feature. " +
+                        "Please consider disabling this feature to improve synchronization reliability.")
+        if IOB in features:
+            logger.warn("<!!> Falling back on WS2 data source because IOB is an enabled feature. " +
+                        "Please consider disabling this feature to improve synchronization reliability.")
         csvdata = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
 
         csvReadingData = csvdata["readingData"]
@@ -112,6 +133,9 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
             add_csv_basal_events(basalEvents, csvBasalData)
         else:
             logger.debug("No CSV basal data found")
+        
+        if basalEvents and len(basalEvents) > 0:
+            logger.info("Last basal event from CIQ: %s" % basalEvents[-1])
 
         added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend, time_start=time_start, time_end=time_end)
     
@@ -131,10 +155,15 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
     if BOLUS in features:
         bolusEvents = []
         if ciqBolusData:
+            logger.info("Processing ciqBolusData (%d entries)" % len(ciqBolusData))
             bolusEvents = process_bolus_events(ciqBolusData, source="ciq")
 
         if csvBolusData and not bolusEvents:
+            logger.warn("Falling back on non-CIQ csvBolusData")
             bolusEvents = process_bolus_events(csvBolusData, source="csv")
+            logger.debug("ciq bolusEvents: %s" % bolusEvents)
+        
+        logger.info("finalized bolusEvents: %s" % bolusEvents)
         added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features), time_start=time_start, time_end=time_end)
 
     if csvIobData:
