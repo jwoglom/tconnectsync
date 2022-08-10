@@ -1,6 +1,9 @@
 from os import stat
 import sys
 import arrow
+from tconnectsync.domain.bolus import Bolus
+
+from tconnectsync.domain.therapy_event import BolusTherapyEvent, CGMTherapyEvent
 
 try:
     from ..secret import TIMEZONE_NAME
@@ -105,7 +108,7 @@ class TConnectEntry:
         complete = is_complete(data["ExtendedBolusIsComplete"]) or is_complete(data["BolusIsComplete"])
         extended_bolus = ("extended" in data["Description"].lower())
 
-        return {
+        return Bolus(**{
             "description": data["Description"],
             "complete": "1" if complete else "",
             "completion": data["CompletionStatusDesc"] if not extended_bolus else data["BolexCompletionStatusDesc"],
@@ -120,7 +123,7 @@ class TConnectEntry:
             # Note: completion time can be empty if the extended bolus is in progress
             "bolex_completion_time": TConnectEntry._datetime_parse(data["BolexCompletionDateTime"]).format() if data["BolexCompletionDateTime"] and complete and extended_bolus else None,
             "bolex_start_time": TConnectEntry._datetime_parse(data["BolexStartDateTime"]).format() if data["BolexStartDateTime"] and complete and extended_bolus else None,
-        }
+        })
     
     @staticmethod
     def parse_reading_entry(data):
@@ -189,7 +192,16 @@ class TConnectEntry:
             "time": time.format(),
             "event_type": TConnectEntry.BASALSUSPENSION_EVENTS[data["SuspendReason"]]
         }
-
+    
+    # Parses an entry from controliq.therapy_events() and returns a TherapyEvent
+    @staticmethod
+    def parse_therapy_event(data):
+        if data["type"] == "Bolus":
+            return BolusTherapyEvent.parse(data)
+        elif data["type"] == "CGM":
+            return CGMTherapyEvent.parse(data)
+        
+        raise UnknownTherapyEventException(data)
 
 class UnknownCIQActivityEventException(Exception):
     def __init__(self, data):
@@ -198,3 +210,7 @@ class UnknownCIQActivityEventException(Exception):
 class UnknownBasalSuspensionEventException(Exception):
     def __init__(self, data):
         super().__init__("Unknown basal suspension event type: %s" % data)
+
+class UnknownTherapyEventException(Exception):
+    def __init__(self, data):
+        super().__init__("Unknown therapy event type: " % data)

@@ -3,6 +3,8 @@ import datetime
 import arrow
 import time
 
+from tconnectsync.parser.ciq_therapy_events import split_therapy_events
+
 from .util import timeago
 from .api.common import ApiException
 from .sync.basal import (
@@ -56,7 +58,24 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
     csvBasalData = None
     csvBolusData = None
 
-    if CGM in features or BOLUS in features or BOLUS_BG in features or IOB in features:
+    ciqBolusData = None
+    ciqReadingData = None
+    if BOLUS in features:
+        logger.info("Downloading t:connect therapy_events")
+        ciqTherapyEventsData = tconnect.controliq.therapy_events(time_start, time_end)
+        ciqBolusData, ciqReadingData = split_therapy_events(ciqTherapyEventsData)
+
+        if ciqReadingData and len(ciqReadingData) > 0:
+            lastReading = ciqReadingData[-1].eventDateTime
+            lastReading = TConnectEntry._datetime_parse(lastReading)
+            logger.debug(ciqReadingData[-1])
+            logger.info("Last CGM reading from t:connect CIQ: %s (%s)" % (lastReading, timeago(lastReading)))
+        else:
+            logger.warning("No last CGM reading is able to be determined from CIQ")
+
+    if (BOLUS in features and not ciqBolusData) or \
+       (CGM in features and not ciqReadingData) or \
+       BOLUS_BG in features or IOB in features:
         logger.info("Downloading t:connect CSV data")
         csvdata = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
 
@@ -69,9 +88,10 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
             lastReading = csvReadingData[-1]['EventDateTime'] if 'EventDateTime' in csvReadingData[-1] else 0
             lastReading = TConnectEntry._datetime_parse(lastReading)
             logger.debug(csvReadingData[-1])
-            logger.info("Last CGM reading from t:connect: %s (%s)" % (lastReading, timeago(lastReading)))
+            logger.info("Last CGM reading from t:connect CSV: %s (%s)" % (lastReading, timeago(lastReading)))
         else:
-            logger.warning("No last CGM reading is able to be determined")
+            logger.warning("No last CGM reading is able to be determined from CSV")
+
 
     added = 0
 
@@ -108,10 +128,14 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
 
         added += ns_write_pump_events(nightscout, pumpEvents, pretend=pretend, time_start=time_start, time_end=time_end)
 
-    if csvBolusData:
-        if BOLUS in features:
+    if BOLUS in features:
+        bolusEvents = []
+        if ciqBolusData:
+            bolusEvents = process_bolus_therapy_events(ciqBolusData)
+
+        if csvBolusData and not bolusEvents:
             bolusEvents = process_bolus_events(csvBolusData)
-            added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features), time_start=time_start, time_end=time_end)
+        added += ns_write_bolus_events(nightscout, bolusEvents, pretend=pretend, include_bg=(BOLUS_BG in features), time_start=time_start, time_end=time_end)
 
     if csvIobData:
         if IOB in features:

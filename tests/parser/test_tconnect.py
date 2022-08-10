@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
+from tconnectsync.domain.bolus import Bolus
 from tconnectsync.parser.tconnect import TConnectEntry, UnknownBasalSuspensionEventException, UnknownCIQActivityEventException
 
 class TestTConnectEntryBasal(unittest.TestCase):
@@ -177,7 +178,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
     def test_parse_bolus_entry_std_correction(self):
         self.assertEqual(
             TConnectEntry.parse_bolus_entry(self.entryStdCorrection),
-            {
+            Bolus(**{
                 "description": "Standard/Correction",
                 "complete": "1",
                 "completion": "Completed",
@@ -191,7 +192,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "extended_bolus": "",
                 "bolex_completion_time": None,
                 "bolex_start_time": None
-        })
+        }))
     
     entryStd = {
         "Type": "Bolus",
@@ -239,7 +240,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
     def test_parse_bolus_entry_std(self):
         self.assertEqual(
             TConnectEntry.parse_bolus_entry(self.entryStd),
-            {
+            Bolus(**{
                 "description": "Standard",
                 "complete": "1",
                 "completion": "Completed",
@@ -253,7 +254,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "extended_bolus": "",
                 "bolex_completion_time": None,
                 "bolex_start_time": None
-        })
+        }))
     
     entryStdAutomatic = {
         "Type": "Bolus",
@@ -301,7 +302,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
     def test_parse_bolus_entry_std_automatic(self):
         self.assertEqual(
             TConnectEntry.parse_bolus_entry(self.entryStdAutomatic),
-            {
+            Bolus(**{
                 "description": "Automatic Bolus/Correction",
                 "complete": "1",
                 "completion": "Completed",
@@ -315,7 +316,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "extended_bolus": "",
                 "bolex_completion_time": None,
                 "bolex_start_time": None
-        })
+        }))
     
     entryStdIncompleteZero = {
         "Type": "Bolus",
@@ -363,7 +364,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
     def test_parse_bolus_entry_std_incomplete_zero(self):
         self.assertEqual(
             TConnectEntry.parse_bolus_entry(self.entryStdIncompleteZero),
-            {
+            Bolus(**{
                 "description": "Standard",
                 "complete": "",
                 "completion": "User Aborted",
@@ -377,7 +378,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "extended_bolus": "",
                 "bolex_completion_time": None,
                 "bolex_start_time": None
-            })
+            }))
     
     entryStdIncompletePartial = {
         "Type": "Bolus",
@@ -425,7 +426,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
     def test_parse_bolus_entry_std_incomplete_partial(self):
         self.assertEqual(
             TConnectEntry.parse_bolus_entry(self.entryStdIncompletePartial),
-            {
+            Bolus(**{
                 "description": "Standard/Correction",
                 "complete": "",
                 "completion": "Terminated by Alarm",
@@ -439,7 +440,7 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "extended_bolus": "",
                 "bolex_completion_time": None,
                 "bolex_start_time": None
-            })
+            }))
 
 class TestTConnectEntryReading(unittest.TestCase):
     entry1 = {

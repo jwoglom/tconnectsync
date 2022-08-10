@@ -52,7 +52,7 @@ class TestBolusSync(unittest.TestCase):
         self.assertEqual(len(bolusEvents), len(bolusData))
 
         def set_bg_type(entry, type):
-            entry["bg_type"] = type
+            entry.bg_type = type
             return entry
 
         # Expect FINGER for bolus entries with a BG because there's no matching event with the same BG
@@ -111,7 +111,7 @@ class TestBolusSync(unittest.TestCase):
         self.assertEqual(len(bolusEvents), len(bolusData))
 
         def set_bg_type(entry, type):
-            entry["bg_type"] = type
+            entry.bg_type = type
             return entry
 
         expected = [
@@ -145,7 +145,7 @@ class TestBolusSync(unittest.TestCase):
         ]
 
         for e in partialEntries:
-            e["description"] += " (%s: requested %s units)" % (e["completion"], e["requested_insulin"])
+            e.description += " (%s: requested %s units)" % (e.completion, e.requested_insulin)
 
         self.assertListEqual(bolusEvents, [
             TConnectEntry.parse_bolus_entry(d) for d in stdData

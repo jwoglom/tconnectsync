@@ -20,21 +20,21 @@ def process_bolus_events(bolusdata, cgmEvents=None):
 
     for b in bolusdata:
         parsed = TConnectEntry.parse_bolus_entry(b)
-        if parsed["completion"] != "Completed":
-            if parsed["insulin"] and float(parsed["insulin"]) > 0:
+        if parsed.completion != "Completed":
+            if parsed.insulin and float(parsed.insulin) > 0:
                 # Count non-completed bolus if any insulin was delivered (vs. the amount of insulin requested)
-                parsed["description"] += " (%s: requested %s units)" % (parsed["completion"], parsed["requested_insulin"])
+                parsed.description += " (%s: requested %s units)" % (parsed.completion, parsed.requested_insulin)
             else:
                 logger.warning("Skipping non-completed bolus data (was a bolus in progress?): %s parsed: %s" % (b, parsed))
                 continue
 
-        if parsed["bg"] and cgmEvents:
-            requested_at = parsed["request_time"] if not parsed["extended_bolus"] else parsed["bolex_start_time"]
-            parsed["bg_type"] = guess_bolus_bg_type(parsed["bg"], requested_at, cgmEvents)
+        if parsed.bg and cgmEvents:
+            requested_at = parsed.request_time if not parsed.extended_bolus else parsed.bolex_start_time
+            parsed.bg_type = guess_bolus_bg_type(parsed.bg, requested_at, cgmEvents)
 
         bolusEvents.append(parsed)
 
-    bolusEvents.sort(key=lambda event: arrow.get(event["request_time"] if not event["extended_bolus"] else event["bolex_start_time"]))
+    bolusEvents.sort(key=lambda event: arrow.get(event.request_time if not event.extended_bolus else event.bolex_start_time))
 
     return bolusEvents
 
@@ -72,27 +72,27 @@ def ns_write_bolus_events(nightscout, bolusEvents, pretend=False, include_bg=Fal
 
     add_count = 0
     for event in bolusEvents:
-        created_at = event["completion_time"] if not event["extended_bolus"] else event["bolex_start_time"]
+        created_at = event.completion_time if not event.extended_bolus else event.bolex_start_time
         if last_upload_time and arrow.get(created_at) <= last_upload_time:
             if pretend:
                 logger.info("Skipping basal event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
             continue
 
-        if include_bg and event["bg"]:
+        if include_bg and event.bg:
             entry = NightscoutEntry.bolus(
-                bolus=event["insulin"],
-                carbs=event["carbs"],
+                bolus=event.insulin,
+                carbs=event.carbs,
                 created_at=created_at,
-                notes="{}{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "", " (Extended)" if event["extended_bolus"] == "1" else ""),
-                bg=event["bg"],
-                bg_type=event["bg_type"]
+                notes="{}{}{}".format(event.description, " (Override)" if event.user_override == "1" else "", " (Extended)" if event.extended_bolus == "1" else ""),
+                bg=event.bg,
+                bg_type=event.bg_type
             )
         else:
             entry = NightscoutEntry.bolus(
-                bolus=event["insulin"],
-                carbs=event["carbs"],
+                bolus=event.insulin,
+                carbs=event.carbs,
                 created_at=created_at,
-                notes="{}{}{}".format(event["description"], " (Override)" if event["user_override"] == "1" else "", " (Extended)" if event["extended_bolus"] == "1" else "")
+                notes="{}{}{}".format(event.description, " (Override)" if event.user_override == "1" else "", " (Extended)" if event.extended_bolus == "1" else "")
             )
 
         add_count += 1
