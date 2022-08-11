@@ -15,3 +15,14 @@ def timeago(timestamp):
     ret += '%d minutes' % (seconds//60)
 
     return fmt % ret
+
+# String methods only available in python 3.9+
+def removesuffix(input_string, suffix):
+    if suffix and input_string.endswith(suffix):
+        return input_string[:-len(suffix)]
+    return input_string
+
+def removeprefix(input_string, prefix):
+    if prefix and input_string.startswith(prefix):
+        return input_string[len(prefix):]
+    return input_string

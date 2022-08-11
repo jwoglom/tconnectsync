@@ -11,6 +11,7 @@ import requests_mock
 from bs4 import BeautifulSoup
 
 from tconnectsync.api.webui import WebUIScraper
+from tconnectsync.domain.device_settings import Device, Profile, ProfileSegment
 
 from .fake import ControlIQApi
 
@@ -293,30 +294,30 @@ class TestWebUIScraper(unittest.TestCase):
 
             devices = webui.my_devices()
             self.assertDictEqual(devices, {
-                '100001': {
+                '100001': Device(**{
                     'name': 't:slim X2™ Insulin Pump', 
                     'model_number': '001002717', 
                     'status': 'Activated —  Dec 30 2021', 
                     'guid': '00000000-0000-0000-0000-000000000001'
-                },
-                '10000002': {
+                }),
+                '10000002': Device(**{
                     'name': 't:slim X2™ Insulin Pump', 
                     'model_number': '001000354', 
                     'status': 'Activated —  Oct 26 2021', 
                     'guid': '00000000-0000-0000-0000-000000000002'
-                }, 
-                '100003': {
+                }), 
+                '100003': Device(**{
                     'name': 't:slim X2™ Insulin Pump', 
                     'model_number': '001000096', 
                     'status': 'Activated —  Nov 20 2017', 
                     'guid': '00000000-0000-0000-0000-000000000003'
-                }, 
-                'ABCDEFGH': {
+                }), 
+                'ABCDEFGH': Device(**{
                     'name': 'OneTouch Verio IQ', 
                     'model_number': 'VERIO IQ', 
                     'status': 'Activated —  Jan 17 2018', 
                     'guid': None
-                }})
+                })})
     
     PUMP_SETTINGS_HTML = """
 <!DOCTYPE html
@@ -956,42 +957,42 @@ class TestWebUIScraper(unittest.TestCase):
                 text=self.PUMP_SETTINGS_HTML)
 
             profiles, settings = webui.device_settings_from_guid('00000000-0000-0000-0000-000000000001')
-            self.assertListEqual(profiles, [{
+            self.assertListEqual(profiles, [Profile(**{
                 'title': 'A', 
                 'active': True, 
-                'segments': [{
+                'segments': [ProfileSegment(**{
                     'display_time': 'Midnight', 
                     'time': '12:00 AM', 
-                    'basal_rate': '0.800 u/hr', 
-                    'correction_factor': '1u:30 mg/dL', 
-                    'carb_ratio': '1u:6.0 g', 
-                    'target_bg': '110 mg/dL'
-                }, {
+                    'basal_rate': 0.800,
+                    'correction_factor': 30.0,
+                    'carb_ratio': 6.0,
+                    'target_bg_mgdl': 110
+                }), ProfileSegment(**{
                     'display_time': '6:00 AM', 
                     'time': '6:00 AM', 
-                    'basal_rate': '1.250 u/hr', 
-                    'correction_factor': '1u:30 mg/dL', 
-                    'carb_ratio': '1u:6.0 g', 
-                    'target_bg': '110 mg/dL'
-                }, {
+                    'basal_rate': 1.250,
+                    'correction_factor': 30,
+                    'carb_ratio': 6.0,
+                    'target_bg_mgdl': 110
+                }), ProfileSegment(**{
                     'display_time': '11:00 AM', 
                     'time': '11:00 AM', 
-                    'basal_rate': '1.000 u/hr', 
-                    'correction_factor': '1u:30 mg/dL', 
-                    'carb_ratio': '1u:6.0 g', 
-                    'target_bg': '110 mg/dL'
-                }, {
+                    'basal_rate': 1.000,
+                    'correction_factor': 30,
+                    'carb_ratio': 6.0,
+                    'target_bg_mgdl': 110
+                }), ProfileSegment(**{
                     'display_time': 'Noon', 
                     'time': '12:00 PM', 
-                    'basal_rate': '0.800 u/hr', 
-                    'correction_factor': '1u:30 mg/dL', 
-                    'carb_ratio': '1u:6.0 g', 
-                    'target_bg': '110 mg/dL'
-                }], 
-                'calculated_total_daily_basal': '21.65 units', 
-                'insulin_duration': '5:00 hours', 
-                'carbohydrates': 'On'
-            }])
+                    'basal_rate': 0.800,
+                    'correction_factor': 30,
+                    'carb_ratio': 6.0,
+                    'target_bg_mgdl': 110
+                })], 
+                'calculated_total_daily_basal': 21.65, 
+                'insulin_duration_min': 5*60,
+                'carbs_enabled': True
+            })])
 
             self.assertDictEqual(settings, {
                 'Alerts': {

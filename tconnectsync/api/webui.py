@@ -1,3 +1,4 @@
+from typing import List
 import requests
 import urllib
 import datetime
@@ -6,6 +7,10 @@ import time
 import logging
 
 from bs4 import BeautifulSoup
+
+from tconnectsync.domain.device_settings import Device, Profile, ProfileSegment
+from tconnectsync.util import removesuffix, removeprefix
+from tconnectsync.util.constants import MMOLL_TO_MGDL
 
 from .common import base_headers, ApiException
 
@@ -92,12 +97,11 @@ class WebUIScraper:
                 settings_guid = settings_a.attrs['href'].split('?guid=')[1]
             
             if serial_number:
-                devices[serial_number] = {
-                    'name': device_name,
-                    'model_number': model_number,
-                    'status': status,
-                    'guid': settings_guid
-                }
+                devices[serial_number] = Device(
+                    name=device_name,
+                    model_number=model_number,
+                    status=status,
+                    guid=settings_guid)
         
         return devices
     
@@ -106,7 +110,7 @@ class WebUIScraper:
     Note that pump_guid is NOT the serial number of the pump, and
     should be obtained from my_devices()[str(serial_number)]['guid']
     """
-    def device_settings_from_guid(self, pump_guid):
+    def device_settings_from_guid(self, pump_guid: str) -> List[Profile]:
         profiles = []
         settings = {}
         r = self.get('myaccount/DeviceSettings.aspx?guid=%s' % pump_guid)
@@ -124,11 +128,32 @@ class WebUIScraper:
         
         return profiles, settings
     
-    def _parse_profile_tbl(self, tbl):
+    def _parse_profile_tbl(self, tbl) -> Profile:
         profile = {}
         profile["title"] = self.strip(tbl.select_one('.setting_title').text)
         profile["active"] = bool(tbl.find(text='Active at the time of upload'))
         profile["segments"] = []
+
+        def parse_basal_rate(rate) -> float:
+            return float(removesuffix(rate, ' u/hr'))
+        
+        def parse_factor(ratio) -> int:
+            return parse_bg_mgdl(removeprefix(ratio, '1u:'))
+
+        def parse_ratio(ratio) -> float:
+            return float(removesuffix(removeprefix(ratio, '1u:'), ' g'))
+        
+        def parse_bg_mgdl(bg) -> int:
+            if bg.endswith(' mg/dL'):
+                return float(removesuffix(bg, ' mg/dL'))
+            elif bg.endswith(' mmol/L'):
+                return float(removesuffix(bg, ' mmol/L')) * MMOLL_TO_MGDL
+            raise ValueError(bg)
+        
+        def hours_to_mins(text) -> int:
+            hrmin = removesuffix(text, " hours")
+            hr, min = hrmin.split(":", 1)
+            return int(min) + int(hr)*60
 
         for tr in tbl.select('tr'):
             # Skip header rows
@@ -149,19 +174,20 @@ class WebUIScraper:
                     t = "12:00 AM"
                 elif display_time == "Noon":
                     t = "12:00 PM"
+
                 segment = {
                     "display_time": display_time,
                     "time": t,
-                    "basal_rate": self.strip(tds[1].text),
-                    "correction_factor": self.strip(tds[2].text),
-                    "carb_ratio": self.strip(tds[3].text),
-                    "target_bg": self.strip(tds[4].text)
+                    "basal_rate": parse_basal_rate(self.strip(tds[1].text)),
+                    "correction_factor": parse_factor(self.strip(tds[2].text)),
+                    "carb_ratio": parse_ratio(self.strip(tds[3].text)),
+                    "target_bg_mgdl": parse_bg_mgdl(self.strip(tds[4].text))
                 }
-                profile["segments"].append(segment)
+                profile["segments"].append(ProfileSegment(**segment))
                 continue
             
             if tr.find(text='Calculated Total Daily Basal'):
-                profile["calculated_total_daily_basal"] = self.strip(tds[1].text)
+                profile["calculated_total_daily_basal"] = float(removesuffix(self.strip(tds[1].text), " units"))
                 continue
             
             # Last row
@@ -175,12 +201,12 @@ class WebUIScraper:
                     key = self.strip(key)
                     val = self.strip(val)
                     if key == 'Duration of Insulin':
-                        profile["insulin_duration"] = val
+                        profile["insulin_duration_min"] = hours_to_mins(val)
                     elif key == 'Carbohydrates':
-                        profile["carbohydrates"] = val
+                        profile["carbs_enabled"] = self.strip(val.lower()) == "on"
 
 
-        return profile
+        return Profile(**profile)
 
     def _parse_settings_tbl(self, tbl):
         outer_tr = tbl.select('tr')[2]
