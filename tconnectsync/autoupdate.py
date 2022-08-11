@@ -1,5 +1,6 @@
 import time
 import logging
+import datetime
 import sys
 
 from .process import process_time_range
@@ -67,7 +68,7 @@ class Autoupdate:
                             # (we can see the indexes increasing, so we know something's happening!)
                             if (now - last_action_or_start) >= 60 * self.secret.AUTOUPDATE_FAILURE_MINUTES:
                                 logger.error(AutoupdateFailureError(
-                                        "An event index change was recorded, but no new data was found via the API. " +
+                                        ("%s: An event index change was recorded, but no new data was found via the API. " % datetime.datetime.now()) +
                                         "The %s was %d minutes ago. This is a problem with tconnectsync." % 
                                         ("last processed event" if self.last_successful_process_time_range else "start of autoupdate", (now - last_action_or_start)//60)))
 
@@ -75,7 +76,7 @@ class Autoupdate:
                                     logger.error("Exiting with error code due to AUTOUPDATE_RESTART_ON_FAILURE")
                                     return 1
                             else:
-                                logger.warn(AutoupdateFailureWarning("An event index change was recorded, but no new data was found via the API. " +
+                                logger.warn(AutoupdateFailureWarning(("%s: An event index change was recorded, but no new data was found via the API. " % datetime.datetime.now()) +
                                             "The %s was %d minutes ago. Resetting TConnectApi to attempt to solve this problem." % 
                                             ("last processed event" if self.last_successful_process_time_range else "start of autoupdate", (now - last_action_or_start)//60)))
                                 
@@ -107,7 +108,7 @@ class Autoupdate:
                 # The most likely case here is that the pump isn't uploading right now.
                 if self.last_event_time and (now - self.last_event_time) >= 60 * self.secret.AUTOUPDATE_NO_DATA_FAILURE_MINUTES:
                     logger.error(AutoupdateNoEventIndexesDetectedError(
-                        "No new data event indexes have been detected for %d minutes. " % ((now - self.last_event_time)//60) +
+                        "%s: No new data event indexes have been detected for %d minutes. " % (datetime.datetime.now(), (now - self.last_event_time)//60) +
                         "The t:connect app might no longer be functioning."))
 
                     # TODO: restarting doesn't really help anything here.
@@ -124,11 +125,11 @@ class Autoupdate:
                 # above no indexes warning.
                 elif self.last_successful_process_time_range and (now - self.last_successful_process_time_range) >= 60 * self.secret.AUTOUPDATE_FAILURE_MINUTES:
                     logger.error(AutoupdateNoNewDataDetectedError(
-                        "No new data has been detected via the API for %d minutes. " % (now - self.last_successful_process_time_range)//60 +
+                        "%s: No new data has been detected via the API for %d minutes. " % (datetime.datetime.now(), now - self.last_successful_process_time_range)//60 +
                         "tconnectsync might not be functioning properly."))
 
                     if self.secret.AUTOUPDATE_RESTART_ON_FAILURE:
-                        logger.error("Exiting with error code due to AUTOUPDATE_RESTART_ON_FAILURE")
+                        logger.error("%s: Exiting with error code due to AUTOUPDATE_RESTART_ON_FAILURE" % datetime.datetime.now())
                         return 1
 
                 # Track how long we've been retrying
