@@ -47,6 +47,12 @@ class ControlIQApi:
             return True
 
     def _build_login_data(self, email, password, soup):
+        try:
+            version = soup.select_one("#footer_version").text
+            logger.info("Reported tconnect software version: %s" % version)
+        except Exception:
+            logger.warn("Unable to find tconnect software version")
+            pass
         return {
             "__LASTFOCUS": "",
             "__EVENTTARGET": "ctl00$ContentBody$LoginControl$linkLogin",
