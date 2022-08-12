@@ -111,27 +111,32 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
     
     log("-----")
 
-    log("Logging in to t:connect WS2 API...")
+    log("Initializing t:connect WS2 API...")
+    ws2_loggedin = False
     try:
         summary = tconnect.ws2.basaliqtech(time_start, time_end)
         debug("WS2 basaliq status: \n%s" % pformat(summary))
+        ws2_loggedin = True
     except Exception as e:
-        log("Error occurred querying WS2 API:")
+        log("Error occurred querying WS2 API. This is okay so long as you are not using the PUMP_EVENTS or IOB sync features.")
         log(e)
         errors += 1
     
-    log("Querying WS2 therapy_timeline_csv...")
     lastReadingTime = None
-    try:
-        ttcsv = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
-        debug("therapy_timeline_csv: \n%s" % pformat(ttcsv))
-        if ttcsv and "readingData" in ttcsv and len(ttcsv["readingData"]) > 0:
-            log("Last therapy_timeline_csv reading: \n%s" % pformat(ttcsv["readingData"][-1]))
-            lastReadingTime = TConnectEntry._datetime_parse(ttcsv["readingData"][-1]['EventDateTime'])
-    except Exception as e:
-        log("Error occurred querying WS2 therapy_timeline_csv. This is okay so long as you are not using the PUMP_EVENTS or IOB sync features.")
-        log(e)
-        errors += 1
+    if ws2_loggedin:
+        log("Querying WS2 therapy_timeline_csv...")
+        try:
+            ttcsv = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
+            debug("therapy_timeline_csv: \n%s" % pformat(ttcsv))
+            if ttcsv and "readingData" in ttcsv and len(ttcsv["readingData"]) > 0:
+                log("Last therapy_timeline_csv reading: \n%s" % pformat(ttcsv["readingData"][-1]))
+                lastReadingTime = TConnectEntry._datetime_parse(ttcsv["readingData"][-1]['EventDateTime'])
+        except Exception as e:
+            log("Error occurred querying WS2 therapy_timeline_csv. This is okay so long as you are not using the PUMP_EVENTS or IOB sync features.")
+            log(e)
+            errors += 1
+    else:
+        log("Not able to log in to WS2 API, so skipping therapy_timeline_csv")
     
     log("-----")
 

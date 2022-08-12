@@ -10,7 +10,7 @@ from tconnectsync.api.common import ApiException
 class TestWS2Api(unittest.TestCase):
     def fake_get_with_http_500(self, num_times):
         tries = 0
-        def fake_get(endpoint):
+        def fake_get(endpoint, **kwargs):
             nonlocal tries, num_times
             if "therapytimeline2csv" in endpoint:
                 if tries < num_times:
@@ -94,7 +94,7 @@ Report Generated On, 4/24/2021 7:50:04 PM
 
         rawData = self.RAW_DATA_FULL
 
-        def fake_get(endpoint):
+        def fake_get(endpoint, **kwargs):
             nonlocal rawData
             if endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/2021-04-01/2021-04-02?format=csv':
                 return rawData
@@ -111,7 +111,7 @@ Report Generated On, 4/24/2021 7:50:04 PM
 
         rawData = ""
 
-        def fake_get(endpoint):
+        def fake_get(endpoint, **kwargs):
             nonlocal rawData
             if endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/2021-04-01/2021-04-02?format=csv':
                 return rawData

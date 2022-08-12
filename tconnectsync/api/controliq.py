@@ -14,6 +14,8 @@ class ControlIQApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/'
     LOGIN_URL = 'https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f'
 
+    LAST_CONFIRMED_SOFTWARE_VERSION = 't:connect 7.14.0.1'
+
     userGuid = None
     accessToken = None
     accessTokenExpiresAt = None
@@ -52,6 +54,9 @@ class ControlIQApi:
             version = soup.select_one("#footer_version").text.strip()
             self.tconnect_software_ver = version
             logger.info("Reported tconnect software version: %s" % version)
+            if version != self.LAST_CONFIRMED_SOFTWARE_VERSION:
+                logger.warn("Newer API version than last confirmed working. Saw %s and expected %s" % (version, self.LAST_CONFIRMED_SOFTWARE_VERSION))
+                logger.warn("If you experience any issues, please report them to https://github.com/jwoglom/tconnectsync")
         except Exception:
             logger.warn("Unable to find tconnect software version")
             pass

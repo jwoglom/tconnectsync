@@ -221,12 +221,10 @@ class TestControlIQApi(unittest.TestCase):
         ciq = ControlIQApi()
         ciq.userGuid = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
 
-        def fake_get(endpoint, query):
+        def fake_get(raw_endpoint, ignored_query):
+            endpoint, query = raw_endpoint.split("?")
             self.assertTrue(endpoint.endswith("summary/users/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"))
-            self.assertEqual(query, {
-                "startDate": "04-01-2021",
-                "endDate": "04-02-2021"
-            })
+            self.assertEqual(query, "startDate=04-01-2021&endDate=04-02-2021")
 
             return {"faked_json": True}
 

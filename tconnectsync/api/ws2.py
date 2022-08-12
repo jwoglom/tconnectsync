@@ -27,8 +27,8 @@ class WS2Api:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.text
 
-    def get_jsonp(self, endpoint):
-        r = self.session.get(self.BASE_URL + endpoint + '?callback=cb', headers=base_headers())
+    def get_jsonp(self, endpoint, **kwargs):
+        r = self.session.get(self.BASE_URL + endpoint + '?callback=cb', headers=base_headers(), **kwargs)
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
 
@@ -80,7 +80,7 @@ class WS2Api:
         endDate = parse_date(end)
 
         try:
-            req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate))
+            req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate), timeout=10)
         except ApiException as e:
             # This seems to occur as some kind of soft rate-limit.
             logger.warning("Received ApiException in therapy_timeline_csv: (retry count %d) %s" % (tries, e))
@@ -137,7 +137,7 @@ class WS2Api:
         endDate = parse_date(end)
         arg = "filterbasal/1" if filterbasal else ""
 
-        return self.get_jsonp('basalsuspension/%s/%s/%s/%s' % (self.userGuid, startDate, endDate, arg))
+        return self.get_jsonp('basalsuspension/%s/%s/%s/%s' % (self.userGuid, startDate, endDate, arg), timeout=10)
 
     """
     Returns info on BasalIQ in JSONP format.
@@ -146,4 +146,4 @@ class WS2Api:
         startDate = parse_date(start)
         endDate = parse_date(end)
 
-        return self.get_jsonp('basaliqtech/%s/%s/%s' % (self.userGuid, startDate, endDate))
+        return self.get_jsonp('basaliqtech/%s/%s/%s' % (self.userGuid, startDate, endDate), timeout=10)
