@@ -21,7 +21,7 @@ Attempts to authenticate with each t:connect API,
 and returns the output of a sample API call from each.
 Also attempts to connect to the Nightscout API.
 """
-def check_login(tconnect, time_start, time_end, verbose=False, sanitize=False):
+def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
     errors = 0
 
     loglines = []
@@ -76,6 +76,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=False):
     try:
         summary = tconnect.controliq.dashboard_summary(time_start, time_end)
         debug("ControlIQ dashboard summary: \n%s" % pformat(summary))
+        log("tconnect_software_ver: %s" % tconnect.controliq.tconnect_software_ver)
     except Exception as e:
         log("Error occurred querying ControlIQ API for dashboard_summary:")
         log(e)
@@ -128,7 +129,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=False):
             log("Last therapy_timeline_csv reading: \n%s" % pformat(ttcsv["readingData"][-1]))
             lastReadingTime = TConnectEntry._datetime_parse(ttcsv["readingData"][-1]['EventDateTime'])
     except Exception as e:
-        log("Error occurred querying WS2 therapy_timeline_csv:")
+        log("Error occurred querying WS2 therapy_timeline_csv. This is okay so long as you are not using the PUMP_EVENTS or IOB sync features.")
         log(e)
         errors += 1
     

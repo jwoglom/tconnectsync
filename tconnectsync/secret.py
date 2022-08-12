@@ -31,7 +31,7 @@ def get_bool(name, default):
 TCONNECT_EMAIL = get('TCONNECT_EMAIL', 'email@email.com')
 TCONNECT_PASSWORD = get('TCONNECT_PASSWORD', 'password')
 
-PUMP_SERIAL_NUMBER = get_number('PUMP_SERIAL_NUMBER', '11111111')
+PUMP_SERIAL_NUMBER = int(get_number('PUMP_SERIAL_NUMBER', '11111111'))
 
 NS_URL = get('NS_URL', 'https://yournightscouturl/')
 NS_SECRET = get('NS_SECRET', 'apisecret')

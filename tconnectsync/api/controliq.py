@@ -17,6 +17,7 @@ class ControlIQApi:
     userGuid = None
     accessToken = None
     accessTokenExpiresAt = None
+    tconnect_software_ver = None
 
     def __init__(self, email, password):
         self.login(email, password)
@@ -48,7 +49,8 @@ class ControlIQApi:
 
     def _build_login_data(self, email, password, soup):
         try:
-            version = soup.select_one("#footer_version").text
+            version = soup.select_one("#footer_version").text.strip()
+            self.tconnect_software_ver = version
             logger.info("Reported tconnect software version: %s" % version)
         except Exception:
             logger.warn("Unable to find tconnect software version")
@@ -132,10 +134,7 @@ class ControlIQApi:
         startDate = parse_date(start)
         endDate = parse_date(end)
 
-        return self.get('tconnect/controliq/api/summary/users/%s' % (self.userGuid), {
-            "startDate": startDate,
-            "endDate": endDate
-        })
+        return self.get('tconnect/controliq/api/summary/users/%s?startDate=%s&endDate=%s' % (self.userGuid, startDate, endDate), {})
     
     """
     Returns active account features, including the date when ControlIQ was enabled.
