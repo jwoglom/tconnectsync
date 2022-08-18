@@ -116,7 +116,10 @@ First, ensure that you have **Python 3** with **Pip** installed:
 
 * **On MacOS:** Open Terminal. Install [Homebrew](https://brew.sh/), and then run `brew install python3`
 * **On Linux:** Follow your distribution's specific instructions.
-  For Debian/Ubuntu based distros, `sudo apt install python3 python3-pip`
+  - For Debian/Ubuntu based distros, `sudo apt install python3 python3-pip`
+  - For CentOS/Rocky Linux 8: 
+    - `sudo dnf install python39-pip`
+    - `sudo alternatives --set python /usr/bin/python3.9` 
 * **On Windows:** Install Ubuntu under the [Windows Subsystem for Linux](https://ubuntu.com/wsl).
   Open the Ubuntu Terminal, then run `sudo apt install python3 python3-pip`.
   Perform the remainder of the steps under the Ubuntu environment.
@@ -126,6 +129,12 @@ Now install the `tconnectsync` package with pip:
 ```
 $ pip3 install tconnectsync
 ```
+To install into a user environment instead of system-wide for a more contained install:
+````
+$ pip3 install --user tconnectsync
+````
+  - This will place the tconnectsync binary file at ``/home/<username>/.local/bin/tconnectsync``
+
 
 If the pip3 command is not found, run `python3 -m pip install tconnectsync` instead.
 
@@ -377,11 +386,16 @@ invoking tconnectsync with no arguments via cron.
 
 If using Pipenv or a virtualenv, make sure that you either prefix the call to main.py with `pipenv run` or source the `bin/activate` file within the virtualenv, so that the proper dependencies are loaded. If not using any kind of virtualenv, you can instead just install the necessary dependencies as specified inside Pipfile globally.
 
-An example configuration in `/etc/crontab` which runs every 15 minutes:
+An system-wide example configuration in `/etc/crontab` which runs every 15 minutes, on the 15 minute mark:
 
 ```bash
 # m         h  dom mon dow user   command
 0,15,30,45  *  *   *   *   root   /path/to/tconnectsync/run.sh
+```
+
+An example of a user crontab `crontab -e` if not running system-wide, which runs every 15 minutes:
+```
+*/15 * * * * /path/to/tconnectsync/run.sh
 ```
 
 You can use one of the same `run.sh` files referenced above, but remove the `--auto-update` flag since you are handling the functionality for running the script periodically yourself.
