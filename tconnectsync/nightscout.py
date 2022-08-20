@@ -11,7 +11,7 @@ from .api.common import ApiException
 from .parser.nightscout import ENTERED_BY
 
 def format_datetime(date):
-	return arrow.get(date).strftime('%Y-%m-%d %H:%M:%S')
+        return arrow.get(date).isoformat()
 
 def time_range(field_name, start_time, end_time):
 	arg = ''
