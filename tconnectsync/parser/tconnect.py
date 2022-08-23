@@ -3,7 +3,7 @@ import sys
 import arrow
 from tconnectsync.domain.bolus import Bolus
 
-from tconnectsync.domain.therapy_event import BolusTherapyEvent, CGMTherapyEvent
+from tconnectsync.domain.therapy_event import BolusTherapyEvent, CGMTherapyEvent, BGTherapyEvent
 
 try:
     from ..secret import TIMEZONE_NAME
@@ -200,6 +200,8 @@ class TConnectEntry:
             return BolusTherapyEvent.parse(data)
         elif data["type"] == "CGM":
             return CGMTherapyEvent.parse(data)
+        elif data["type"] == "BG":
+            return BGTherapyEvent.parse(data)
         
         raise UnknownTherapyEventException(data)
 

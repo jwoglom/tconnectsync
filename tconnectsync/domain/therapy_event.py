@@ -51,10 +51,50 @@ class CGMTherapyEvent(TherapyEvent):
     },
     """
     @classmethod
-    def parse(self, json):
+    def parse(_, json):
+        self = CGMTherapyEvent()
         TherapyEvent.parse(self, json)
         self.eventID = json['eventID']
         self.egv = json['egv']['estimatedGlucoseValue']
+        return self
+
+class BGTherapyEvent(TherapyEvent):
+    eventID = None
+    egv = None
+    """
+    {   
+        'bg': 160, # note in EGV
+        'cgmCalibration': 1, # not in EGV
+        'description': 'BG',
+        'deviceType': 't:slim X2 Insulin Pump',
+        'eventDateTime': '2022-08-20T07:25:24',
+        'eventTypeId': 16,
+        'indexId': 844955,
+        'interactive': 0,
+        'iob': 0.75,
+        'note': {   'active': False,
+                'eventId': 0, # different location than EGV
+                'eventTypeId': 16,
+                'id': 0,
+                'indexId': '',
+                'sourceRecordId': 0},
+        'requestDateTime': '0001-01-01T00:00:00',
+        'serialNumber': 'xxx',
+        'sourceRecId': 793549667,
+        'tempRateActivated': 0,
+        'tempRateCompleted': 0,
+        'tempRateId': 0,
+        'type': 'BG',
+        'uploadId': 748700213}
+    """    
+    @classmethod
+    def parse(_, json):
+        self = BGTherapyEvent()
+        TherapyEvent.parse(self, json)
+        self.eventID = json['note']['eventId']
+        # This is probably not how we want to provide CGM calibrations to Nightscout,
+        # but will just include it as egv data for now to keep the thing from crashing :)
+        self.egv = json['bg']
         return self
 
 class BolusTherapyEvent(TherapyEvent):
@@ -364,4 +404,28 @@ class BolusTherapyEvent(TherapyEvent):
         "tempRateCompleted": 0,
         "tempRateActivated": 0
     }
+    CGM Calibration (Therapy Event Type BG):
+    {   'bg': 160,
+        'cgmCalibration': 1,
+        'description': 'BG',
+        'deviceType': 't:slim X2 Insulin Pump',
+        'eventDateTime': '2022-08-20T07:25:24',
+        'eventTypeId': 16,
+        'indexId': 844955,
+        'interactive': 0,
+        'iob': 0.75,
+        'note': {   'active': False,
+                    'eventId': 0,
+                    'eventTypeId': 16,
+                    'id': 0,
+                    'indexId': '',
+                    'sourceRecordId': 0},
+        'requestDateTime': '0001-01-01T00:00:00',
+        'serialNumber': 'xxx',
+        'sourceRecId': 793549667,
+        'tempRateActivated': 0,
+        'tempRateCompleted': 0,
+        'tempRateId': 0,
+        'type': 'BG',
+        'uploadId': 0}
     """
