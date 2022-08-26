@@ -215,4 +215,5 @@ class UnknownBasalSuspensionEventException(Exception):
 
 class UnknownTherapyEventException(Exception):
     def __init__(self, data):
-        super().__init__("Unknown therapy event type: " % data)
+        typ = data["type"]
+        super().__init__(f"Unknown therapy event type: {typ} in {data}")
