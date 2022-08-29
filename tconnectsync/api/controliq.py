@@ -55,10 +55,10 @@ class ControlIQApi:
             self.tconnect_software_ver = version
             logger.info("Reported tconnect software version: %s" % version)
             if version != self.LAST_CONFIRMED_SOFTWARE_VERSION:
-                logger.warn("Newer API version than last confirmed working. Saw %s and expected %s" % (version, self.LAST_CONFIRMED_SOFTWARE_VERSION))
-                logger.warn("If you experience any issues, please report them to https://github.com/jwoglom/tconnectsync")
+                logger.warning("Newer API version than last confirmed working. Saw %s and expected %s" % (version, self.LAST_CONFIRMED_SOFTWARE_VERSION))
+                logger.warning("If you experience any issues, please report them to https://github.com/jwoglom/tconnectsync")
         except Exception:
-            logger.warn("Unable to find tconnect software version")
+            logger.warning("Unable to find tconnect software version")
             pass
         return {
             "__LASTFOCUS": "",

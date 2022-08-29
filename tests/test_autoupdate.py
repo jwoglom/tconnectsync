@@ -24,9 +24,9 @@ def build_mock_logger():
         logger.error(*args, **kwargs)
     
     def fake_warn(*args, **kwargs):
-        logger.warn(*args, **kwargs)
+        logger.warning(*args, **kwargs)
         
-    with patch("tconnectsync.autoupdate.logger.error") as mock_error, patch("tconnectsync.autoupdate.logger.warn") as mock_warn:
+    with patch("tconnectsync.autoupdate.logger.error") as mock_error, patch("tconnectsync.autoupdate.logger.warning") as mock_warn:
         mock_error.side_effect = fake_error
         mock_warn.side_effect = fake_warn
         yield (mock_error, mock_warn)
