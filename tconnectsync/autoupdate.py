@@ -76,7 +76,7 @@ class Autoupdate:
                                     logger.error("Exiting with error code due to AUTOUPDATE_RESTART_ON_FAILURE")
                                     return 1
                             else:
-                                logger.warn(AutoupdateFailureWarning(("%s: An event index change was recorded, but no new data was found via the API. " % datetime.datetime.now()) +
+                                logger.warning(AutoupdateFailureWarning(("%s: An event index change was recorded, but no new data was found via the API. " % datetime.datetime.now()) +
                                             "The %s was %d minutes ago. Resetting TConnectApi to attempt to solve this problem." % 
                                             ("last processed event" if self.last_successful_process_time_range else "start of autoupdate", (now - last_action_or_start)//60)))
                                 
@@ -143,7 +143,7 @@ class Autoupdate:
                 # uploaded, so 
                 if len(self.time_diffs_between_attempts) >= 3:
                     # The pump hasn't sent us data that, based on previous cadence, we were expecting
-                    logger.warn(AutoupdateNoIndexChangeWarning("Sleeping %d seconds after unexpected no index change based on previous cadence. (New data might be delayed.)" % 
+                    logger.warning(AutoupdateNoIndexChangeWarning("Sleeping %d seconds after unexpected no index change based on previous cadence. (New data might be delayed.)" % 
                         int(self.secret.AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS)))
                     
                     logger.debug("Last event time: %s, time diffs between attempts: %s" % (self.last_event_time, self.time_diffs_between_attempts))
