@@ -21,8 +21,8 @@ class WS2Api:
         self.userGuid = userGuid
         self.session = base_session()
 
-    def get(self, endpoint):
-        r = self.session.get(self.BASE_URL + endpoint, headers=base_headers())
+    def get(self, endpoint, **kwargs):
+        r = self.session.get(self.BASE_URL + endpoint, headers=base_headers(), **kwargs)
         if r.status_code != 200:
             raise ApiException(r.status_code, "WS2 API HTTP %s response: %s" % (str(r.status_code), r.text))
         return r.text
