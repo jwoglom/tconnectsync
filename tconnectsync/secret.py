@@ -40,6 +40,8 @@ if not get('NS_SECRET') and get('API_SECRET'):
     print('API_SECRET environment variable is set, overriding NS_SECRET')
     NS_SECRET = get('API_SECRET')
 
+NS_SKIP_TLS_VERIFY = get_bool('NS_SKIP_TLS_VERIFY', 'false')
+
 TIMEZONE_NAME = get('TIMEZONE_NAME', 'America/New_York')
 
 if not get('TIMEZONE_NAME') and get('TZ'):

@@ -23,9 +23,10 @@ def time_range(field_name, start_time, end_time):
 
 
 class NightscoutApi:
-	def __init__(self, url, secret):
+	def __init__(self, url, secret, skip_verify=False):
 		self.url = url
 		self.secret = secret
+		self.verify = False if skip_verify else None
 
 
 	def upload_entry(self, ns_format, entity='treatments'):
@@ -33,7 +34,7 @@ class NightscoutApi:
 			'Accept': 'application/json',
 			'Content-Type': 'application/json',
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
-		})
+		}, verify=self.verify)
 		if r.status_code != 200:
 			raise ApiException(r.status_code, "Nightscout upload response: %s" % r.text)
 
@@ -42,7 +43,7 @@ class NightscoutApi:
 			'Accept': 'application/json',
 			'Content-Type': 'application/json',
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
-		})
+		}, verify=self.verify)
 		if r.status_code != 200:
 			raise ApiException(r.status_code, "Nightscout delete response: %s" % r.text)
 
@@ -51,7 +52,7 @@ class NightscoutApi:
 			'Accept': 'application/json',
 			'Content-Type': 'application/json',
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
-		})
+		}, verify=self.verify)
 		if r.status_code != 200:
 			raise ApiException(r.status_code, "Nightscout put response: %s" % r.text)
 
@@ -59,7 +60,7 @@ class NightscoutApi:
 		dateFilter = time_range('created_at', time_start, time_end)
 		latest = requests.get(urljoin(self.url, 'api/v1/treatments?count=1&find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[eventType]=' + urllib.parse.quote(eventType) + dateFilter + '&ts=' + str(time.time())), headers={
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
-		})
+		}, verify=self.verify)
 		if latest.status_code != 200:
 			raise ApiException(latest.status_code, "Nightscout last_uploaded_entry response: %s" % latest.text)
 
@@ -72,7 +73,7 @@ class NightscoutApi:
 		dateFilter = time_range('dateString', time_start, time_end)
 		latest = requests.get(urljoin(self.url, 'api/v1/entries.json?count=1&find[device]=' + urllib.parse.quote(ENTERED_BY) + dateFilter + '&ts=' + str(time.time())), headers={
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
-		})
+		}, verify=self.verify)
 		if latest.status_code != 200:
 			raise ApiException(latest.status_code, "Nightscout last_uploaded_bg_entry response: %s" % latest.text)
 
@@ -85,7 +86,7 @@ class NightscoutApi:
 		dateFilter = time_range('created_at', time_start, time_end)
 		latest = requests.get(urljoin(self.url, 'api/v1/activity?find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[activityType]=' + urllib.parse.quote(activityType) + dateFilter + '&ts=' + str(time.time())), headers={
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
-		})
+		}, verify=self.verify)
 		if latest.status_code != 200:
 			raise ApiException(latest.status_code, "Nightscout activity response: %s" % latest.text)
 
@@ -100,7 +101,7 @@ class NightscoutApi:
 	def api_status(self):
 		status = requests.get(urljoin(self.url, 'api/v1/status.json'), headers={
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
-		})
+		}, verify=self.verify)
 		if status.status_code != 200:
 			raise Exception('HTTP error status code (%d) from Nightscout: %s' % (status.status_code, status.text))
 		return status.json()

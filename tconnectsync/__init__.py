@@ -17,7 +17,8 @@ try:
         TCONNECT_EMAIL,
         TCONNECT_PASSWORD,
         NS_URL,
-        NS_SECRET
+        NS_SECRET,
+        NS_SKIP_TLS_VERIFY
     )
     from . import secret
 except Exception:
@@ -74,7 +75,7 @@ def main(*args, **kwargs):
 
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
 
-    nightscout = NightscoutApi(NS_URL, NS_SECRET)
+    nightscout = NightscoutApi(NS_URL, NS_SECRET, NS_SKIP_TLS_VERIFY)
 
     if args.check_login:
         return check_login(tconnect, time_start, time_end)
