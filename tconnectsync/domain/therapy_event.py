@@ -429,3 +429,52 @@ class BolusTherapyEvent(TherapyEvent):
         'type': 'BG',
         'uploadId': 0}
     """
+
+class BasalTherapyEvent(TherapyEvent):
+    """
+    {
+        'basalRate': {
+            'duration': 0, 
+            'percent': 0, 
+            'value': 0.0
+        }, 
+        'displayInHistory': 0, 
+        'eventDateTime': '2022-12-02T00:00:00', 
+        'note': {
+            'id': 0, 
+            'indexId': '16403', 
+            'eventTypeId': 90, 
+            'sourceRecordId': 0, 
+            'eventId': 0, 
+            'active': False
+        }, 
+        'noteDate': {}, 
+        'requestDateTime': '0001-01-01T00:00:00', 
+        'type': 'Basal', 
+        'description': 'NDE', 
+        'sourceRecId': xxx, 
+        'eventTypeId': 0, 
+        'indexId': 0, 
+        'uploadId': 0, 
+        'interactive': 1, 
+        'tempRateId': 0, 
+        'tempRateCompleted': 0, 
+        'tempRateActivated': 0
+    }
+    """
+    basalRateValue = None
+    basalRatePercent = None
+    basalRateDuration = None
+    eventTime = None
+
+
+    @classmethod
+    def parse(_, json):
+        self = CGMTherapyEvent()
+        TherapyEvent.parse(self, json)
+        if 'basalRate' in json:
+            self.basalRateValue = json['basalRate']['value']
+            self.basalRatePercent = json['basalRate']['percent']
+            self.basalRateDuration = json['basalRate']['duration']
+        self.eventTime = json['eventDateTime']
+        return self
