@@ -30,7 +30,8 @@ jobs:
         pipenv install --system
     - name: Run pipenv check
       run: |
-        pipenv check
+        pipenv check \
+          --ignore 51499 # DDoS attack in wheel package, which is unsupported in python 3.7
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
