@@ -65,7 +65,7 @@ class NightscoutApi:
 
 	def last_uploaded_entry(self, eventType, time_start=None, time_end=None):
 		def internal(t_to_space):
-			dateFilter = time_range('created_at', time_start, time_end, t_to_space=t_to_space)
+			dateFilter = time_range('created_at', time_start, time_end, t_to_space)
 			latest = requests.get(urljoin(self.url, 'api/v1/treatments?count=1&find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[eventType]=' + urllib.parse.quote(eventType) + dateFilter + '&ts=' + str(time.time())), headers={
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
