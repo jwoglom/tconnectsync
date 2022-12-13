@@ -77,9 +77,18 @@ class NightscoutApi:
 				return j[0]
 			return None
 		
-		ret = internal(False)
+		ret = None
+		try:
+			ret = internal(False)
+		except ApiException as e:
+			logger.warning("last_uploaded_entry with no t_to_space: %s", e)
+			ret = None
 		if ret is None and (time_start or time_end):
-			ret = internal(True)
+			try:
+				ret = internal(True)
+			except ApiException as e:
+				logger.warning("last_uploaded_entry with t_to_space: %s", e)
+				ret = None
 			if ret is not None:
 				logger.warning("last_uploaded_entry with eventType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (eventType, time_start, time_end))
 		return ret
