@@ -34,6 +34,12 @@ def process_bolus_events(bolusdata, cgmEvents=None, source=""):
             else:
                 logger.warning("Skipping non-completed %s bolus data (was a bolus in progress?): %s parsed: %s" % (source, b, parsed))
                 continue
+            if parsed.is_extended_bolus:
+                if not parsed.bolex_start_time and not parsed.start_time:
+                    logger.warning("Skipping non-completed %s extended bolus data with no start time: %s parsed: %s" % (source, b, parsed))
+                elif not parsed.bolex_start_time and parsed.start_time:
+                    logger.warning("Setting bolex_start_time to start_time for non-completed %s extended bolus: %s parsed: %s" % (source, b, parsed))
+                    parsed.bolex_start_time = parsed.start_time
 
         if parsed.bg and cgmEvents:
             requested_at = parsed.request_time if not parsed.extended_bolus else parsed.bolex_start_time
