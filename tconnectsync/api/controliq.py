@@ -58,7 +58,13 @@ class ControlIQApi:
                 logger.warning("Newer API version than last confirmed working. Saw %s and expected %s" % (version, self.LAST_CONFIRMED_SOFTWARE_VERSION))
                 logger.warning("If you experience any issues, please report them to https://github.com/jwoglom/tconnectsync")
         except Exception:
-            logger.warning("Unable to find tconnect software version")
+            logger.warning("Unable to find tconnect software version.")
+            contents = "<unknown>"
+            if soup:
+                contents = "%s" % soup.encode_contents()
+                if len(contents) > 1000:
+                    contents = "%s[SNIP]%s" % (contents[:500], contents[-500:])
+            logger.info("BeautifulSoup parsed contents: %s" % contents)
             pass
         return {
             "__LASTFOCUS": "",
