@@ -2,6 +2,7 @@ import sys
 import time
 import arrow
 import logging
+import traceback
 import pkg_resources
 from datetime import datetime
 from pprint import pformat
@@ -29,6 +30,13 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
         print(*args)
         loglines.append(" ".join([str(i) for i in args]) + "\n")
 
+    def log_err(e):
+        try:
+            out = ''.join(list(traceback.TracebackException.from_exception(e).format()))
+            log(out)
+        except Exception:
+            log("could not log exception traceback: {}".format(e))
+
     def debug(*args):
         if verbose:
             print(*args)
@@ -46,7 +54,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
         from .secret import TCONNECT_EMAIL, TCONNECT_PASSWORD, PUMP_SERIAL_NUMBER, NS_URL, NS_SECRET, TIMEZONE_NAME
     except ImportError as e:
         log("Error: Unable to load config file. Please check your .env file or environment variables")
-        log(e)
+        log_err(e)
     
     if not TCONNECT_EMAIL or TCONNECT_EMAIL == 'email@email.com':
         log("Error: You have not specified a TCONNECT_EMAIL")
@@ -79,7 +87,9 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
         log("tconnect_software_ver: %s" % tconnect.controliq.tconnect_software_ver)
     except Exception as e:
         log("Error occurred querying ControlIQ API for dashboard_summary:")
-        log(e)
+        log_err(e)
+        if e and "HTTP 404" in str(e):
+            log("<!> The API returns a 404 error if there is no data for the provided dates (currently %s - %s). Try re-running with an earlier start date using --start-date and --end-date arguments." % (time_start, time_end))
         errors += 1
     
     log("Querying ControlIQ therapy_timeline...")
@@ -97,7 +107,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
                 lastBasalDuration = processed_tt[-1]['duration_mins']
     except Exception as e:
         log("Error occurred querying ControlIQ therapy_timeline:")
-        log(e)
+        log_err(e)
         errors += 1
     
     log("Querying ControlIQ therapy_events...")
@@ -106,7 +116,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
         debug("controliq therapy_events: \n%s" % pformat(androidevents))
     except Exception as e:
         log("Error occurred querying ControlIQ therapy_events:")
-        log(e)
+        log_err(e)
         errors += 1
     
     log("-----")
@@ -119,7 +129,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
         ws2_loggedin = True
     except Exception as e:
         log("Error occurred querying WS2 API. This is okay so long as you are not using the PUMP_EVENTS or IOB sync features.")
-        log(e)
+        log_err(e)
         errors += 1
     
     lastReadingTime = None
@@ -133,7 +143,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
                 lastReadingTime = TConnectEntry._datetime_parse(ttcsv["readingData"][-1]['EventDateTime'])
         except Exception as e:
             log("Error occurred querying WS2 therapy_timeline_csv. This is okay so long as you are not using the PUMP_EVENTS or IOB sync features.")
-            log(e)
+            log_err(e)
             errors += 1
     else:
         log("Not able to log in to WS2 API, so skipping therapy_timeline_csv")
@@ -150,7 +160,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
         debug("Android last uploaded event: \n%s" % pformat(event))
     except Exception as e:
         log("Error occurred querying Android API:")
-        log(e)
+        log_err(e)
         errors += 1
     
     log("-----")
@@ -168,7 +178,7 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
         debug("Nightscout last uploaded bolus: \n%s" % pformat(last_upload_bolus))
     except Exception as e:
         log("Error occurred querying Nightscout API:")
-        log(e)
+        log_err(e)
         errors += 1
 
     log("-----")
