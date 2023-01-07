@@ -1,3 +1,4 @@
+coverage:
   status:
     patch: no
     changes: no
@@ -5,7 +6,9 @@
       default: false
       tconnectsync:
         paths: "tconnectsync/"
-        target: 75%
+        target: '75%'
+        threshold: '5%'
       tests:
         paths: "tests/"
-        target: 95%
+        target: '95%'
+        threshold: '5%'
