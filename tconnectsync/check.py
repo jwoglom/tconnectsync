@@ -5,7 +5,7 @@ import logging
 import traceback
 import pkg_resources
 from datetime import datetime
-from pprint import pformat
+from pprint import pformat as pformat_base
 
 from .nightscout import NightscoutApi
 from .parser.nightscout import BASAL_EVENTTYPE, BOLUS_EVENTTYPE
@@ -233,3 +233,7 @@ def run_sanitize(s, sanitizedData):
         if v and len(str(v)) > 0:
             ret = ret.replace(str(v), '[%s]' % k)
     return ret
+
+def pformat(*args, **kwargs):
+    kwargs['width'] = 160
+    return pformat_base(*args, **kwargs)
