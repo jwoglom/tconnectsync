@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+import json
 import unittest
 from typing import Dict
 import copy
 
-from tconnectsync.sync.profile import get_pump_profiles, compare_profiles
+from tconnectsync.sync.profile import get_pump_profiles, compare_profiles, nightscout_profiles_identical
 from tconnectsync.domain.device_settings import Profile, ProfileSegment, DeviceSettings
 from tconnectsync.secret import NIGHTSCOUT_PROFILE_CARBS_HR_VALUE, NIGHTSCOUT_PROFILE_DELAY_VALUE, TIMEZONE_NAME
 
@@ -466,6 +467,58 @@ class TestCompareProfiles(unittest.TestCase):
             new_profiles
         )
         self.assertFalse(changed, 'did not stabilize')
+
+class TestNightscoutProfilesIdentical(unittest.TestCase):
+    def test_same_dict(self):
+        self.assertTrue(nightscout_profiles_identical(NS_PROFILE_A, NS_PROFILE_A))
+
+    def test_different_dict(self):
+        self.assertFalse(nightscout_profiles_identical(NS_PROFILE_A, NS_PROFILE_B))
+
+    def test_same_re_jsoned(self):
+        self.assertTrue(nightscout_profiles_identical(NS_PROFILE_A, json.loads(json.dumps(NS_PROFILE_A))))
+
+    def test_same_different_number_types(self):
+        a = b = json.loads(json.dumps(NS_PROFILE_A))
+        a['dia'] = 5
+        b = json.loads(json.dumps(NS_PROFILE_A))
+        b['dia'] = 5.0
+        self.assertTrue(nightscout_profiles_identical(a, b))
+
+    def test_same_different_number_strings_1(self):
+        a = b = json.loads(json.dumps(NS_PROFILE_A))
+        a['dia'] = 5
+        b = json.loads(json.dumps(NS_PROFILE_A))
+        b['dia'] = '5.0'
+        self.assertTrue(nightscout_profiles_identical(a, b))
+
+    def test_same_different_number_strings_2(self):
+        a = b = json.loads(json.dumps(NS_PROFILE_A))
+        a['dia'] = '5'
+        b = json.loads(json.dumps(NS_PROFILE_A))
+        b['dia'] = 5.0
+        self.assertTrue(nightscout_profiles_identical(a, b))
+
+    def test_same_different_number_strings_3(self):
+        a = b = json.loads(json.dumps(NS_PROFILE_A))
+        a['dia'] = '5'
+        b = json.loads(json.dumps(NS_PROFILE_A))
+        b['dia'] = '5.000'
+        self.assertTrue(nightscout_profiles_identical(a, b))
+
+    def test_different_numbers(self):
+        a = b = json.loads(json.dumps(NS_PROFILE_A))
+        a['dia'] = 5
+        b = json.loads(json.dumps(NS_PROFILE_A))
+        b['dia'] = 5.1
+        self.assertFalse(nightscout_profiles_identical(a, b))
+
+    def test_different_numbers_strings(self):
+        a = b = json.loads(json.dumps(NS_PROFILE_A))
+        a['dia'] = '5'
+        b = json.loads(json.dumps(NS_PROFILE_A))
+        b['dia'] = '5.01'
+        self.assertFalse(nightscout_profiles_identical(a, b))
 
 if __name__ == '__main__':
     unittest.main()

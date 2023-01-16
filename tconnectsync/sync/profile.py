@@ -102,6 +102,10 @@ def compare_profiles(device_profiles: List[Profile], device_settings: DeviceSett
     return True, new_ns_profile
 
 def nightscout_profiles_identical(configured: dict, translated: dict) -> bool:
+    if configured == translated:
+        logger.debug("direct dicts equal")
+        return True
+
     if json.dumps(configured, sort_keys=True, indent=None) == json.dumps(translated, sort_keys=True, indent=None):
         logger.debug("initial JSON dump identical")
         return True
@@ -126,10 +130,21 @@ def nightscout_profiles_identical(configured: dict, translated: dict) -> bool:
             else:
                 ob[i] = func(v)
 
+    def to_numeric(x):
+        if type(x) in [int, float]:
+            return '%f' % x
+        try:
+            return '%f' % float(x)
+        except (ValueError, TypeError):
+            return x
+
+
+    convert_func = lambda x: to_numeric(x)
+
     configured_str = json.loads(json.dumps(configured))
-    map_nested_dicts_modify(configured_str, lambda x: str(x))
+    map_nested_dicts_modify(configured_str, convert_func)
     translated_str = json.loads(json.dumps(translated))
-    map_nested_dicts_modify(translated_str, lambda x: str(x))
+    map_nested_dicts_modify(translated_str, convert_func)
 
     if json.dumps(configured_str, sort_keys=True, indent=None) == json.dumps(translated_str, sort_keys=True, indent=None):
         logger.debug("map_nested_dicts JSON dump identical")
