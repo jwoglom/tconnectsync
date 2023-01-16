@@ -72,7 +72,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 4)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -84,6 +84,7 @@ class TestProcessTimeRange(unittest.TestCase):
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 4)
 
     """No data in Nightscout. Nothing should be updated in Nightscout without the BASAL feature."""
     def test_basal_data_not_updated_without_feature(self):
@@ -108,11 +109,12 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, IOB])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, IOB])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 0)
 
     """Two basal entries in Nightscout. Two new basal entries in tconnect."""
     def test_partial_ciq_basal_data(self):
@@ -144,7 +146,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 2)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -154,6 +156,7 @@ class TestProcessTimeRange(unittest.TestCase):
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 2)
 
 
     """
@@ -189,7 +192,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 2)
         self.assertDictEqual(nightscout.uploaded_entries, {
@@ -207,6 +210,7 @@ class TestProcessTimeRange(unittest.TestCase):
             ]
         })
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 3)
 
     """No data in Nightscout. Uploads all bolus data from tconnect via the WS2 API."""
     def test_new_ciq_bolus_data_from_ws2(self):
@@ -233,7 +237,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         pprint.pprint(nightscout.uploaded_entries)
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), len(bolusData))
@@ -246,6 +250,7 @@ class TestProcessTimeRange(unittest.TestCase):
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 4)
 
     """No data in Nightscout. Uploads all bolus data from tconnect via CIQ therapy_events."""
     def test_new_ciq_bolus_data_from_ciq_therapy_events(self):
@@ -270,7 +275,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL])
 
         pprint.pprint(nightscout.uploaded_entries)
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), len(BOLUS_FULL_EXAMPLES))
@@ -286,6 +291,7 @@ class TestProcessTimeRange(unittest.TestCase):
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 3)
 
     """No data in Nightscout. Nothing should be updated in Nightscout without the BOLUS feature."""
     def test_bolus_data_not_updated_without_feature(self):
@@ -311,12 +317,13 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BASAL, IOB])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BASAL, IOB])
 
         pprint.pprint(nightscout.uploaded_entries)
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 0)
 
     """No data in Nightscout. Uploads new iob reading from tconnect."""
     def test_new_ciq_iob_data(self):
@@ -343,7 +350,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL, IOB])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL, IOB])
 
         pprint.pprint(nightscout.uploaded_entries)
         self.assertEqual(len(nightscout.uploaded_entries["activity"]), 1)
@@ -354,6 +361,7 @@ class TestProcessTimeRange(unittest.TestCase):
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 1)
 
     """No data in Nightscout. Nothing should be updated in Nightscout without the IOB feature."""
     def test_iob_data_not_updated_without_feature(self):
@@ -380,11 +388,12 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BASAL, BOLUS])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BASAL, BOLUS])
 
         self.assertEqual(len(nightscout.uploaded_entries["activity"]), 0)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 0)
     
     """Existing IOB in Nightscout. Uploads new iob reading and deletes old IOB."""
     def test_updates_ciq_iob_data(self):
@@ -419,7 +428,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout.last_uploaded_activity = fake_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[IOB])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[IOB])
 
         pprint.pprint(nightscout.uploaded_entries)
         self.assertEqual(len(nightscout.uploaded_entries["activity"]), 1)
@@ -432,6 +441,7 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertListEqual(nightscout.deleted_entries, [
             "activity/sentinel_existing_iob_id"
         ])
+        self.assertEqual(count, 1)
     
     """No pump activity events in Nightscout. New CIQ activity events."""
     def test_new_ciq_activity_events(self):
@@ -471,7 +481,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 2)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -481,6 +491,7 @@ class TestProcessTimeRange(unittest.TestCase):
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 2)
 
     """No pump activity events in Nightscout. New CIQ activity events, but feature is disabled."""
     def test_no_ciq_activity_events_without_feature(self):
@@ -521,11 +532,12 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL, IOB])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[BOLUS, BASAL, IOB])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 0)
 
     
     """
@@ -583,7 +595,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 1)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -598,6 +610,7 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertListEqual(nightscout.deleted_entries, [
             "treatments/old_sleep"
         ])
+        self.assertEqual(count, 1)
 
     """No pump activity events in Nightscout. New WS2 activity events."""
     def test_new_ws2_activity_events(self):
@@ -636,7 +649,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 3)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -647,6 +660,7 @@ class TestProcessTimeRange(unittest.TestCase):
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 3)
 
     """Existing pump activity events in Nightscout. New WS2 activity events. Only adds new events."""
     def test_existing_ws2_activity_events(self):
@@ -701,7 +715,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 1)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -710,6 +724,7 @@ class TestProcessTimeRange(unittest.TestCase):
         ]})
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 1)
 
     """No pump activity events in nightscout. New WS2 activity events, but only of skipped types. None should be added."""
     def test_skipped_ws2_activity_events(self):
@@ -749,11 +764,12 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 0)
 
     """Profile present on pump and not in Nightscout with PROFILES feature enabled, adds profile."""
     def test_pump_profile_added(self):
@@ -790,17 +806,19 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout.current_profile = fake_current_profile
 
+        count = None
         with patch("tconnectsync.sync.profile._get_default_upload_mode") as mock_upload_mode, \
              patch("tconnectsync.sync.profile._get_default_serial_number") as mock_serial_number:
             mock_upload_mode.return_value = 'add'
             mock_serial_number.return_value = serial_number
 
-            process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
+            count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
 
         self.assertEqual(len(nightscout.uploaded_entries["profile"]), 1)
         self.assertDictEqual(nightscout.uploaded_entries["profile"][0]['store']['A'], NS_PROFILE_A)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 1)
 
     """Profile present on pump and in Nightscout with PROFILES feature enabled, does not add profile."""
     def test_pump_profile_not_updated(self):
@@ -837,16 +855,18 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout.current_profile = fake_current_profile
 
+        count = None
         with patch("tconnectsync.sync.profile._get_default_upload_mode") as mock_upload_mode, \
              patch("tconnectsync.sync.profile._get_default_serial_number") as mock_serial_number:
             mock_upload_mode.return_value = 'add'
             mock_serial_number.return_value = serial_number
 
-            process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
+            count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
 
         self.assertEqual(len(nightscout.uploaded_entries["profile"]), 0)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 0)
 
     """Profile present on pump and in Nightscout with PROFILES feature enabled, with changes on pump, adds new profile object."""
     def test_pump_profile_new_entry_added(self):
@@ -883,12 +903,13 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout.current_profile = fake_current_profile
 
+        count = None
         with patch("tconnectsync.sync.profile._get_default_upload_mode") as mock_upload_mode, \
              patch("tconnectsync.sync.profile._get_default_serial_number") as mock_serial_number:
             mock_upload_mode.return_value = 'add'
             mock_serial_number.return_value = serial_number
 
-            process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
+            count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
 
         self.assertEqual(len(nightscout.uploaded_entries["profile"]), 1)
         self.assertEqual(len(nightscout.uploaded_entries["profile"][0]['store']), 2)
@@ -896,6 +917,7 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertDictEqual(nightscout.uploaded_entries["profile"][0]['store']['B'], NS_PROFILE_B)
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 1)
 
     """
     Profile present on pump and in Nightscout with PROFILES feature enabled, with changes on pump,
@@ -935,12 +957,13 @@ class TestProcessTimeRange(unittest.TestCase):
 
         nightscout.current_profile = fake_current_profile
 
+        count = None
         with patch("tconnectsync.sync.profile._get_default_upload_mode") as mock_upload_mode, \
              patch("tconnectsync.sync.profile._get_default_serial_number") as mock_serial_number:
             mock_upload_mode.return_value = 'replace'
             mock_serial_number.return_value = serial_number
 
-            process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
+            count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
 
         self.assertDictEqual(nightscout.uploaded_entries, {})
         self.assertEqual(len(nightscout.put_entries["profile"]), 1)
@@ -948,6 +971,7 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertDictEqual(nightscout.put_entries["profile"][0]['store']['A'], NS_PROFILE_A)
         self.assertDictEqual(nightscout.put_entries["profile"][0]['store']['B'], NS_PROFILE_B)
         self.assertListEqual(nightscout.deleted_entries, [])
+        self.assertEqual(count, 1)
 
 
 if __name__ == '__main__':

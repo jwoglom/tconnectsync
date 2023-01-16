@@ -148,8 +148,8 @@ def setup_new_profile(ns_profile: dict) -> dict:
 
     return ns_profile
 
-def process_profiles(tconnect: TConnectApi, nightscout: NightscoutApi, pretend: bool = False, upload_mode: str = None):
-    if upload_mode is None:
+def process_profiles(tconnect: TConnectApi, nightscout: NightscoutApi, pretend: bool = False, upload_mode: str = None) -> bool:
+    if not upload_mode:
         upload_mode = _get_default_upload_mode()
 
     logger.debug("Checking for differences between pump and nightscout profiles: %s mode", upload_mode)
@@ -160,7 +160,7 @@ def process_profiles(tconnect: TConnectApi, nightscout: NightscoutApi, pretend: 
 
     if not diff:
         logger.info("Pump and Nightscout profiles up to date")
-        return
+        return False
     
     if upload_mode == 'add':
         profile_to_upload = setup_new_profile(ns_profile_new)
@@ -168,10 +168,14 @@ def process_profiles(tconnect: TConnectApi, nightscout: NightscoutApi, pretend: 
 
         if not pretend:
             nightscout.upload_entry(profile_to_upload, entity='profile')
+        return True
+
     elif upload_mode == 'replace':
         logger.info("Replacing new Nightscout profiles object: %s", ns_profile_new)
 
         if not pretend:
             nightscout.put_entry(ns_profile_new, entity='profile')
+        return True
+
     else:
         raise RuntimeError('invalid upload_mode: %s' % upload_mode)

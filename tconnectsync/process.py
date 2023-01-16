@@ -189,7 +189,8 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
     
     if PROFILES in features:
         logger.debug("Running profiles feature")
-        process_profiles(tconnect, nightscout, pretend=pretend)
+        if process_profiles(tconnect, nightscout, pretend=pretend):
+            added += 1
 
     logger.info("Wrote %d events to Nightscout this process cycle" % added)
     return added
