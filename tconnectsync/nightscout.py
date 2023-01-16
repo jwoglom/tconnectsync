@@ -43,7 +43,7 @@ class NightscoutApi:
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 		}, verify=self.verify)
 		if r.status_code != 200:
-			raise ApiException(r.status_code, "Nightscout upload response: %s" % r.text)
+			raise ApiException(r.status_code, "Nightscout upload %s response: %s" % (r.status_code, r.text))
 
 	def delete_entry(self, entity):
 		r = requests.delete(urljoin(self.url, 'api/v1/' + entity + '?api_secret=' + self.secret), json={}, headers={
@@ -52,7 +52,7 @@ class NightscoutApi:
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 		}, verify=self.verify)
 		if r.status_code != 200:
-			raise ApiException(r.status_code, "Nightscout delete response: %s" % r.text)
+			raise ApiException(r.status_code, "Nightscout delete %s response: %s" % (r.status_code, r.text))
 
 	def put_entry(self, ns_format, entity):
 		r = requests.put(urljoin(self.url, 'api/v1/' + entity + '?api_secret=' + self.secret), json=ns_format, headers={
@@ -61,7 +61,7 @@ class NightscoutApi:
 			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 		}, verify=self.verify)
 		if r.status_code != 200:
-			raise ApiException(r.status_code, "Nightscout put response: %s" % r.text)
+			raise ApiException(r.status_code, "Nightscout put %s response: %s" % (r.status_code, r.text))
 
 	def last_uploaded_entry(self, eventType, time_start=None, time_end=None):
 		def internal(t_to_space):
@@ -70,7 +70,7 @@ class NightscoutApi:
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
 			if latest.status_code != 200:
-				raise ApiException(latest.status_code, "Nightscout last_uploaded_entry response: %s" % latest.text)
+				raise ApiException(latest.status_code, "Nightscout last_uploaded_entry %s response: %s" % (latest.status_code, latest.text))
 
 			j = latest.json()
 			if j and len(j) > 0:
@@ -100,7 +100,7 @@ class NightscoutApi:
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
 			if latest.status_code != 200:
-				raise ApiException(latest.status_code, "Nightscout last_uploaded_bg_entry response: %s" % latest.text)
+				raise ApiException(latest.status_code, "Nightscout last_uploaded_bg_entry %s response: %s" % (latest.status_code, latest.text))
 
 			j = latest.json()
 			if j and len(j) > 0:
@@ -121,7 +121,7 @@ class NightscoutApi:
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
 			if latest.status_code != 200:
-				raise ApiException(latest.status_code, "Nightscout activity response: %s" % latest.text)
+				raise ApiException(latest.status_code, "Nightscout activity %s response: %s" % (latest.status_code, latest.text))
 
 			j = latest.json()
 			if j and len(j) > 0:
@@ -147,26 +147,15 @@ class NightscoutApi:
 		return status.json()
 	
 	"""
-	Returns information on configured Nightscout profiles, over the optional time range.
-	Will only return the most recent profile for the given range.
+	Returns information on the currently configured Nightscout profile data store
+	(contains all profiles in Nightscout under one mongo object).
 	"""
-	def profiles(self, time_start=None, time_end=None):
-		def internal(t_to_space):
-			dateFilter = time_range('created_at', time_start, time_end, t_to_space=t_to_space)
-			latest = requests.get(urljoin(self.url, 'api/v1/profile.json?' + dateFilter + '&ts=' + str(time.time())), headers={
-				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
-			}, verify=self.verify)
-			if latest.status_code != 200:
-				raise ApiException(latest.status_code, "Nightscout profiles response: %s" % latest.text)
-
-			j = latest.json()
-			if j and len(j) > 0:
-				return j[0]
-			return None
-		
-		ret = internal(False)
-		if ret is None and (time_start or time_end):
-			ret = internal(True)
-			if ret is not None:
-				logger.warning("profiles with time_start=%s time_end=%s only returned data when timestamps contained a space" % (time_start, time_end))
-		return ret
+	def current_profile(self, time_start=None, time_end=None):
+		r = requests.get(urljoin(self.url, 'api/v1/profile/current?api_secret=' + self.secret), json={}, headers={
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+			'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
+		}, verify=self.verify)
+		if r.status_code != 200:
+			raise ApiException(r.status_code, "Nightscout current_profile %s response: %s" % (r.status_code, r.text))
+		return r.json()

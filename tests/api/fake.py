@@ -44,6 +44,12 @@ class WebUIScraper(tconnectsync.api.webui.WebUIScraper):
     def __init__(self, controliq):
         self.controliq = controliq
 
+    def my_devices(self):
+        raise NotImplementedError
+    
+    def device_settings(self, pump_guid):
+        raise NotImplementedError
+
 class TConnectApi(tconnectsync.api.TConnectApi):
     def __init__(self, email=None, password=None):
         if email is not None and password is not None:
@@ -54,3 +60,4 @@ class TConnectApi(tconnectsync.api.TConnectApi):
     _ciq = ControlIQApi()
     _ws2 = WS2Api()
     _android = AndroidApi()
+    _webui = WebUIScraper(_ciq)

@@ -2,22 +2,30 @@ from typing import List, Tuple
 import logging
 import json
 import copy
+import arrow
 
 from ..api import TConnectApi
 from ..domain.device_settings import Profile, DeviceSettings
 from ..parser.nightscout import NightscoutEntry
-from ..secret import PUMP_SERIAL_NUMBER
+from ..nightscout import NightscoutApi
+from ..secret import PUMP_SERIAL_NUMBER, NIGHTSCOUT_PROFILE_UPLOAD_MODE
 
 logger = logging.getLogger(__name__)
+
+def _get_default_serial_number():
+    return PUMP_SERIAL_NUMBER
+
+def _get_default_upload_mode():
+    return NIGHTSCOUT_PROFILE_UPLOAD_MODE
 
 def get_pump_profiles(tconnect: TConnectApi, serial_number: int = None) -> Tuple[List[Profile], DeviceSettings]:
     all_devices = tconnect.webui.my_devices()
     if serial_number is None:
-        serial_number = PUMP_SERIAL_NUMBER
+        serial_number = _get_default_serial_number()
 
     if str(serial_number) not in all_devices:
         logger.warn("Could not find entry for provided pump serial number in t:connect device list: %s, received: %s", serial_number, all_devices)
-        return []
+        return [], None
     
     device = all_devices[str(serial_number)]
 
@@ -36,7 +44,7 @@ Compare pump device and Nightscout profiles, and return a final dictionary of
 Nightscout profile objects, with the pump profile settings overriding what is
 currently in Nightscout.
 
-ns_profile_obj is the output from NightscoutApi.profiles() and should be the most
+ns_profile_obj is the output from NightscoutApi.current_profile() and should be the most
 recent profile object in mongo.
 
 Returns the new Nightscout profile and whether it was changed.
@@ -61,12 +69,12 @@ def compare_profiles(device_profiles: List[Profile], device_settings: DeviceSett
 
     existent_profiles_in_ns = set(device.keys()) & set(ns.keys())
     for profile_name in existent_profiles_in_ns:
-        logger.info("Checking for differences for %s profile between pump and nightscout", profile_name)
+        logger.debug("Checking for differences for %s profile between pump and nightscout", profile_name)
         pump_configured_profile = device[profile_name]
         ns_translated_profile = NightscoutEntry.profile_store(pump_configured_profile, device_settings)
         ns_configured_profile = ns[profile_name]
 
-        logger.info("Comparing %s profile from pump: %s to nightscout: %s", profile_name, ns_translated_profile, ns_configured_profile)
+        logger.debug("Comparing %s profile from pump: %s to nightscout: %s", profile_name, ns_translated_profile, ns_configured_profile)
         if nightscout_profiles_identical(ns_configured_profile, ns_translated_profile):
             logger.info("Profile %s identical between pump and nightscout", profile_name)
             continue
@@ -95,7 +103,7 @@ def compare_profiles(device_profiles: List[Profile], device_settings: DeviceSett
 
 def nightscout_profiles_identical(configured: dict, translated: dict) -> bool:
     if json.dumps(configured, sort_keys=True, indent=None) == json.dumps(translated, sort_keys=True, indent=None):
-        logger.debug("Initial JSON dump identical")
+        logger.debug("initial JSON dump identical")
         return True
 
     # convert all JSON values into strings
@@ -129,3 +137,41 @@ def nightscout_profiles_identical(configured: dict, translated: dict) -> bool:
 
     logger.debug("profiles not identical")
     return False
+
+def setup_new_profile(ns_profile: dict) -> dict:
+    if '_id' in ns_profile:
+        del ns_profile['_id']
+    
+    now = arrow.now().isoformat()
+    ns_profile['startDate'] = now
+    ns_profile['created_at'] = now
+
+    return ns_profile
+
+def process_profiles(tconnect: TConnectApi, nightscout: NightscoutApi, pretend: bool = False, upload_mode: str = None):
+    if upload_mode is None:
+        upload_mode = _get_default_upload_mode()
+
+    logger.debug("Checking for differences between pump and nightscout profiles: %s mode", upload_mode)
+    
+    ns_profile_obj = nightscout.current_profile()
+    pump_profiles, pump_settings = get_pump_profiles(tconnect)
+    diff, ns_profile_new = compare_profiles(pump_profiles, pump_settings, ns_profile_obj)
+
+    if not diff:
+        logger.info("Pump and Nightscout profiles up to date")
+        return
+    
+    if upload_mode == 'add':
+        profile_to_upload = setup_new_profile(ns_profile_new)
+        logger.info("Adding new Nightscout profiles object: %s", profile_to_upload)
+
+        if not pretend:
+            nightscout.upload_entry(profile_to_upload, entity='profile')
+    elif upload_mode == 'replace':
+        logger.info("Replacing new Nightscout profiles object: %s", ns_profile_new)
+
+        if not pretend:
+            nightscout.put_entry(ns_profile_new, entity='profile')
+    else:
+        raise RuntimeError('invalid upload_mode: %s' % upload_mode)

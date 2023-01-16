@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 import requests
 import urllib
 import datetime
@@ -70,7 +70,7 @@ class WebUIScraper:
     Returns a mapping between pump/device IDs and information about that device,
     including the GUID used for obtaining pump settings.
     """
-    def my_devices(self):
+    def my_devices(self) -> Dict[str, DeviceSettings]:
         devices = {}
         r = self.get('myaccount/my_devices.aspx')
         soup = BeautifulSoup(r.content, features='lxml')
@@ -274,7 +274,7 @@ class WebUIScraper:
     Wraps a call to my_devices to identify the device GUID from the
     given pump serial, and then returns device_settings_from_guid.
     """
-    def device_settings(self, pump_serial):
+    def device_settings(self, pump_serial: str) -> Tuple[List[Profile], DeviceSettings]:
         devices = self.my_devices()
         if str(pump_serial) in devices.keys():
             dev = devices[str(pump_serial)]

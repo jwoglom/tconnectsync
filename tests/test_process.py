@@ -4,17 +4,22 @@ import unittest
 import datetime
 import pprint
 import copy
+from unittest.mock import patch
 
 from tconnectsync.process import process_time_range
 from tconnectsync.parser.nightscout import EXERCISE_EVENTTYPE, IOB_ACTIVITYTYPE, SLEEP_EVENTTYPE, NightscoutEntry
-from tconnectsync.features import BASAL, BOLUS, IOB, PUMP_EVENTS
-from tests.domain.test_therapy_event import BOLUS_FULL_EXAMPLES, TestCGMTherapyEvent
+from tconnectsync.features import BASAL, BOLUS, IOB, PROFILES, PUMP_EVENTS
+from tconnectsync.domain.device_settings import Device
+from tests.secrets import build_secrets
+from tests.sync.test_profile import DEVICE_PROFILE_A, DEVICE_PROFILE_B, DEVICE_SETTINGS, NS_PROFILE_A, NS_PROFILE_B, build_ns_profile
+
 
 from .api.fake import TConnectApi
 from .nightscout_fake import NightscoutApi
 from .sync.test_basal import TestBasalSync
 from .sync.test_bolus import TestBolusSync
 from .sync.test_iob import TestIOBSync
+from .domain.test_therapy_event import BOLUS_FULL_EXAMPLES, TestCGMTherapyEvent
 
 class TestProcessTimeRange(unittest.TestCase):
     maxDiff = None
@@ -748,6 +753,200 @@ class TestProcessTimeRange(unittest.TestCase):
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 0)
         self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """Profile present on pump and not in Nightscout with PROFILES feature enabled, adds profile."""
+    def test_pump_profile_added(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        pump_guid = '00000000-0000-0000-0000-000000000001'
+        serial_number = '12345'
+        
+        def fake_my_devices():
+            return {
+                serial_number: Device(
+                    name='test',
+                    model_number=serial_number,
+                    status='OK',
+                    guid=pump_guid)
+            }
+        tconnect.webui.my_devices = fake_my_devices
+
+        def fake_device_settings_from_guid(guid):
+            if guid != pump_guid:
+                raise RuntimeError('invalid guid')
+            return [DEVICE_PROFILE_A.activeProfile()], DEVICE_SETTINGS
+
+        tconnect.webui.device_settings_from_guid = fake_device_settings_from_guid
+
+        nightscout = NightscoutApi()
+
+        def fake_current_profile(time_start=None, time_end=None):
+            return build_ns_profile({}, '')
+
+        nightscout.current_profile = fake_current_profile
+
+        with patch("tconnectsync.sync.profile._get_default_upload_mode") as mock_upload_mode, \
+             patch("tconnectsync.sync.profile._get_default_serial_number") as mock_serial_number:
+            mock_upload_mode.return_value = 'add'
+            mock_serial_number.return_value = serial_number
+
+            process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
+
+        self.assertEqual(len(nightscout.uploaded_entries["profile"]), 1)
+        self.assertDictEqual(nightscout.uploaded_entries["profile"][0]['store']['A'], NS_PROFILE_A)
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """Profile present on pump and in Nightscout with PROFILES feature enabled, does not add profile."""
+    def test_pump_profile_not_updated(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        pump_guid = '00000000-0000-0000-0000-000000000001'
+        serial_number = '12345'
+        
+        def fake_my_devices():
+            return {
+                serial_number: Device(
+                    name='test',
+                    model_number=serial_number,
+                    status='OK',
+                    guid=pump_guid)
+            }
+        tconnect.webui.my_devices = fake_my_devices
+
+        def fake_device_settings_from_guid(guid):
+            if guid != pump_guid:
+                raise RuntimeError('invalid guid')
+            return [DEVICE_PROFILE_A.activeProfile()], DEVICE_SETTINGS
+
+        tconnect.webui.device_settings_from_guid = fake_device_settings_from_guid
+
+        nightscout = NightscoutApi()
+
+        def fake_current_profile(time_start=None, time_end=None):
+            return build_ns_profile({'A': NS_PROFILE_A}, 'A')
+
+        nightscout.current_profile = fake_current_profile
+
+        with patch("tconnectsync.sync.profile._get_default_upload_mode") as mock_upload_mode, \
+             patch("tconnectsync.sync.profile._get_default_serial_number") as mock_serial_number:
+            mock_upload_mode.return_value = 'add'
+            mock_serial_number.return_value = serial_number
+
+            process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
+
+        self.assertEqual(len(nightscout.uploaded_entries["profile"]), 0)
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """Profile present on pump and in Nightscout with PROFILES feature enabled, with changes on pump, adds new profile object."""
+    def test_pump_profile_new_entry_added(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        pump_guid = '00000000-0000-0000-0000-000000000001'
+        serial_number = '12345'
+        
+        def fake_my_devices():
+            return {
+                serial_number: Device(
+                    name='test',
+                    model_number=serial_number,
+                    status='OK',
+                    guid=pump_guid)
+            }
+        tconnect.webui.my_devices = fake_my_devices
+
+        def fake_device_settings_from_guid(guid):
+            if guid != pump_guid:
+                raise RuntimeError('invalid guid')
+            return [DEVICE_PROFILE_A, DEVICE_PROFILE_B.activeProfile()], DEVICE_SETTINGS
+
+        tconnect.webui.device_settings_from_guid = fake_device_settings_from_guid
+
+        nightscout = NightscoutApi()
+
+        def fake_current_profile(time_start=None, time_end=None):
+            return build_ns_profile({'A': NS_PROFILE_A}, 'A')
+
+        nightscout.current_profile = fake_current_profile
+
+        with patch("tconnectsync.sync.profile._get_default_upload_mode") as mock_upload_mode, \
+             patch("tconnectsync.sync.profile._get_default_serial_number") as mock_serial_number:
+            mock_upload_mode.return_value = 'add'
+            mock_serial_number.return_value = serial_number
+
+            process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
+
+        self.assertEqual(len(nightscout.uploaded_entries["profile"]), 1)
+        self.assertEqual(len(nightscout.uploaded_entries["profile"][0]['store']), 2)
+        self.assertDictEqual(nightscout.uploaded_entries["profile"][0]['store']['A'], NS_PROFILE_A)
+        self.assertDictEqual(nightscout.uploaded_entries["profile"][0]['store']['B'], NS_PROFILE_B)
+        self.assertDictEqual(nightscout.put_entries, {})
+        self.assertListEqual(nightscout.deleted_entries, [])
+
+    """
+    Profile present on pump and in Nightscout with PROFILES feature enabled, with changes on pump,
+    replaces existing profile object with NIGHTSCOUT_PROFILE_UPLOAD_MODE=replace.
+    """
+    def test_pump_profile_new_entry_replaced(self):
+        tconnect = TConnectApi()
+
+        # datetimes are unused by the API fake
+        start = datetime.datetime(2021, 5, 1, 0, 0)
+        end = datetime.datetime(2021, 5, 3, 0, 0)
+
+        pump_guid = '00000000-0000-0000-0000-000000000001'
+        serial_number = '12345'
+        
+        def fake_my_devices():
+            return {
+                serial_number: Device(
+                    name='test',
+                    model_number=serial_number,
+                    status='OK',
+                    guid=pump_guid)
+            }
+        tconnect.webui.my_devices = fake_my_devices
+
+        def fake_device_settings_from_guid(guid):
+            if guid != pump_guid:
+                raise RuntimeError('invalid guid')
+            return [DEVICE_PROFILE_A, DEVICE_PROFILE_B.activeProfile()], DEVICE_SETTINGS
+
+        tconnect.webui.device_settings_from_guid = fake_device_settings_from_guid
+
+        nightscout = NightscoutApi()
+
+        def fake_current_profile(time_start=None, time_end=None):
+            return build_ns_profile({'A': NS_PROFILE_A}, 'A')
+
+        nightscout.current_profile = fake_current_profile
+
+        with patch("tconnectsync.sync.profile._get_default_upload_mode") as mock_upload_mode, \
+             patch("tconnectsync.sync.profile._get_default_serial_number") as mock_serial_number:
+            mock_upload_mode.return_value = 'replace'
+            mock_serial_number.return_value = serial_number
+
+            process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PROFILES])
+
+        self.assertDictEqual(nightscout.uploaded_entries, {})
+        self.assertEqual(len(nightscout.put_entries["profile"]), 1)
+        self.assertEqual(len(nightscout.put_entries["profile"][0]['store']), 2)
+        self.assertDictEqual(nightscout.put_entries["profile"][0]['store']['A'], NS_PROFILE_A)
+        self.assertDictEqual(nightscout.put_entries["profile"][0]['store']['B'], NS_PROFILE_B)
         self.assertListEqual(nightscout.deleted_entries, [])
 
 

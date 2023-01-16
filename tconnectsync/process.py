@@ -29,8 +29,9 @@ from .sync.pump_events import (
     process_basalsuspension_events,
     ns_write_pump_events
 )
+from .sync.profile import process_profiles
 from .parser.tconnect import TConnectEntry
-from .features import BASAL, BOLUS, IOB, BOLUS_BG, CGM, DEFAULT_FEATURES, PUMP_EVENTS
+from .features import BASAL, BOLUS, IOB, BOLUS_BG, CGM, DEFAULT_FEATURES, PUMP_EVENTS, PROFILES
 from tconnectsync.sync import basal
 
 logger = logging.getLogger(__name__)
@@ -41,18 +42,21 @@ cycle of synchronizing data within the time range.
 If pretend is true, then doesn't actually write data to Nightscout.
 """
 def process_time_range(tconnect, nightscout, time_start, time_end, pretend, features=DEFAULT_FEATURES):
-    logger.info("Downloading t:connect ControlIQ data")
-    try:
-        ciqTherapyTimelineData = tconnect.controliq.therapy_timeline(time_start, time_end)
-    except ApiException as e:
-        # The ControlIQ API returns a 404 if the user did not have a ControlIQ enabled
-        # device in the time range which is queried. Since it launched in early 2020,
-        # ignore 404's before February.
-        if e.status_code == 404 and time_start.date() < datetime.date(2020, 2, 1):
-            logger.warning("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
-            ciqTherapyTimelineData = None
-        else:
-            raise e
+    ciqTherapyTimelineData = None
+    if BASAL in features or PUMP_EVENTS in features:
+        logger.info("Downloading t:connect ControlIQ data")
+
+        try:
+            ciqTherapyTimelineData = tconnect.controliq.therapy_timeline(time_start, time_end)
+        except ApiException as e:
+            # The ControlIQ API returns a 404 if the user did not have a ControlIQ enabled
+            # device in the time range which is queried. Since it launched in early 2020,
+            # ignore 404's before February.
+            if e.status_code == 404 and time_start.date() < datetime.date(2020, 2, 1):
+                logger.warning("Ignoring HTTP 404 for ControlIQ API request before Feb 2020")
+                ciqTherapyTimelineData = None
+            else:
+                raise e
     
     csvReadingData = None
     csvIobData = None
@@ -182,6 +186,10 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
             logger.debug("Writing iob events")
             added += ns_write_iob_events(nightscout, iobEvents, pretend=pretend)
             logger.debug("Finished writing iob events")
+    
+    if PROFILES in features:
+        logger.debug("Running profiles feature")
+        process_profiles(tconnect, nightscout, pretend=pretend)
 
     logger.info("Wrote %d events to Nightscout this process cycle" % added)
     return added

@@ -16,6 +16,13 @@ else:
 def get(val, default=None):
     return os.environ.get(val, values.get(val, default))
 
+def get_one_of(name, default=None, options=[]):
+    val = get(name, default)
+    if val not in options:
+        print("Error: %s must be one of: %s" % (name, options))
+        print("Current value: %s" % val)
+        sys.exit(1)
+
 def get_number(name, default):
     val = get(name, default)
     try:
@@ -58,6 +65,8 @@ AUTOUPDATE_NO_DATA_FAILURE_MINUTES = get_number('AUTOUPDATE_NO_DATA_FAILURE_MINU
 AUTOUPDATE_FAILURE_MINUTES = get_number('AUTOUPDATE_FAILURE_MINUTES', '15') # 15 minutes
 AUTOUPDATE_RESTART_ON_FAILURE = get_bool('AUTOUPDATE_RESTART_ON_FAILURE', 'true')
 AUTOUPDATE_MAX_LOOP_INVOCATIONS = get_number('AUTOUPDATE_MAX_LOOP_INVOCATIONS', '-1')
+
+NIGHTSCOUT_PROFILE_UPLOAD_MODE = get_one_of('NIGHTSCOUT_PROFILE_UPLOAD_MODE', 'add', ['add', 'replace'])
 
 # Default Nightscout profile segment fields which aren't stored by Tandem
 NIGHTSCOUT_PROFILE_CARBS_HR_VALUE = get('NIGHTSCOUT_PROFILE_CARBS_HR_VALUE', '20')
