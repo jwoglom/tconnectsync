@@ -25,3 +25,10 @@ class Profile:
     calculated_total_daily_basal: float # in units
     insulin_duration_min: int
     carbs_enabled: bool
+
+# Settings stored globally in the pump that are stored per-profile in Nightscout
+@dataclass
+class DeviceSettings:
+    low_bg_threshold: int
+    high_bg_threshold: int
+    raw_settings: dict

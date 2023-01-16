@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import requests
 import urllib
 import datetime
@@ -8,7 +8,7 @@ import logging
 
 from bs4 import BeautifulSoup
 
-from tconnectsync.domain.device_settings import Device, Profile, ProfileSegment
+from tconnectsync.domain.device_settings import Device, Profile, ProfileSegment, DeviceSettings
 from tconnectsync.util import removesuffix, removeprefix
 from tconnectsync.util.constants import MMOLL_TO_MGDL
 
@@ -108,9 +108,9 @@ class WebUIScraper:
     """
     Returns a parsed representation of a pump's settings.
     Note that pump_guid is NOT the serial number of the pump, and
-    should be obtained from my_devices()[str(serial_number)]['guid']
+    should be obtained from my_devices()[str(serial_number)].guid
     """
-    def device_settings_from_guid(self, pump_guid: str) -> List[Profile]:
+    def device_settings_from_guid(self, pump_guid: str) -> Tuple[List[Profile], DeviceSettings]:
         profiles = []
         settings = {}
         r = self.get('myaccount/DeviceSettings.aspx?guid=%s' % pump_guid)
@@ -126,7 +126,15 @@ class WebUIScraper:
             else:
                 settings.update(self._parse_settings_tbl(tbl))
         
-        return profiles, settings
+        low_bg_threshold, high_bg_threshold = self._extract_bg_thresholds(settings)
+
+        dev_settings = DeviceSettings(
+            low_bg_threshold=low_bg_threshold,
+            high_bg_threshold=high_bg_threshold,
+            raw_settings=settings
+        )
+        
+        return profiles, dev_settings
     
     def _parse_profile_tbl(self, tbl) -> Profile:
         profile = {}
@@ -245,6 +253,22 @@ class WebUIScraper:
         loop(children[1], 'Pump Settings')
 
         return settings
+    
+    def _extract_bg_thresholds(self, settings):
+        # Nightscout needs default values
+        low_bg_threshold = 70
+        high_bg_threshold = 180
+        if 'CGM Alerts' in settings:
+            if 'Low Alert' in settings['CGM Alerts']:
+                low = settings['CGM Alerts']['Low Alert']
+                if low['value']:
+                    low_bg_threshold = int(low['text'].split(' mg/dL')[0])
+            if 'High Alert' in settings['CGM Alerts']:
+                high = settings['CGM Alerts']['High Alert']
+                if high['value']:
+                    high_bg_threshold = int(high['text'].split(' mg/dL')[0])
+        
+        return low_bg_threshold, high_bg_threshold
     
     """
     Wraps a call to my_devices to identify the device GUID from the

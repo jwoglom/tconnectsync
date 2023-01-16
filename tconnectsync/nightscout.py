@@ -145,3 +145,28 @@ class NightscoutApi:
 		if status.status_code != 200:
 			raise Exception('HTTP error status code (%d) from Nightscout: %s' % (status.status_code, status.text))
 		return status.json()
+	
+	"""
+	Returns information on configured Nightscout profiles, over the optional time range.
+	Will only return the most recent profile for the given range.
+	"""
+	def profiles(self, time_start=None, time_end=None):
+		def internal(t_to_space):
+			dateFilter = time_range('created_at', time_start, time_end, t_to_space=t_to_space)
+			latest = requests.get(urljoin(self.url, 'api/v1/profile.json?' + dateFilter + '&ts=' + str(time.time())), headers={
+				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
+			}, verify=self.verify)
+			if latest.status_code != 200:
+				raise ApiException(latest.status_code, "Nightscout profiles response: %s" % latest.text)
+
+			j = latest.json()
+			if j and len(j) > 0:
+				return j[0]
+			return None
+		
+		ret = internal(False)
+		if ret is None and (time_start or time_end):
+			ret = internal(True)
+			if ret is not None:
+				logger.warning("profiles with time_start=%s time_end=%s only returned data when timestamps contained a space" % (time_start, time_end))
+		return ret

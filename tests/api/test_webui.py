@@ -953,7 +953,6 @@ class TestWebUIScraper(unittest.TestCase):
         with requests_mock.Mocker() as m:
             m.get('https://tconnect.tandemdiabetes.com/myaccount/DeviceSettings.aspx?guid=00000000-0000-0000-0000-000000000001',
                 request_headers=base_headers(),
-
                 text=self.PUMP_SETTINGS_HTML)
 
             profiles, settings = webui.device_settings_from_guid('00000000-0000-0000-0000-000000000001')
@@ -994,7 +993,7 @@ class TestWebUIScraper(unittest.TestCase):
                 'carbs_enabled': True
             })])
 
-            self.assertDictEqual(settings, {
+            self.assertDictEqual(settings.raw_settings, {
                 'Alerts': {
                     'Alert: Auto-Off': {'text': '18 hrs', 'value': True},
                     'Alert: Low Insulin': {'text': '35 u'}
@@ -1043,6 +1042,8 @@ class TestWebUIScraper(unittest.TestCase):
                 },
                 'upload_date': 'Jan 09, 2022'
             })
+            self.assertEqual(settings.low_bg_threshold, 80)
+            self.assertEqual(settings.high_bg_threshold, 200)
 
 
 

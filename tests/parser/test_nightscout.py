@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
 import unittest
-from tconnectsync.parser.nightscout import NightscoutEntry, InvalidBolusTypeException
+from tconnectsync.parser.nightscout import NightscoutEntry, InvalidBolusTypeException, tandem_to_ns_time, tandem_to_ns_time_seconds
+from tconnectsync.domain.device_settings import Profile, ProfileSegment, DeviceSettings
+from tconnectsync.secret import NIGHTSCOUT_PROFILE_CARBS_HR_VALUE, NIGHTSCOUT_PROFILE_DELAY_VALUE, TIMEZONE_NAME
 
 class TestNightscoutEntry(unittest.TestCase):
+    maxDiff = None
     def test_basal(self):
         self.assertEqual(
             NightscoutEntry.basal(
@@ -191,6 +194,167 @@ class TestNightscoutEntry(unittest.TestCase):
             }
         )
 
+    
+    def test_profile_store(self):
+        self.assertEqual(
+            NightscoutEntry.profile_store(
+                profile=Profile(
+                    title='A', 
+                    active=True, 
+                    segments=[
+                        ProfileSegment(
+                            display_time='Midnight', 
+                            time='12:00 AM', 
+                            basal_rate=0.8, 
+                            correction_factor=30.0, 
+                            carb_ratio=6.0, 
+                            target_bg_mgdl=110.0), 
+                        ProfileSegment(
+                            display_time='6:00 AM', 
+                            time='6:00 AM', 
+                            basal_rate=1.25, 
+                            correction_factor=30.0, 
+                            carb_ratio=6.0, 
+                            target_bg_mgdl=110.0), 
+                        ProfileSegment(
+                            display_time='11:00 AM', 
+                            time='11:00 AM', 
+                            basal_rate=1.0, 
+                            correction_factor=30.0, 
+                            carb_ratio=6.0, 
+                            target_bg_mgdl=110.0), 
+                        ProfileSegment(
+                            display_time='Noon', 
+                            time='12:00 PM', 
+                            basal_rate=0.8, 
+                            correction_factor=30.0, 
+                            carb_ratio=6.0, 
+                            target_bg_mgdl=110.0)
+                    ],
+                    calculated_total_daily_basal=21.65, 
+                    insulin_duration_min=300, 
+                    carbs_enabled=True
+                ),
+                device_settings=DeviceSettings(
+                    low_bg_threshold=80,
+                    high_bg_threshold=200,
+                    raw_settings={}
+                )
+            ),
+            {
+                "dia": 5.0,
+                "carbratio": [
+                    {
+                        "time": "00:00",
+                        "timeAsSeconds": 0,
+                        "value": 6.0
+                    },
+                    {
+                        "time": "06:00",
+                        "timeAsSeconds": 6*60*60,
+                        "value": 6.0
+                    },
+                    {
+                        "time": "11:00",
+                        "timeAsSeconds": 11*60*60,
+                        "value": 6.0
+                    },
+                    {
+                        "time": "12:00",
+                        "timeAsSeconds": 12*60*60,
+                        "value": 6.0
+                    }
+                ],
+
+                "carbs_hr": NIGHTSCOUT_PROFILE_CARBS_HR_VALUE,
+                "delay": NIGHTSCOUT_PROFILE_DELAY_VALUE,
+                "sens": [
+                    {
+                        "time": "00:00",
+                        "timeAsSeconds": 0,
+                        "value": 30.0
+                    },
+                    {
+                        "time": "06:00",
+                        "timeAsSeconds": 6*60*60,
+                        "value": 30.0
+                    },
+                    {
+                        "time": "11:00",
+                        "timeAsSeconds": 11*60*60,
+                        "value": 30.0
+                    },
+                    {
+                        "time": "12:00",
+                        "timeAsSeconds": 12*60*60,
+                        "value": 30.0
+                    }
+                ],
+                "basal": [
+                    {
+                        "time": "00:00",
+                        "timeAsSeconds": 0,
+                        "value": 0.8
+                    },
+                    {
+                        "time": "06:00",
+                        "timeAsSeconds": 6*60*60,
+                        "value": 1.25
+                    },
+                    {
+                        "time": "11:00",
+                        "timeAsSeconds": 11*60*60,
+                        "value": 1.0
+                    },
+                    {
+                        "time": "12:00",
+                        "timeAsSeconds": 12*60*60,
+                        "value": 0.8
+                    }
+                ],
+                "target_low": [
+                    {
+                        "time": "00:00",
+                        "timeAsSeconds": 0,
+                        "value": 80
+                    }
+                ],
+                "target_high": [
+                    {
+                        "time": "00:00",
+                        "timeAsSeconds": 0,
+                        "value": 200
+                    }
+                ],
+                "timezone": TIMEZONE_NAME,
+                "startDate": "1970-01-01T00:00:00.000Z",
+                "units": "mg/dl"
+            }
+        )
+
+
+class TestTandemNightscoutTime(unittest.TestCase):
+    def test_tandem_to_ns_time(self):
+        self.assertEqual(tandem_to_ns_time('12:00 AM'), '00:00')
+        self.assertEqual(tandem_to_ns_time('12:30 AM'), '00:30')
+        self.assertEqual(tandem_to_ns_time('6:00 AM'), '06:00')
+        self.assertEqual(tandem_to_ns_time('6:30 AM'), '06:30')
+        self.assertEqual(tandem_to_ns_time('11:30 AM'), '11:30')
+        self.assertEqual(tandem_to_ns_time('12:00 PM'), '12:00')
+        self.assertEqual(tandem_to_ns_time('12:30 PM'), '12:30')
+        self.assertEqual(tandem_to_ns_time('06:30 PM'), '18:30')
+        self.assertEqual(tandem_to_ns_time('11:30 PM'), '23:30')
+
+    def test_tandem_to_ns_time_seconds(self):
+        self.assertEqual(tandem_to_ns_time_seconds('12:00 AM'), 0)
+        self.assertEqual(tandem_to_ns_time_seconds('12:30 AM'), 30*60)
+        self.assertEqual(tandem_to_ns_time_seconds('6:00 AM'), 6*60*60)
+        self.assertEqual(tandem_to_ns_time_seconds('6:30 AM'), 6*60*60 + 30*60)
+        self.assertEqual(tandem_to_ns_time_seconds('11:30 AM'), 11*60*60 + 30*60)
+        self.assertEqual(tandem_to_ns_time_seconds('12:00 PM'), 12*60*60)
+        self.assertEqual(tandem_to_ns_time_seconds('12:30 PM'), 12*60*60 + 30*60)
+        self.assertEqual(tandem_to_ns_time_seconds('06:30 PM'), 12*60*60 + 6*60*60 + 30*60)
+        self.assertEqual(tandem_to_ns_time_seconds('11:30 PM'), 12*60*60 + 11*60*60 + 30*60)
 
 if __name__ == '__main__':
     unittest.main()
