@@ -37,6 +37,7 @@ Here are a few examples of reasons why you might want to adjust the enabled sync
 
 * If you currently input boluses into Nightscout manually with comments, then you may wish to _disable the `BOLUS` synchronization feature_ so that there are no duplicated boluses in Nightscout.
 * If you want to see Sleep and Exercise Mode data appear in Nightscout, then you may with to _enable the `PUMP_EVENTS` synchronization feature_.
+* If you want to automatically update your Nightscout insulin profile settings from your pump, then you may want to _enable the `PROFILES` synchronization feature_.
 
 These synchronization features are enabled by default:
 
@@ -45,6 +46,7 @@ These synchronization features are enabled by default:
 
 The following synchronization features can be optionally enabled:
 
+* `PROFILES`: Insulin profile information, including segments, basal rates, correction factors, carb ratios, and the profile which is active.
 * `PUMP_EVENTS`: Events reported by the pump. Includes support for the following:
   * Site/Cartridge Change (occurs for both a site change and a cartridge change)
   * Empty Cartridge/Pump Shutdown (from my investigation, occurs either when the cartridge runs out of insulin OR you hard-shut off the pump)
@@ -60,7 +62,7 @@ The following synchronization features are under development, [**but are not yet
 To specify custom synchronization features, pass the names of the desired features to the `--features` flag, e.g.:
 
 ```bash
-$ tconnectsync --features BASAL BOLUS PUMP_EVENTS
+$ tconnectsync --features BASAL BOLUS PUMP_EVENTS PROFILES
 ```
 
 If you're using tconnectsync-heroku, see [this section in its README](https://github.com/jwoglom/tconnectsync-heroku#Updating-synchronization-features).
