@@ -195,5 +195,8 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
         if process_profiles(tconnect, nightscout, pretend=pretend):
             added += 1
 
-    logger.info("Wrote %d events to Nightscout this process cycle" % added)
+    if pretend:
+        logger.info("Would have written %d events to Nightscout this process cycle (in pretend mode)" % added)
+    else:
+        logger.info("Wrote %d events to Nightscout this process cycle" % added)
     return added
