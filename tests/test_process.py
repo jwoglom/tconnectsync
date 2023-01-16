@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from tconnectsync.process import process_time_range
 from tconnectsync.parser.nightscout import EXERCISE_EVENTTYPE, IOB_ACTIVITYTYPE, SLEEP_EVENTTYPE, NightscoutEntry
-from tconnectsync.features import BASAL, BOLUS, IOB, PROFILES, PUMP_EVENTS
+from tconnectsync.features import BASAL, BOLUS, IOB, PROFILES, PUMP_EVENTS, PUMP_EVENTS_BASAL_SUSPENSION
 from tconnectsync.domain.device_settings import Device
 from tests.secrets import build_secrets
 from tests.sync.test_profile import DEVICE_PROFILE_A, DEVICE_PROFILE_B, DEVICE_SETTINGS, NS_PROFILE_A, NS_PROFILE_B, build_ns_profile
@@ -649,7 +649,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = self.stub_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS, PUMP_EVENTS_BASAL_SUSPENSION])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 3)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {
@@ -715,7 +715,7 @@ class TestProcessTimeRange(unittest.TestCase):
         nightscout.last_uploaded_entry = fake_last_uploaded_entry
         nightscout.last_uploaded_activity = self.stub_last_uploaded_activity
 
-        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS])
+        count = process_time_range(tconnect, nightscout, start, end, pretend=False, features=[PUMP_EVENTS, PUMP_EVENTS_BASAL_SUSPENSION])
 
         self.assertEqual(len(nightscout.uploaded_entries["treatments"]), 1)
         self.assertDictEqual(dict(nightscout.uploaded_entries), {

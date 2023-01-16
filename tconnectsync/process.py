@@ -31,7 +31,7 @@ from .sync.pump_events import (
 )
 from .sync.profile import process_profiles
 from .parser.tconnect import TConnectEntry
-from .features import BASAL, BOLUS, IOB, BOLUS_BG, CGM, DEFAULT_FEATURES, PUMP_EVENTS, PROFILES
+from .features import BASAL, BOLUS, IOB, BOLUS_BG, CGM, DEFAULT_FEATURES, PUMP_EVENTS, PROFILES, PUMP_EVENTS_BASAL_SUSPENSION
 from tconnectsync.sync import basal
 
 logger = logging.getLogger(__name__)
@@ -146,19 +146,22 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
         logger.debug("Writing basal events")
         added += ns_write_basal_events(nightscout, basalEvents, pretend=pretend, time_start=time_start, time_end=time_end)
         logger.debug("Finished writing basal events")
-    
-    if PUMP_EVENTS in features:
-        pumpEvents = process_ciq_activity_events(ciqTherapyTimelineData)
-        logger.debug("CIQ activity events: %s" % pumpEvents)
 
-        logger.warning("Using WS2 data source for basalsuspension because PUMP_EVENTS is an enabled feature")
+    if PUMP_EVENTS_BASAL_SUSPENSION in features:
+        logger.warning("Using WS2 data source for basalsuspension because PUMP_EVENTS_BASAL_SUSPENSION is an enabled feature")
         logger.warning("<!!> The WS2 data source is unreliable and may prevent timely synchronization")
         ws2BasalSuspension = tconnect.ws2.basalsuspension(time_start, time_end)
 
         bsPumpEvents = process_basalsuspension_events(ws2BasalSuspension)
         logger.debug("basalsuspension events: %s" % bsPumpEvents)
 
-        pumpEvents += bsPumpEvents
+        logger.debug("Writing pump basalsuspension events")
+        added += ns_write_pump_events(nightscout, bsPumpEvents, pretend=pretend, time_start=time_start, time_end=time_end)
+        logger.debug("Finished writing basal events")
+
+    if PUMP_EVENTS in features:
+        pumpEvents = process_ciq_activity_events(ciqTherapyTimelineData)
+        logger.debug("CIQ activity events: %s" % pumpEvents)
 
         logger.debug("Writing pump events")
         added += ns_write_pump_events(nightscout, pumpEvents, pretend=pretend, time_start=time_start, time_end=time_end)
