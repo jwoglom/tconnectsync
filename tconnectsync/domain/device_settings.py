@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import List, Optional
 
 @dataclass
@@ -25,6 +25,16 @@ class Profile:
     calculated_total_daily_basal: float # in units
     insulin_duration_min: int
     carbs_enabled: bool
+
+    def activeProfile(self):
+        p = self.copy()
+        p.active = True
+        return p
+
+    def copy(self):
+        p = replace(self)
+        p.segments = [replace(s) for s in p.segments]
+        return p
 
 # Settings stored globally in the pump that are stored per-profile in Nightscout
 @dataclass
