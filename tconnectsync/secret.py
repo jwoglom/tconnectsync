@@ -22,6 +22,7 @@ def get_one_of(name, default=None, options=[]):
         print("Error: %s must be one of: %s" % (name, options))
         print("Current value: %s" % val)
         sys.exit(1)
+    return val
 
 def get_number(name, default):
     val = get(name, default)
