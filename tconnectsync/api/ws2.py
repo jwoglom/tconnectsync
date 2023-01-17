@@ -5,7 +5,7 @@ import logging
 import time
 import json
 
-from .common import base_session, parse_date, base_headers, ApiException
+from .common import base_session, parse_date, parsed_date_to_arrow, base_headers, days_between, split_days_range, ApiException
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +75,33 @@ class WS2Api:
     This has its own built-in retry logic because Tandem's frontend serving
     the API returns 500s when its backend times out.
     """
+    MAX_THERAPY_TIMELINE_DAYS = 2
     def therapy_timeline_csv(self, start=None, end=None, tries=0):
         startDate = parse_date(start)
         endDate = parse_date(end)
+
+        pStart = parsed_date_to_arrow(startDate)
+        pEnd = parsed_date_to_arrow(endDate)
+        if days_between(pStart, pEnd) > self.MAX_THERAPY_TIMELINE_DAYS:
+            ranges = split_days_range(pStart, pEnd, self.MAX_THERAPY_TIMELINE_DAYS)
+            logger.debug("Splitting call to therapy_timeline_csv(%s, %s) into: %s", start, end, ranges)
+            outputs = []
+            for rng in ranges:
+                rStart, rEnd = rng
+                logger.debug("split therapy_timeline_csv(%s, %s)", rStart, rEnd)
+                output = self.therapy_timeline_csv(rStart, rEnd, tries=tries)
+                logger.debug("split therapy_timeline_csv(%s, %s) = %s", rStart, rEnd, ["%s: %s items" % (key, len(val)) for key, val in output.items()])
+                outputs.append(output)
+            full = {}
+            for o in outputs:
+                for key, val in o.items():
+                    if key not in full:
+                        full[key] = val
+                    elif val is not None:
+                        full[key] += val
+            
+            logger.debug("therapy_timeline_csv merge: %s", ["%s: %s items" % (key, len(val)) for key, val in full.items()])
+            return full
 
         try:
             req_text = self.get('therapytimeline2csv/%s/%s/%s?format=csv' % (self.userGuid, startDate, endDate), timeout=10)
@@ -92,6 +116,7 @@ class WS2Api:
                     return self.therapy_timeline_csv(start, end, tries+1)
             raise e
 
+        logger.debug('req_text: %s', req_text)
         sections = self._split_empty_sections(req_text)
 
         readingData = None

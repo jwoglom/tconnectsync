@@ -1,6 +1,8 @@
 import datetime
+from typing import List, Tuple
 import requests
 import random
+import arrow
 
 from tconnectsync import secret
 
@@ -8,6 +10,9 @@ def parse_date(date):
     if type(date) == str:
         return date
     return (date or datetime.datetime.now()).strftime('%m-%d-%Y')
+
+def parsed_date_to_arrow(date):
+    return arrow.get(datetime.datetime.strptime(date, '%m-%d-%Y'))
 
 USER_AGENTS = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
@@ -96,6 +101,28 @@ def base_session():
         s._original_request = s.request
         s.request = wrapped_request.__get__(s, requests.Session)
     return s
+
+def days_between(start, end) -> int:
+    diff = arrow.get(end) - arrow.get(start)
+    return diff.days
+
+# both inclusive
+def split_days_range(start_a, end_a, days: int = 5) -> List[Tuple[str, str]]:
+    ranges = []
+    start = arrow.get(start_a)
+    end = arrow.get(end_a)
+    cur_s = start
+    cur = start
+    while cur <= end:
+        if (cur - cur_s).days >= days-1:
+            ranges.append((cur_s, cur))
+            cur_s = cur + datetime.timedelta(days=1)
+        
+        cur += datetime.timedelta(days=1)
+    if len(ranges) > 0 and (end - ranges[-1][-1]).days > 0:
+        ranges.append((cur_s, end))
+    
+    return ranges
 
 class ApiException(Exception):
     def __init__(self, status_code, text, *args, **kwargs):

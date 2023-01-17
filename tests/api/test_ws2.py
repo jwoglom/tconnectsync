@@ -2,6 +2,7 @@
 
 import unittest
 import itertools
+import copy
 
 from .fake import WS2Api
 
@@ -28,7 +29,7 @@ class TestWS2Api(unittest.TestCase):
         ws2.get = self.fake_get_with_http_500(2)
 
         self.assertEqual(
-            ws2.therapy_timeline_csv('2021-04-01', '2021-04-02'),
+            ws2.therapy_timeline_csv('04-01-2021', '04-02-2021'),
             {
                 "readingData": [],
                 "iobData": [],
@@ -41,7 +42,7 @@ class TestWS2Api(unittest.TestCase):
 
         ws2.get = self.fake_get_with_http_500(3)
 
-        self.assertRaises(ApiException, ws2.therapy_timeline_csv, '2021-04-01', '2021-04-02')
+        self.assertRaises(ApiException, ws2.therapy_timeline_csv, '04-01-2021', '04-02-2021')
 
     RAW_DATA_HEADER = """Tandem Diabetes Care Inc.
 t:connect Therapy Timeline Data Export
@@ -96,12 +97,12 @@ Report Generated On, 4/24/2021 7:50:04 PM
 
         def fake_get(endpoint, **kwargs):
             nonlocal rawData
-            if endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/2021-04-01/2021-04-02?format=csv':
+            if endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/04-01-2021/04-02-2021?format=csv':
                 return rawData
 
         ws2.get = fake_get
 
-        tt = ws2.therapy_timeline_csv('2021-04-01', '2021-04-02')
+        tt = ws2.therapy_timeline_csv('04-01-2021', '04-02-2021')
 
         self.assertDictEqual(tt, self.PARSED_DATA)
 
@@ -113,7 +114,7 @@ Report Generated On, 4/24/2021 7:50:04 PM
 
         def fake_get(endpoint, **kwargs):
             nonlocal rawData
-            if endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/2021-04-01/2021-04-02?format=csv':
+            if endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/04-01-2021/04-02-2021?format=csv':
                 return rawData
 
         ws2.get = fake_get
@@ -122,8 +123,57 @@ Report Generated On, 4/24/2021 7:50:04 PM
         for i in itertools.permutations([self.RAW_DATA_HEADER, self.RAW_DATA_CGM, self.RAW_DATA_IOB, self.RAW_DATA_BOLUS], 4):
             rawData = "\n".join(i)
 
-            tt = ws2.therapy_timeline_csv('2021-04-01', '2021-04-02')
+            tt = ws2.therapy_timeline_csv('04-01-2021', '04-02-2021')
             self.assertDictEqual(tt, self.PARSED_DATA)
+    
+    def test_therapy_timeline_csv_split_past_max_days(self):
+        ws2 = WS2Api()
+        ws2.userGuid = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+
+
+        def replace_str(raw, one, two):
+            return raw.replace('04-01-2021', one).replace('04-02-2021', two)
+        rawData1 = self.RAW_DATA_FULL
+        rawData2 = replace_str(self.RAW_DATA_FULL, '04-03-2021', '04-04-2021')
+        rawData3 = replace_str(self.RAW_DATA_FULL, '04-05-2021', '04-06-2021')
+        rawData4 = replace_str(self.RAW_DATA_FULL, '04-07-2021', '04-07-2021')
+
+        def replace_parsed(one, two):
+            parsedData = copy.deepcopy(self.PARSED_DATA)
+            for typ in parsedData.keys():
+                for i in range(len(parsedData[typ])):
+                    for f in parsedData[typ][i].keys():
+                        if 'datetime' in f.lower():
+                            parsedData[typ][i][f] = replace_str(parsedData[typ][i][f], one, two)
+            return parsedData
+
+        parsedData1 = self.PARSED_DATA
+        parsedData2 = replace_parsed('04-03-2021', '04-04-2021')
+        parsedData3 = replace_parsed('04-05-2021', '04-06-2021')
+        parsedData4 = replace_parsed('04-07-2021', '04-07-2021')
+
+        fullParsedData = parsedData1
+        for d in [parsedData2, parsedData3, parsedData4]:
+            for typ in d.keys():
+                fullParsedData[typ] += d[typ]
+
+        def fake_get(endpoint, **kwargs):
+            nonlocal rawData1, rawData2, rawData3, rawData4
+            print('fake_get call %s' % endpoint)
+            if endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/04-01-2021/04-02-2021?format=csv':
+                return rawData1
+            elif endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/04-03-2021/04-04-2021?format=csv':
+                return rawData2
+            elif endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/04-05-2021/04-06-2021?format=csv':
+                return rawData3
+            elif endpoint == 'therapytimeline2csv/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/04-07-2021/04-07-2021?format=csv':
+                return rawData4
+
+        ws2.get = fake_get
+
+        tt = ws2.therapy_timeline_csv('04-01-2021', '04-07-2021')
+
+        self.assertDictEqual(tt, fullParsedData)
 
 if __name__ == '__main__':
     unittest.main()
