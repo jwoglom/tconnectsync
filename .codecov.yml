@@ -5,10 +5,12 @@ coverage:
     project:
       default: false
       tconnectsync:
-        paths: "tconnectsync/"
+        paths: 
+        - "tconnectsync/"
         target: '75%'
         threshold: '5%'
       tests:
-        paths: "tests/"
+        paths:
+        - "tests/"
         target: '95%'
         threshold: '5%'

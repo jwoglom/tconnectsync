@@ -41,6 +41,14 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    - name: Check codecov configuration
+      run: |
+        curl -X POST --data-binary @.codecov.yml https://codecov.io/validate
+
+        if [[ "$(curl -s -o /dev/null -w "%{http_code}" -X POST --data-binary @.codecov.yml https://codecov.io/validate)" != "200" ]]; then
+          echo Error parsing codecov file
+          exit 1
+        fi
     - name: Generate Coverage Report
       run: |
         pip install coverage
