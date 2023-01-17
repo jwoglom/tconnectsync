@@ -90,7 +90,7 @@ def compare_profiles(device_profiles: List[Profile], device_settings: DeviceSett
 
     if not current_pump_profile:
         logger.error('No current pump profile, so skipping profile update: device: %s', device_profiles)
-        return False, current_ns_profile
+        return False, ns_profile_obj
 
     current_ns_profile = ns_profile_obj.get('defaultProfile')
     if current_pump_profile != current_ns_profile:
