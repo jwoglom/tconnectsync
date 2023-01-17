@@ -94,7 +94,7 @@ DEVICE_SETTINGS = DeviceSettings(
 )
 
 NS_PROFILE_A = {
-    "dia": 5.0,
+    "dia": "5.0",
     "carbratio": [
         {
             "time": "00:00",
@@ -184,7 +184,7 @@ NS_PROFILE_A = {
 }
 
 NS_PROFILE_B = {
-    "dia": 5.0,
+    "dia": "5.0",
     "carbratio": [
         {
             "time": "00:00",
