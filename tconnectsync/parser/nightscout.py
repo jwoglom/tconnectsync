@@ -114,8 +114,8 @@ class NightscoutEntry:
     @staticmethod
     def profile_store(profile: Profile, device_settings: DeviceSettings) -> dict:
         return {
-            # insulin duration in hours
-            "dia": (profile.insulin_duration_min / 60),
+            # insulin duration in hours; Nightscout JS bug requires all top-level fields to be strings
+            "dia": "%s" % (profile.insulin_duration_min / 60),
             "carbratio": [
                 {
                     "time": tandem_to_ns_time(segment.time),

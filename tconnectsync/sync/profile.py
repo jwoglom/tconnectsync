@@ -88,6 +88,10 @@ def compare_profiles(device_profiles: List[Profile], device_settings: DeviceSett
         if profile.active:
             current_pump_profile = profile.title
 
+    if not current_pump_profile:
+        logger.error('No current pump profile, so skipping profile update: device: %s', device_profiles)
+        return False, current_ns_profile
+
     current_ns_profile = ns_profile_obj.get('defaultProfile')
     if current_pump_profile != current_ns_profile:
         logger.info("Current profile changed: pump: %s nightscout: %s", current_pump_profile, current_ns_profile)
