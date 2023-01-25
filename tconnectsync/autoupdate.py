@@ -125,7 +125,7 @@ class Autoupdate:
                 # above no indexes warning.
                 elif self.last_successful_process_time_range and (now - self.last_successful_process_time_range) >= 60 * self.secret.AUTOUPDATE_FAILURE_MINUTES:
                     logger.error(AutoupdateNoNewDataDetectedError(
-                        "%s: No new data has been detected via the API for %d minutes. " % (datetime.datetime.now(), now - self.last_successful_process_time_range)//60 +
+                        "%s: No new data has been detected via the API for %d minutes. " % (datetime.datetime.now(), (now - self.last_successful_process_time_range)//60) +
                         "tconnectsync might not be functioning properly."))
 
                     if self.secret.AUTOUPDATE_RESTART_ON_FAILURE:
