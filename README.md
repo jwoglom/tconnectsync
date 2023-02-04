@@ -404,7 +404,7 @@ You can use one of the same `run.sh` files referenced above, but remove the `--a
 
 ### For non-WSL Windows 
 Create a batch file 'tconnectsync.bat' file containing:
-'<PYTHONDIRECTORY\python "C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\main.py --auto-update"
+'<PYTHONDIRECTORY\python "C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\main.py" --auto-update
 
 If main.py doesn't exist in C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\, create it to match the copy in this repository.
 
