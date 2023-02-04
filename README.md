@@ -124,7 +124,7 @@ First, ensure that you have **Python 3** with **Pip** installed:
     - `sudo alternatives --set python /usr/bin/python3.9` 
 * **On Windows:** Install Ubuntu under the [Windows Subsystem for Linux](https://ubuntu.com/wsl).
   Open the Ubuntu Terminal, then run `sudo apt install python3 python3-pip`.
-  Perform the remainder of the steps under the Ubuntu environment.
+  Perform the remainder of the steps under the Ubuntu environment. Alternatively, this can be installed in native Windows with no modifications.
 
 Now install the `tconnectsync` package with pip:
 
@@ -136,7 +136,7 @@ To install into a user environment instead of system-wide for a more contained i
 $ pip3 install --user tconnectsync
 ````
   - This will place the tconnectsync binary file at ``/home/<username>/.local/bin/tconnectsync``
-
+  - For non-WSL Windows, it will be in ``<PYTHON DIRECTORY>\Lib\site-packages\tconnectsync``
 
 If the pip3 command is not found, run `python3 -m pip install tconnectsync` instead.
 
@@ -167,7 +167,7 @@ Move the `.env` file you created to the following folder:
 
 * **MacOS:** `/Users/<username>/.config/tconnectsync/.env`
 * **Linux:** `$HOME/.config/tconnectsync/.env`
-* **Windows:** `$HOME/.config/tconnectsync/.env` (inside WSL)
+* **Windows:** `$HOME/.config/tconnectsync/.env` (inside WSL) OR `C:\Users\<username>\.config\tconnectsync` (native Windows)
 
 ```
 $ tconnectsync --check-login
@@ -401,6 +401,14 @@ An example of a user crontab `crontab -e` if not running system-wide, which runs
 ```
 
 You can use one of the same `run.sh` files referenced above, but remove the `--auto-update` flag since you are handling the functionality for running the script periodically yourself.
+
+### For non-WSL Windows 
+Create a batch file 'tconnectsync.bat' file containing:
+'<PYTHONDIRECTORY\python "C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\main.py --auto-update"
+
+If main.py doesn't exist in C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\, create it to match the copy in this repository.
+
+Use task scheduler to run this batch file on a scheduled basis.
 
 ## Tandem APIs
 
