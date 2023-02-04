@@ -19,6 +19,9 @@ class TherapyEvent:
         self.eventDateTime = json['eventDateTime']
         self.sourceRecId = json['sourceRecId']
         self.rawJson = json
+    
+    def __str__(self):
+        return "%s(%s)" % (self.type, self.rawJson)
 
 class CGMTherapyEvent(TherapyEvent):
     eventID = None

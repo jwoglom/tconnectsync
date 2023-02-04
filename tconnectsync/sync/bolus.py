@@ -40,9 +40,9 @@ def process_bolus_events(bolusdata, cgmEvents=None, source=""):
                 elif not parsed.bolex_start_time and parsed.request_time:
                     logger.warning("Setting bolex_start_time to request_time for non-completed %s extended bolus: %s parsed: %s" % (source, b, parsed))
                     parsed.bolex_start_time = parsed.request_time
-            logger.debug("process_bolus_events for incomplete bolus: %s parsed: %s" % (b.rawJson, parsed))
+            logger.debug("process_bolus_events for incomplete bolus: %s parsed: %s" % (b, parsed))
         elif parsed.is_extended_bolus:
-            logger.debug("process_bolus_events for complete extended bolus: %s parsed: %s" % (b.rawJson, parsed))
+            logger.debug("process_bolus_events for complete extended bolus: %s parsed: %s" % (b, parsed))
 
         if parsed.bg and cgmEvents:
             requested_at = parsed.request_time if not parsed.extended_bolus else parsed.bolex_start_time

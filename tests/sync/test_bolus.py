@@ -172,5 +172,23 @@ class TestBolusSync(unittest.TestCase):
         for d in zeroData:
             self.assertNotIn(TConnectEntry.parse_bolus_entry(d), bolusEvents)
 
+    def test_process_bolus_events_ciq_extended_bolus(self):
+        stdData = [
+            TestTConnectEntryBolus.entryExtendedComplete,
+        ]
+        zeroData = [
+        ]
+        bolusData = stdData + zeroData
+
+        bolusEvents = process_bolus_events(bolusData)
+        self.assertEqual(len(bolusEvents), len(stdData))
+
+        self.assertListEqual(bolusEvents, [
+            TConnectEntry.parse_bolus_entry(d) for d in stdData
+        ])
+
+        for d in zeroData:
+            self.assertNotIn(TConnectEntry.parse_bolus_entry(d), bolusEvents)
+
 if __name__ == '__main__':
     unittest.main()
