@@ -441,6 +441,93 @@ class TestTConnectEntryBolus(unittest.TestCase):
                 "bolex_completion_time": None,
                 "bolex_start_time": None
             }))
+    
+    entryExtendedBolusComplete = {
+        "actualTotalBolusRequested": 0.4,
+        "bg": 131,
+        "bolex": {
+            "size": 0.2,
+            "bolexStartDateTime": "2022-08-09T23:20:04",
+            "insulinDelivered": {
+                "completionDateTime": "2022-08-09T23:35:03",
+                "value": 0.2
+            },
+            "iob": 5.7,
+            "completionStatusId": 3,
+            "completionStatusDesc": "Completed",
+            "extendedBolusIsComplete": 1,
+            "insulinRequested": 0.2,
+            "bolexCompletionId": 16757133
+        },
+        "bolusRequestOptions": "Extended",
+        "bolusType": "Carb",
+        "carbSize": 0,
+        "correctionBolusSize": 0,
+        "correctionFactor": 30,
+        "declinedCorrection": 0,
+        "duration": 15,
+        "eventDateTime": "2022-08-09T23:19:15",
+        "eventHistoryReportDetails": "CF 1:30 - Carb Ratio 1:6 - Target BG 110<br/>Override: Pump calculated Bolus = 0.0 units",
+        "eventHistoryReportEventDesc": "Food Bolus: 50&#37; Extended 15 mins",
+        "foodBolusSize": 0,
+        "iob": 5.87,
+        "isQuickBolus": 0,
+        "note": {
+            "id": 0,
+            "indexId": "631597",
+            "eventTypeId": 64,
+            "sourceRecordId": 0,
+            "eventId": 0,
+            "active": False
+        },
+        "requestDateTime": "2022-08-09T23:19:15",
+        "standard": {
+            "insulinDelivered": {
+                "completionDateTime": "2022-08-09T23:20:04",
+                "value": 0.2
+            },
+            "foodDelivered": 0,
+            "correctionDelivered": 0,
+            "insulinRequested": 0.2,
+            "completionStatusId": 3,
+            "completionStatusDesc": "Completed",
+            "bolusIsComplete": 1,
+            "bolusRequestId": 3636,
+            "bolusCompletionId": 3636
+        },
+        "standardPercent": 50,
+        "targetBG": 110,
+        "userOverride": 1,
+        "type": "Bolus",
+        "description": "Extended 50.00%/0.00",
+        "sourceRecId": 1209631944,
+        "eventTypeId": 0,
+        "indexId": 0,
+        "uploadId": 0,
+        "interactive": 0,
+        "tempRateId": 0,
+        "tempRateCompleted": 0,
+        "tempRateActivated": 0
+    }
+    def test_parse_bolus_entry_extended_complete(self):
+        self.assertEqual(
+            TConnectEntry.parse_bolus_entry(self.entryExtendedBolusComplete),
+            Bolus(
+                description='Extended 50.00%/0.00', 
+                complete='1', 
+                completion='Completed', 
+                request_time='2022-08-09 23:19:15-04:00', 
+                completion_time='2022-08-09 23:20:04-04:00', 
+                insulin='0.2', 
+                requested_insulin='0.2', 
+                carbs='0', 
+                bg='131', 
+                user_override='1', 
+                extended_bolus='1', 
+                bolex_completion_time='2022-08-09 23:35:03-04:00', 
+                bolex_start_time='2022-08-09 23:20:04-04:00'))
+
+
 
 class TestTConnectEntryReading(unittest.TestCase):
     entry1 = {
