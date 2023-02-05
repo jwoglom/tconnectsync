@@ -132,6 +132,17 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
             added += ns_write_cgm_events(nightscout, cgmData, pretend, time_start=time_start, time_end=time_end)
             logger.debug("Finished writing CGM events")
 
+    if ciqReadingData:
+        cgmData = None
+        if CGM in features:
+            logger.debug("Processing CGM events")
+            cgmData = process_cgm_events(ciqReadingData)
+        
+        if CGM in features:
+            logger.debug("Writing CGM events")
+            added += ns_write_cgm_events(nightscout, cgmData, pretend, time_start=time_start, time_end=time_end)
+            logger.debug("Finished writing CGM events")
+
     if BASAL in features:
         basalEvents = process_ciq_basal_events(ciqTherapyTimelineData)
         if csvBasalData:
