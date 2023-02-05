@@ -122,9 +122,11 @@ First, ensure that you have **Python 3** with **Pip** installed:
   - For CentOS/Rocky Linux 8: 
     - `sudo dnf install python39-pip`
     - `sudo alternatives --set python /usr/bin/python3.9` 
-* **On Windows:** Install Ubuntu under the [Windows Subsystem for Linux](https://ubuntu.com/wsl).
-  Open the Ubuntu Terminal, then run `sudo apt install python3 python3-pip`.
-  Perform the remainder of the steps under the Ubuntu environment. Alternatively, this can be installed in native Windows with no modifications.
+* **On Windows:** 
+  - **With WSL:** Install Ubuntu under the [Windows Subsystem for Linux](https://ubuntu.com/wsl).
+    Open the Ubuntu Terminal, then run `sudo apt install python3 python3-pip`.
+    Perform the remainder of the steps under the Ubuntu environment.
+  - **Native:** Alternatively, you can run tconnectsync in native Windows with no modifications. However, this is less well-tested (open a GitHub issue if you experience any problems).
 
 Now install the `tconnectsync` package with pip:
 
@@ -402,13 +404,19 @@ An example of a user crontab `crontab -e` if not running system-wide, which runs
 
 You can use one of the same `run.sh` files referenced above, but remove the `--auto-update` flag since you are handling the functionality for running the script periodically yourself.
 
-### For non-WSL Windows 
+### For Native Windows 
+
 Create a batch file 'tconnectsync.bat' file containing:
-'<PYTHONDIRECTORY\python "C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\main.py" --auto-update
 
-If main.py doesn't exist in C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\, create it to match the copy in this repository.
+```
+python "C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\main.py" --auto-update
+```
 
-Use task scheduler to run this batch file on a scheduled basis.
+If `python` does not exist in your path, specify the full path to `python.exe`.
+
+If main.py doesn't exist in `C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\`, create it to match the copy in this repository.
+
+[Use Windows Task Scheduler](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10) to run this batch file on a scheduled basis.
 
 ## Tandem APIs
 
