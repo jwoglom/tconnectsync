@@ -127,17 +127,18 @@ class TConnectEntry:
     
     @staticmethod
     def parse_reading_entry(data):
+        return {
+            "time": TConnectEntry._datetime_parse(data["EventDateTime"]).format(),
+            "bg": data["Readings (CGM / BGM)"],
+            "type": data["Description"]
+        }
+
+    def parse_reading_ciq_entry(data):
         if data.egv:
             return {
                 "time": TConnectEntry._datetime_parse(data.eventDateTime).format(),
                 "bg": data.egv,
                 "type": data.type
-            }
-        else:
-            return {
-                "time": TConnectEntry._datetime_parse(data["EventDateTime"]).format(),
-                "bg": data["Readings (CGM / BGM)"],
-                "type": data["Description"]
             }
 
     ACTIVITY_EVENTS = { 1: "Sleep", 2: "Exercise", 3: "AutoBolus", 4: "CarbOnly" }

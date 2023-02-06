@@ -14,6 +14,13 @@ def process_cgm_events(readingData):
     
     return data
 
+def process_cgm_ciq_events(readingData):
+    data = []
+    for r in readingData:
+        data.append(TConnectEntry.parse_reading_ciq_entry(r))
+    
+    return data
+
 """
 Given reading data and a time, finds the BG reading event which would have
 been the current one at that time. e.g., it looks before the given time,
