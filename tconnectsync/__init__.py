@@ -18,11 +18,12 @@ try:
         TCONNECT_PASSWORD,
         NS_URL,
         NS_SECRET,
-        NS_SKIP_TLS_VERIFY
+        NS_SKIP_TLS_VERIFY,
+        PUMP_SERIAL_NUMBER
     )
     from . import secret
-except Exception:
-    print('Unable to read secret.py')
+except Exception as e:
+    print('Unable to read secrets from secret.py', e)
     sys.exit(1)
 
 
@@ -78,6 +79,10 @@ def main(*args, **kwargs):
         logging.warn('NO USERNAME WAS PROVIDED. Ensure you have set TCONNECT_EMAIL appropriately.')
     if TCONNECT_PASSWORD == 'password':
         logging.warn('NO PASSWORD WAS PROVIDED. Ensure you have set TCONNECT_PASSWORD appropriately.')
+    if NS_URL == 'https://yournightscouturl/':
+        logging.warn('NO NIGHTSCOUT URL WAS PROVIDED. Ensure your have set NS_URL appropriately.')
+    if PUMP_SERIAL_NUMBER == '11111111':
+        logging.warn('NO PUMP SERIAL NUMBER WAS PROVIDED. Ensure you have set PUMP_SERIAL_NUMBER appropriately.')
 
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
 
