@@ -127,7 +127,7 @@ def split_days_range(start_a, end_a, days: int = 5) -> List[Tuple[str, str]]:
 class ApiException(Exception):
     def __init__(self, status_code, text, *args, **kwargs):
         self.status_code = status_code
-        super().__init__('%s (HTTP %s)' % (text, status_code), *args, **kwargs)
+        super().__init__('%s%s' % (text, ' (HTTP %s)' % status_code if status_code else ''), *args, **kwargs)
 
 class ApiLoginException(ApiException):
     pass

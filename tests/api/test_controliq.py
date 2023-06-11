@@ -111,11 +111,64 @@ class TestControlIQApi(unittest.TestCase):
 
                 text=post_callback)
 
-            self.assertRaises(ApiLoginException, ciq.login, 'email@email.com', 'password')
+            self.assertRaisesRegex(ApiLoginException, 'Error logging in to t:connect: Check your login credentials.', ciq.login, 'email@email.com', 'password')
 
             self.assertIsNone(ciq.userGuid)
             self.assertIsNone(ciq.accessToken)
             self.assertIsNone(ciq.accessTokenExpiresAt)
+
+    def test_login_invalid_credentials_parsed_message(self):
+        ciq = ControlIQApi()
+        ciq.LOGIN_URL = RealControlIQApi.LOGIN_URL
+        ciq.login = lambda email, password: RealControlIQApi.login(ciq, email, password)
+
+        with requests_mock.Mocker() as m:
+            m.get('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
+                request_headers=base_headers(),
+
+                text=self.LOGIN_HTML)
+
+            def post_callback(request, context):
+                context.status_code = 200
+                return '<html><body><div class="notice_error" id="literalMessage" style="">The email address or password you entered is invalid. Please re-enter and try again.</div></body></html>'
+
+            m.post('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
+                request_headers={'Referer': ciq.LOGIN_URL, **base_headers()},
+
+                text=post_callback)
+
+            self.assertRaisesRegex(ApiLoginException, 'Error logging in to t:connect: The email address or password you entered is invalid. Please re-enter and try again.', ciq.login, 'email@email.com', 'password')
+
+            self.assertIsNone(ciq.userGuid)
+            self.assertIsNone(ciq.accessToken)
+            self.assertIsNone(ciq.accessTokenExpiresAt)
+
+    def test_login_unexpected_http_code(self):
+        ciq = ControlIQApi()
+        ciq.LOGIN_URL = RealControlIQApi.LOGIN_URL
+        ciq.login = lambda email, password: RealControlIQApi.login(ciq, email, password)
+
+        with requests_mock.Mocker() as m:
+            m.get('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
+                request_headers=base_headers(),
+
+                text=self.LOGIN_HTML)
+
+            def post_callback(request, context):
+                context.status_code = 500
+                return '<html><body>...</body></html>'
+
+            m.post('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f',
+                request_headers={'Referer': ciq.LOGIN_URL, **base_headers()},
+
+                text=post_callback)
+
+            self.assertRaisesRegex(ApiLoginException, 'Error logging in to t:connect \(HTTP 500\)', ciq.login, 'email@email.com', 'password')
+
+            self.assertIsNone(ciq.userGuid)
+            self.assertIsNone(ciq.accessToken)
+            self.assertIsNone(ciq.accessTokenExpiresAt)
+
 
     def fake_get_with_http_code(self, http_code, expected_endpoint, num_times):
         tries = 0

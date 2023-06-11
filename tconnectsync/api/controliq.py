@@ -5,7 +5,7 @@ import logging
 
 from bs4 import BeautifulSoup
 
-from ..util import timeago
+from ..util import timeago, cap_length
 from .common import parse_date, base_headers, base_session, ApiException, ApiLoginException
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class ControlIQApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/'
     LOGIN_URL = 'https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f'
 
-    LAST_CONFIRMED_SOFTWARE_VERSION = 't:connect 7.14.0.1'
+    LAST_CONFIRMED_SOFTWARE_VERSION = 't:connect 7.15.0.1'
 
     userGuid = None
     accessToken = None
@@ -34,12 +34,20 @@ class ControlIQApi:
             data = self._build_login_data(email, password, soup)
 
             req = s.post(self.LOGIN_URL, data=data, headers={'Referer': self.LOGIN_URL, **base_headers()}, allow_redirects=False)
+            # HTTP 200 is reported when credentials are incorrect
+            if req.status_code == 200:
+                login_error = self._find_login_error(req.text)
+                if not login_error:
+                    login_error = 'Check your login credentials.'
+                raise ApiLoginException(None, 'Error logging in to t:connect: %s' % login_error)
+
             if req.status_code != 302:
-                raise ApiLoginException(req.status_code, 'Error logging in to t:connect. Check your login credentials.')
+                raise ApiLoginException(req.status_code, 'Error logging in to t:connect')
 
 
             fwd = s.post(urllib.parse.urljoin(self.LOGIN_URL, req.headers['Location']), cookies=req.cookies, headers=base_headers())
             if fwd.status_code != 200:
+                logger.warn("Received non-HTTP 200: %s" % req.text)
                 raise ApiException(fwd.status_code, 'Error retrieving t:connect login cookies.')
 
             self.userGuid = req.cookies['UserGUID']
@@ -78,6 +86,14 @@ class ControlIQApi:
             "ctl00$ContentBody$LoginControl$txtLoginPassword": password,
             "txtLoginPassword_ClientState": '{"enabled":true,"emptyMessage":"","validationText":"%s","valueAsString":"%s","lastSetTextBoxValue":"%s"}' % (password, password, password)
         }
+
+    def _find_login_error(self, text):
+        try:
+            soup = BeautifulSoup(text, features='lxml')
+            notice_error = soup.select_one(".notice_error").text.strip()
+            return notice_error
+        except Exception:
+            return None
 
     def needs_relogin(self):
         diff = (arrow.get(self.accessTokenExpiresAt) - arrow.get())

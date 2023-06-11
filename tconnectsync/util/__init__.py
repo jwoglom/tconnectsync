@@ -29,3 +29,8 @@ def removeprefix(input_string, prefix):
     if prefix and input_string.startswith(prefix):
         return input_string[len(prefix):]
     return input_string
+
+def cap_length(text, maxlen):
+    if not text or len(text) <= maxlen:
+        return text
+    return '%s[...]%s' % (text[:maxlen//2], text[maxlen//-2:])
