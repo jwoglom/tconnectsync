@@ -73,6 +73,12 @@ def main(*args, **kwargs):
     if time_end < time_start:
         raise Exception('time_start must be before time_end')
 
+
+    if TCONNECT_EMAIL == 'email@email.com':
+        logging.warn('NO USERNAME WAS PROVIDED. Ensure you have set TCONNECT_EMAIL appropriately.')
+    if TCONNECT_PASSWORD == 'password':
+        logging.warn('NO PASSWORD WAS PROVIDED. Ensure you have set TCONNECT_PASSWORD appropriately.')
+
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
 
     nightscout = NightscoutApi(NS_URL, NS_SECRET, NS_SKIP_TLS_VERIFY)
