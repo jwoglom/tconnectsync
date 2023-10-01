@@ -30,10 +30,14 @@ class WebUIScraper:
         return self.controliq.needs_relogin()
 
     def _get(self, endpoint):
-        r = self.controliq.loginSession.get(self.BASE_URL + endpoint, headers=base_headers())
+        r = self.controliq.loginSession.get(self.BASE_URL + endpoint, headers=base_headers(), allow_redirects=True)
 
         if r.status_code != 200:
             raise ApiException(r.status_code, "WebUIScraper HTTP %s response: %s" % (str(r.status_code), r.text))
+
+        if 'login.aspx' in r.url:
+            raise ApiException(401, "WebUIScraper HTTP %s response for login page, returning 401: %s" % (str(r.status_code), r.url))
+
         return r
 
 

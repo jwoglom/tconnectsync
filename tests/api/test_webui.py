@@ -18,7 +18,7 @@ from .fake import ControlIQApi
 from tconnectsync.api.controliq import ControlIQApi as RealControlIQApi
 from tconnectsync.api.common import ApiException, ApiLoginException, base_headers
 
-class TestWebUIScraper(unittest.TestCase):
+class TestWebUIScraperMyDevices(unittest.TestCase):
     maxDiff = None
 
     DEVICES_HTML = """
@@ -319,6 +319,64 @@ class TestWebUIScraper(unittest.TestCase):
                     'guid': None
                 })})
     
+    REDIRECT_HTML = """<html><head><title>Object moved</title></head><body>
+<h2>Object moved to <a href="/login.aspx?ReturnUrl=%2fmyaccount%2fmy_devices.aspx">here</a>.</h2>
+</body></html>"""
+
+    LOGIN_HTML = """<html></html>"""
+
+    def test_relogin_when_redirected_to_login_page(self):
+        ciq = ControlIQApi()
+        ciq.needs_relogin = lambda: False
+        ciq.loginSession = requests.Session()
+        ciq.LOGIN_URL = RealControlIQApi.LOGIN_URL
+        ciq._email = 'EMAIL'
+        ciq._password = 'PASSWORD'
+
+        login_times = []
+        def fake_login(email, password):
+            self.assertEqual(email, ciq._email)
+            self.assertEqual(password, ciq._password)
+
+            login_times.append(1)
+            return True
+
+        ciq.login = fake_login
+        webui = WebUIScraper(ciq)
+
+        ciq.login(ciq._email, ciq._password)
+        self.assertEqual(len(login_times), 1)
+
+        with requests_mock.Mocker() as m:
+            m.get('https://tconnect.tandemdiabetes.com/myaccount/my_devices.aspx',
+                request_headers=base_headers(),
+
+                status_code=302,
+                headers={'Location': 'https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2fmyaccount%2fmy_devices.aspx'},
+                text=self.REDIRECT_HTML)
+
+            m.get('https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2fmyaccount%2fmy_devices.aspx',
+                request_headers=base_headers(),
+
+                status_code=200,
+                text=self.LOGIN_HTML)
+
+            self.assertRaises(ApiException, webui.my_devices)
+            self.assertEqual(len(login_times), 2)
+
+        with requests_mock.Mocker() as m:
+            m.get('https://tconnect.tandemdiabetes.com/myaccount/my_devices.aspx',
+                request_headers=base_headers(),
+
+                text=self.DEVICES_HTML)
+
+            devices = webui.my_devices()
+            self.assertEqual(len(login_times), 2)
+
+
+class TestWebUIScraperPumpSettings(unittest.TestCase):
+    maxDiff = None
+
     PUMP_SETTINGS_HTML = """
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
