@@ -55,7 +55,7 @@ The following synchronization features can be optionally enabled:
   * Sleep Mode (in Nightscout, appears with a start and end time)
 * `IOB`: Insulin-on-board data. Only the most recent IOB entry is saved to Nightscout, as an "activity". The Nightscout UI does not currently display this information. In order to read this value, you need to query the Nightscout activity API endpoint. If you don't know what that means, then there is no reason to enable this option.
 
-The following synchronization features are under development, [**but are not yet ready for use**](https://github.com/jwoglom/tconnectsync/issues/16):
+The following synchronization features are considered to be in alpha, and haven't been widely tested. If you want to use them, [set `ENABLE_TESTING_MODES=true` for them to show up](https://github.com/jwoglom/tconnectsync/blob/master/tconnectsync/features.py#L29):
 * `BOLUS_BG`: Adds BG readings which are associated with boluses on the pump into the Nightscout treatment object. It will determine whether the BG reading was automatically filled via the Dexcom connection on the pump or was manually entered by seeing if the BG reading matches the current CGM reading as known to the pump at that time. Support for this is nearly complete.
 * `CGM`: Adds Dexcom CGM readings from the pump to Nightscout as SGV (sensor glucose value) entries. This should only be used in a situation where xDrip/Dexcom Share/etc. is not used and the pump connection to the CGM will be the only source of CGM data to Nightscout. This requires additional testing before it should be considered ready.
 
