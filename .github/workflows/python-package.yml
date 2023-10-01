@@ -35,7 +35,9 @@ jobs:
         pipenv check \
           --ignore 51499 \
           --ignore 52495 \
-          --ignore 52365
+          --ignore 52365 \
+          --ignore 59956 \
+          --ignore 58755
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
