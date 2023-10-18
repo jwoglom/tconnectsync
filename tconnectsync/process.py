@@ -21,6 +21,7 @@ from .sync.iob import (
     ns_write_iob_events
 )
 from .sync.cgm import (
+    process_cgm_ciq_events,
     process_cgm_events,
     ns_write_cgm_events
 )
@@ -126,6 +127,17 @@ def process_time_range(tconnect, nightscout, time_start, time_end, pretend, feat
         if CGM in features or BOLUS_BG in features:
             logger.debug("Processing CGM events")
             cgmData = process_cgm_events(csvReadingData)
+        
+        if CGM in features:
+            logger.debug("Writing CGM events")
+            added += ns_write_cgm_events(nightscout, cgmData, pretend, time_start=time_start, time_end=time_end)
+            logger.debug("Finished writing CGM events")
+
+    if ciqReadingData:
+        cgmData = None
+        if CGM in features:
+            logger.debug("Processing CGM events")
+            cgmData = process_cgm_ciq_events(ciqReadingData)
         
         if CGM in features:
             logger.debug("Writing CGM events")
