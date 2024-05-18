@@ -192,11 +192,11 @@ def _ns_write_pump_events(nightscout, events, buildNsEventFunc, eventType, prete
 
     add_count = 0
     for event in events:
-        created_at = event["time"]
-        if last_upload_time and arrow.get(created_at) <= last_upload_time:
+        created_at = arrow.get(event["time"])
+        if last_upload_time and created_at <= last_upload_time:
             skip = True
             if "duration_mins" in event.keys() and "duration" in last_upload.keys():
-                if created_at == last_upload["created_at"] and float(event["duration_mins"]) > float(last_upload["duration"]):
+                if created_at == arrow.get(last_upload["created_at"]) and float(event["duration_mins"]) > float(last_upload["duration"]):
                     logger.info("Latest %s event needs updating: duration has increased from %s to %s: %s" % (eventType, last_upload["duration"], event["duration_mins"], event))
                     logger.info("Deleting previous %s: %s" % (eventType, last_upload))
                     nightscout.delete_entry('treatments/%s' % last_upload["_id"])
