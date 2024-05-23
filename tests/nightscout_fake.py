@@ -20,7 +20,7 @@ class NightscoutApi(tconnectsync.nightscout.NightscoutApi):
     def put_entry(self, ns_format, entity):
         self.put_entries[entity].append(ns_format)
 
-    def last_uploaded_entry(self, eventType, start_date=None, end_date=None):
+    def last_uploaded_entry(self, eventType, time_start=None, time_end=None):
         raise NotImplementedError
 
     def last_uploaded_activity(self, activityType):
