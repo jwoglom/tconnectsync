@@ -14,7 +14,7 @@ class ControlIQApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/'
     LOGIN_URL = 'https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f'
 
-    LAST_CONFIRMED_SOFTWARE_VERSION = 't:connect 7.16.0.1'
+    LAST_CONFIRMED_SOFTWARE_VERSION = 't:connect 7.17.1.2'
 
     userGuid = None
     accessToken = None
