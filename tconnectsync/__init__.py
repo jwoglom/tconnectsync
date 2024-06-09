@@ -86,7 +86,7 @@ def main(*args, **kwargs):
 
     tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
 
-    nightscout = NightscoutApi(NS_URL, NS_SECRET, NS_SKIP_TLS_VERIFY)
+    nightscout = NightscoutApi(NS_URL, NS_SECRET, skip_verify=NS_SKIP_TLS_VERIFY, pretend=args.pretend)
 
     if args.check_login:
         return check_login(tconnect, time_start, time_end)

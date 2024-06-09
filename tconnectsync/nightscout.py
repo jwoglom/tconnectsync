@@ -30,10 +30,11 @@ def time_range(field_name, start_time, end_time, t_to_space=False):
 
 logger = logging.getLogger(__name__)
 class NightscoutApi:
-	def __init__(self, url, secret, skip_verify=False):
+	def __init__(self, url, secret, skip_verify=False, pretend=False):
 		self.url = url
 		self.secret = secret
 		self.verify = False if skip_verify else None
+		self.pretend = pretend
 
 
 	def upload_entry(self, ns_format, entity='treatments'):
@@ -76,22 +77,27 @@ class NightscoutApi:
 			if j and len(j) > 0:
 				return j[0]
 			return None
-		
-		ret = None
 		try:
-			ret = internal(False)
-		except ApiException as e:
-			logger.warning("last_uploaded_entry with no t_to_space: %s", e)
 			ret = None
-		if ret is None and (time_start or time_end):
 			try:
-				ret = internal(True)
+				ret = internal(False)
 			except ApiException as e:
-				logger.warning("last_uploaded_entry with t_to_space: %s", e)
+				logger.warning("last_uploaded_entry with no t_to_space: %s", e)
 				ret = None
-			if ret is not None:
-				logger.warning("last_uploaded_entry with eventType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (eventType, time_start, time_end))
-		return ret
+			if ret is None and (time_start or time_end):
+				try:
+					ret = internal(True)
+				except ApiException as e:
+					logger.warning("last_uploaded_entry with t_to_space: %s", e)
+					ret = None
+				if ret is not None:
+					logger.warning("last_uploaded_entry with eventType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (eventType, time_start, time_end))
+			return ret
+		except requests.exceptions.ConnectionError as e:
+			if self.pretend:
+				logger.warn('Ignoring ConnectionError because pretend=true', e)
+			else:
+				raise e
 	
 	def last_uploaded_bg_entry(self, time_start=None, time_end=None):
 		def internal(t_to_space):
@@ -107,12 +113,19 @@ class NightscoutApi:
 				return j[0]
 			return None
 		
-		ret = internal(False)
-		if ret is None and (time_start or time_end):
-			ret = internal(True)
-			if ret is not None:
-				logger.warning("last_uploaded_bg_entry with time_start=%s time_end=%s only returned data when timestamps contained a space" % (time_start, time_end))
-		return ret
+		try:
+			ret = internal(False)
+			if ret is None and (time_start or time_end):
+				ret = internal(True)
+				if ret is not None:
+					logger.warning("last_uploaded_bg_entry with time_start=%s time_end=%s only returned data when timestamps contained a space" % (time_start, time_end))
+
+			return ret
+		except requests.exceptions.ConnectionError as e:
+			if self.pretend:
+				logger.warn('Ignoring ConnectionError because pretend=true', e)
+			else:
+				raise e
 
 	def last_uploaded_activity(self, activityType, time_start=None, time_end=None):
 		def internal(t_to_space):
@@ -128,12 +141,18 @@ class NightscoutApi:
 				return j[0]
 			return None
 		
-		ret = internal(False)
-		if ret is None and (time_start or time_end):
-			ret = internal(True)
-			if ret is not None:
-				logger.warning("last_uploaded_activity with activityType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (activityType, time_start, time_end))
-		return ret
+		try:
+			ret = internal(False)
+			if ret is None and (time_start or time_end):
+				ret = internal(True)
+				if ret is not None:
+					logger.warning("last_uploaded_activity with activityType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (activityType, time_start, time_end))
+			return ret
+		except requests.exceptions.ConnectionError as e:
+			if self.pretend:
+				logger.warn('Ignoring ConnectionError because pretend=true', e)
+			else:
+				raise e
 
 	"""
 	Returns general status information about the Nightscout server.
