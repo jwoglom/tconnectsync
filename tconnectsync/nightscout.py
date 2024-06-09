@@ -30,11 +30,11 @@ def time_range(field_name, start_time, end_time, t_to_space=False):
 
 logger = logging.getLogger(__name__)
 class NightscoutApi:
-	def __init__(self, url, secret, skip_verify=False, pretend=False):
+	def __init__(self, url, secret, skip_verify=False, ignore_conn_errors=False):
 		self.url = url
 		self.secret = secret
 		self.verify = False if skip_verify else None
-		self.pretend = pretend
+		self.ignore_conn_errors = ignore_conn_errors
 
 
 	def upload_entry(self, ns_format, entity='treatments'):
@@ -94,8 +94,8 @@ class NightscoutApi:
 					logger.warning("last_uploaded_entry with eventType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (eventType, time_start, time_end))
 			return ret
 		except requests.exceptions.ConnectionError as e:
-			if self.pretend:
-				logger.warn('Ignoring ConnectionError because pretend=true', e)
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
 	
@@ -122,8 +122,8 @@ class NightscoutApi:
 
 			return ret
 		except requests.exceptions.ConnectionError as e:
-			if self.pretend:
-				logger.warn('Ignoring ConnectionError because pretend=true', e)
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
 
@@ -149,8 +149,8 @@ class NightscoutApi:
 					logger.warning("last_uploaded_activity with activityType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (activityType, time_start, time_end))
 			return ret
 		except requests.exceptions.ConnectionError as e:
-			if self.pretend:
-				logger.warn('Ignoring ConnectionError because pretend=true', e)
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
 

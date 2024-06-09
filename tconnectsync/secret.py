@@ -49,6 +49,7 @@ if not get('NS_SECRET') and get('API_SECRET'):
     NS_SECRET = get('API_SECRET')
 
 NS_SKIP_TLS_VERIFY = get_bool('NS_SKIP_TLS_VERIFY', 'false')
+NS_IGNORE_CONN_ERRORS = get_bool('NS_IGNORE_CONN_ERRORS', 'false')
 
 TIMEZONE_NAME = get('TIMEZONE_NAME', 'America/New_York')
 
