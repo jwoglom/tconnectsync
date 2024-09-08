@@ -14,7 +14,7 @@ class ControlIQApi:
     BASE_URL = 'https://tdcservices.tandemdiabetes.com/'
     LOGIN_URL = 'https://tconnect.tandemdiabetes.com/login.aspx?ReturnUrl=%2f'
 
-    LAST_CONFIRMED_SOFTWARE_VERSION = 't:connect 7.17.1.2'
+    LAST_CONFIRMED_SOFTWARE_VERSION = 't:connect 7.17.2.3'
 
     userGuid = None
     accessToken = None
@@ -51,9 +51,21 @@ class ControlIQApi:
                 raise ApiException(fwd.status_code, 'Error retrieving t:connect login cookies.')
 
             self.userGuid = req.cookies['UserGUID']
-            self.accessToken = req.cookies['accessToken']
-            self.accessTokenExpiresAt = req.cookies['accessTokenExpiresAt']
-            logger.info("Logged in to ControlIQApi successfully (expiration: %s, %s)" % (self.accessTokenExpiresAt, timeago(self.accessTokenExpiresAt)))
+            if 'accessToken' in req.cookies and 'accessTokenExpiresAt' in req.cookies:
+                self.accessToken = req.cookies['accessToken']
+                self.accessTokenExpiresAt = req.cookies['accessTokenExpiresAt']
+                logger.info("Logged in to ControlIQApi successfully via accessToken cookie (expiration: %s, %s)" % (self.accessTokenExpiresAt, timeago(self.accessTokenExpiresAt)))
+            else:
+                logger.info("No accessToken cookie found when logging in to ControlIQApi. Triggering AndroidApi auth")
+
+                from .android import AndroidApi
+                android = AndroidApi(email, password)
+                self.accessToken = android.accessToken
+                self.accessTokenExpiresAt = android.accessTokenExpiresAt
+
+                logger.info("Logged in to AndroidApi successfully via accessToken param (expiration: %s, %s)" % (self.accessTokenExpiresAt, timeago(self.accessTokenExpiresAt)))
+
+
             self.loginSession = s
             return True
 
@@ -96,6 +108,9 @@ class ControlIQApi:
             return None
 
     def needs_relogin(self):
+        if not self.accessTokenExpiresAt:
+            return False
+
         diff = (arrow.get(self.accessTokenExpiresAt) - arrow.get())
         return (diff.seconds <= 5 * 60)
 

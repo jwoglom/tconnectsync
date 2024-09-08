@@ -29,6 +29,10 @@ class AndroidApi:
     ANDROID_API_USERNAME = base64.b64decode('QzIzMzFDRDYtRDQ1MC00OTVFLTlDMTktNjcyMTUyMzBDODVD').decode()
     ANDROID_API_PASSWORD = base64.b64decode('dHo0MzNLVzVRREM5VjdmIXo2QF4ybyZZNlNHR1lo').decode()
 
+    # These credentials are used by tconnect web
+    TCONNECT_WEB_USERNAME = base64.b64decode('M0U2MzU3QkEtRjYyNS00REQyLUI2NUYtNEI1RTgxNDRBQTZG').decode()
+    TCONNECT_WEB_PASSWORD = base64.b64decode('cUMyaXFIc2w3OFFoR0RYdCpMenFwb1pxZTl3eHN6').decode()
+
     ANDROID_USER_AGENT = 'Dalvik/2.1.0 (Linux; U; Android 12; Pixel 4a Build/SP2A.220305.012)'
 
     # These tokens are separate from the "standard" tdcservices API
@@ -65,15 +69,17 @@ class AndroidApi:
             raise ApiLoginException(r.status_code, 'Received HTTP %s during login: %s' % (r.status_code, r.text))
 
         j = r.json()
-        if "user" not in j or not j["user"]:
-            raise ApiException(r.status_code, 'No user details present in AndroidApi oauth response: %s' % r.text)
+        # tconnect web returns a null user
+        # if "user" not in j or not j["user"]:
+        #     raise ApiException(r.status_code, 'No user details present in AndroidApi oauth response: %s' % r.text)
 
         self.accessToken = j["accessToken"]
         self.accessTokenExpiresAt = j["accessTokenExpiresAt"]
         # NOTE: the refresh token is currently unused, instead a new access
         # token is obtained from scratch by re-logging in when it expires.
-        self.refreshToken = j["refreshToken"]
-        self.refreshTokenExpiresAt = j["refreshTokenExpiresAt"]
+        if "refreshToken" in j and "refreshTokenExpiresAt" in j:
+            self.refreshToken = j["refreshToken"]
+            self.refreshTokenExpiresAt = j["refreshTokenExpiresAt"]
         self.userId = j["user"]["id"]
 
         logger.info("Logged in to AndroidApi successfully (expiration: %s, %s)" % (self.accessTokenExpiresAt, timeago(self.accessTokenExpiresAt)))
