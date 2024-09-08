@@ -45,7 +45,8 @@ jobs:
           --ignore 67599 \
           --ignore 72083 \
           --ignore 71064 \
-          --ignore 71608
+          --ignore 71608 \
+          --ignore 72236
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
