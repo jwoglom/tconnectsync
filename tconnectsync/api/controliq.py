@@ -86,6 +86,13 @@ class ControlIQApi:
                     contents = "%s[SNIP]%s" % (contents[:500], contents[-500:])
             logger.info("BeautifulSoup parsed contents: %s" % contents)
             pass
+        if not soup.select_one("#__VIEWSTATE"):
+            enc_contents = soup.encode_contents()
+            if "Web Page Blocked!" in enc_contents or "Attack ID:" in enc_contents:
+                logger.warn("Being ratelimited/blocked by web application firewall. Sleeping for 30 minutes before retrying.")
+                logger.info("BeautifulSoup parsed contents: %s" % enc_contents)
+                time.sleep(1800)
+                exit(1)
         return {
             "__LASTFOCUS": "",
             "__EVENTTARGET": "ctl00$ContentBody$LoginControl$linkLogin",
