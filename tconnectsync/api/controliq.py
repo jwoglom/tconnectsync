@@ -87,7 +87,7 @@ class ControlIQApi:
             logger.info("BeautifulSoup parsed contents: %s" % contents)
             pass
         if not soup.select_one("#__VIEWSTATE"):
-            enc_contents = soup.encode_contents()
+            enc_contents = str(soup.encode_contents())
             if "Web Page Blocked!" in enc_contents or "Attack ID:" in enc_contents:
                 logger.warn("Being ratelimited/blocked by web application firewall. Sleeping for 30 minutes before retrying.")
                 logger.info("BeautifulSoup parsed contents: %s" % enc_contents)
