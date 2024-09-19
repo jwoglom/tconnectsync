@@ -19,6 +19,11 @@ def enumNameFormat(text):
     for i in '()/"\u201c\u201d':
         t = t.replace(i, '')
 
+    if t.lower() == 'false':
+        return 'FalseVal'
+    if t.lower() == 'true':
+        return 'TrueVal'
+
     return f'{t[0].upper()}{t[1:]}'
 
 def transform_enum(event_def, name, name_fmt, field, tx):

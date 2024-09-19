@@ -1624,8 +1624,8 @@ class LidPlgsPeriodic(BaseEvent):
     }
 
     class PgvvalidEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def pgvvalid(self):
@@ -2103,8 +2103,8 @@ class LidAaUserModeChange(BaseEvent):
     }
 
     class SleepstartedbyguiEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def sleepstartedbygui(self):
@@ -2116,8 +2116,8 @@ class LidAaUserModeChange(BaseEvent):
     }
 
     class ExercisestoppedbytimerEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def exercisestoppedbytimer(self):
@@ -2146,8 +2146,8 @@ class LidAaUserModeChange(BaseEvent):
     }
 
     class EatingsoonstoppedbytimerEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def eatingsoonstoppedbytimer(self):
@@ -2234,8 +2234,8 @@ class LidAaPcmChange(BaseEvent):
     }
 
     class PumpsuspendedEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def pumpsuspended(self):
@@ -2247,8 +2247,8 @@ class LidAaPcmChange(BaseEvent):
     }
 
     class CalculationavailableEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def calculationavailable(self):
@@ -2260,8 +2260,8 @@ class LidAaPcmChange(BaseEvent):
     }
 
     class CgmavailableEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def cgmavailable(self):
@@ -2273,8 +2273,8 @@ class LidAaPcmChange(BaseEvent):
     }
 
     class ClosedlooppreferredEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def closedlooppreferred(self):
@@ -2286,8 +2286,8 @@ class LidAaPcmChange(BaseEvent):
     }
 
     class SufficientclosedloopparamsEnum(Enum):
-        False = 0
-        True = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def sufficientclosedloopparams(self):
