@@ -5,6 +5,10 @@
 
 Tconnectsync synchronizes data one-way from the Tandem Diabetes t:connect web/mobile application to Nightscout.
 
+> [!IMPORTANT]  
+> Tandem has announced that t:connect will be shut down in favor of Tandem Source in the US beginning September 30, 2024.
+> tconnectsync is in the process of being updated to work with Tandem Source. Please check back for updates over the next few weeks.
+
 If you have a t:slim X2 pump with the companion t:connect mobile Android or iOS app, this will allow your pump bolus and basal data to be uploaded to [Nightscout](https://github.com/nightscout/cgm-remote-monitor) automatically.
 Together with a CGM uploader, such as [xDrip+](https://github.com/NightscoutFoundation/xDrip) or the official Dexcom mobile app plus Dexcom Share, this allows your CGM _and_ pump data to be automatically uploaded to Nightscout!
 
