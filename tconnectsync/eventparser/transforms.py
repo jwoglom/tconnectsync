@@ -13,7 +13,7 @@ def enumNameFormat(text):
     if t.startswith('yes,'):
         return 'Yes'
     
-    for i in '-,':
+    for i in '-,.':
         t = t.split(i)[0]
     
     for i in '()/"\u201c\u201d':

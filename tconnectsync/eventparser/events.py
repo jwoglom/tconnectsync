@@ -2391,7 +2391,7 @@ class LidCgmDataGxb(BaseEvent):
         ValidTimestamp = 2**5
         ValidEgvValidRange = 2**6
         ValidAlgstateAlgstateIs6 = 2**7
-        EgvWasSuccessfullyAddedToCgmSubsystemArrayE.G. = 2**8
+        EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
 
     @property
     def egvInfoBitmask(self):
@@ -2927,7 +2927,7 @@ class LidCgmDataFsl2(BaseEvent):
         ValidTimestamp = 2**5
         ValidEgvValidRange = 2**6
         ValidAlgstateAlgstateIs100 = 2**7
-        EgvWasSuccessfullyAddedToCgmSubsystemArrayE.G. = 2**8
+        EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
         OmrReadingType = 2**9
         RealTimeReadingFromNfcScan = 2**10
 
@@ -3095,7 +3095,7 @@ class LidCgmDataG7(BaseEvent):
         ValidTimestamp = 2**5
         ValidEgvValidRange = 2**6
         ValidAlgstateAlgstateIs32 = 2**7
-        EgvWasSuccessfullyAddedToCgmSubsystemArrayE.G. = 2**8
+        EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
         Reserved = 2**9
         Reserved = 2**10
 
