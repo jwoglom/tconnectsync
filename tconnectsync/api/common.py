@@ -11,6 +11,11 @@ def parse_date(date):
         return date
     return (date or datetime.datetime.now()).strftime('%m-%d-%Y')
 
+def parse_ymd_date(date):
+    if type(date) == str:
+        return date
+    return (date or datetime.datetime.now()).strftime('%Y-%m-%d')
+
 def parsed_date_to_arrow(date):
     return arrow.get(datetime.datetime.strptime(date, '%m-%d-%Y'))
 

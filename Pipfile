@@ -8,13 +8,17 @@ ptpython = "*"
 
 [packages]
 tconnectsync = {path = "."}
-requests = "*"
 bs4 = "*"
 arrow = "*"
 lxml = "*"
 python-dotenv = "*"
 requests-mock = "*"
 pysocks = "*"
+urllib3 = "==1.26.6"
+requests = {extras = ["socks"], version = "*"}
+requests-oidc = "*"
+pyjwt = "*"
+cryptography = "*"
 
 [scripts]
 tconnectsync = "python3 main.py"
