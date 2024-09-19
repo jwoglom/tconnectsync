@@ -2360,7 +2360,7 @@ class LidCgmDataGxb(BaseEvent):
         Backfill = 2**1
         ImmediateMatchValue = 2**2
         Calibration = 2**3
-        None = 2**4
+        NoneVal = 2**4
 
     @property
     def cgmDataType(self):
@@ -2867,7 +2867,7 @@ class LidCgmDataFsl2(BaseEvent):
     class CgmdatatypeBitmask(IntFlag):
         FiveMinuteReadingFmr = 2**0
         Backfill = 2**1
-        None = 2**4
+        NoneVal = 2**4
         OneMinuteReadingOmr = 2**5
         RealTimeReading = 2**6
 
@@ -3031,7 +3031,7 @@ class LidCgmDataG7(BaseEvent):
         Backfill = 2**1
         ImmNoLongerApplies = 2**2
         Calibration = 2**3
-        None = 2**4
+        NoneVal = 2**4
 
     @property
     def cgmDataType(self):

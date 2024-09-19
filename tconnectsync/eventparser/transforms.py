@@ -23,6 +23,8 @@ def enumNameFormat(text):
         return 'FalseVal'
     if t.lower() == 'true':
         return 'TrueVal'
+    if t.lower() == 'none':
+        return 'NoneVal'
 
     return f'{t[0].upper()}{t[1:]}'
 
