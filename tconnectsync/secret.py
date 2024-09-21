@@ -4,6 +4,9 @@ from dotenv import dotenv_values
 cwd_path = os.path.join(os.getcwd(), '.env')
 global_path = os.path.join(pathlib.Path.home(), '.config/tconnectsync/.env')
 
+cwd_creds_path = os.path.join(os.getcwd(), '.creds_cache')
+global_creds_path = os.path.join(pathlib.Path.home(), '.config/tconnectsync/.creds_cache')
+
 values = {}
 
 if os.path.exists(cwd_path):
@@ -59,6 +62,8 @@ if not get('TIMEZONE_NAME') and get('TZ'):
 
 # Optional configuration
 
+CACHE_CREDENTIALS = get_bool('CACHE_CREDENTIALS', 'true')
+CACHE_CREDENTIALS_PATH = get('CACHE_CREDENTIALS', cwd_creds_path if os.path.exists(cwd_creds_path) else global_creds_path)
 AUTOUPDATE_DEFAULT_SLEEP_SECONDS = get_number('AUTOUPDATE_DEFAULT_SLEEP_SECONDS', '300') # 5 minutes
 AUTOUPDATE_MAX_SLEEP_SECONDS = get_number('AUTOUPDATE_MAX_SLEEP_SECONDS', '1500') # 25 minutes
 AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS = get_number('AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS', '60') # 1 minute
