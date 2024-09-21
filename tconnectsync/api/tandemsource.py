@@ -7,6 +7,7 @@ import base64
 import hashlib
 import os
 import jwt
+import pickle
 
 from requests_oidc import make_auth_code_session
 from requests_oidc.plugins import OSCachedPlugin
@@ -17,6 +18,7 @@ from jwt.algorithms import RSAAlgorithm
 
 from ..util import timeago, cap_length
 from .common import parse_ymd_date, base_headers, base_session, ApiException, ApiLoginException
+from ..secret import CACHE_CREDENTIALS, CACHE_CREDENTIALS_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +40,13 @@ class TandemSourceApi:
 
     def login(self, email, password):
         logger.info("Logging in to TandemSourceApi...")
+        if self.try_load_cached_creds(email):
+            logger.info("Successfully used cached credentials")
+            return True
+
         with base_session() as s:
             initial = s.get(self.LOGIN_PAGE_URL, headers=base_headers())
-            
+
             data = {
                 "username": email,
                 "password": password
@@ -58,7 +64,7 @@ class TandemSourceApi:
 
             if not login_ok:
                 raise ApiException(req.status_code, 'Error parsing login_api_url: %s' % json.dumps(req_json))
-            
+
             logger.debug("2. starting OIDC")
 
             # oidc
@@ -79,7 +85,7 @@ class TandemSourceApi:
                 sha256_digest = hashlib.sha256(verifier.encode('utf-8')).digest()
                 code_challenge = base64.urlsafe_b64encode(sha256_digest).decode('utf-8').rstrip('=')
                 return code_challenge
-            
+
 
             code_verifier = generate_code_verifier()
             code_challenge = generate_code_challenge(code_verifier)
@@ -130,7 +136,7 @@ class TandemSourceApi:
 
             if oidc_step2.status_code//100 != 2:
                 raise ApiException(oidc_step1.status_code, 'Got unexpected status code for oidc step2: %s' % oidc_step1.text)
-            
+
             oidc_json = oidc_step2.json()
             logger.debug("5. parsing oidc_step2 json response: %s" % json.dumps(oidc_json))
 
@@ -139,7 +145,7 @@ class TandemSourceApi:
 
             if not 'id_token' in oidc_json:
                 raise ApiException(oidc_step1.status_code, 'Missing id_token in oidc_step2 json: %s' % json.dumps(oidc_json))
-            
+
             self.loginSession = s
             self.idToken = oidc_json['id_token']
             self.extract_jwt()
@@ -147,9 +153,11 @@ class TandemSourceApi:
 
             self.accessToken = oidc_json['access_token']
             self.accessTokenExpiresAt = arrow.get(arrow.get().int_timestamp + oidc_json['expires_in'])
-            
+
+            self.cache_creds(email)
+
             return True
-    
+
     def extract_jwt(self):
         logger.debug("6. extracting JWT from %s" % self.idToken)
         id_token = self.idToken
@@ -182,10 +190,110 @@ class TandemSourceApi:
         )
 
         logger.info("Decoded JWT: %s" % json.dumps(id_token_claims))
-        
+
         self.jwtData = id_token_claims
         self.pumperId = id_token_claims['pumperId']
         self.accountId = id_token_claims['accountId']
+
+    def try_load_cached_creds(self, email):
+        if not CACHE_CREDENTIALS:
+            return False
+
+        if not os.path.exists(CACHE_CREDENTIALS_PATH):
+            logger.info("No cached credentials exist")
+            return False
+
+        _saved_blob = {}
+        try:
+            with open(CACHE_CREDENTIALS_PATH, 'rb') as f:
+                _saved_blob = pickle.load(f)
+        except Exception as e:
+            logger.warning(f"Could not load cached credentials at {CACHE_CREDENTIALS_PATH}: {e}")
+            return False
+
+        if not _saved_blob:
+            logger.warning(f"Could not load cached credentials at {CACHE_CREDENTIALS_PATH}: empty dict")
+            return False
+
+        if _saved_blob.get('cache_creds_version') != 1.0:
+            logger.warning(f"Unexpected cache_creds_version at {CACHE_CREDENTIALS_PATH}: {_saved_blob['cache_creds_version']}, expected 1.0")
+            return False
+
+        if _saved_blob.get('cache_creds_email') != email:
+            logger.warning(f"Cached credentials are for a different email ({_saved_blob['cache_creds_email']} in cache, but using {email}), skipping")
+            return False
+
+        at_expiry = _saved_blob['accessTokenExpiresAt']
+        if arrow.get().int_timestamp >= arrow.get(at_expiry).int_timestamp:
+            logger.info(f"Cached credentials have expired ({_saved_blob['accessTokenExpiresAt']}), skipping")
+            return False
+
+        self.jwtData = _saved_blob['jwtData']
+        self.pumperId = _saved_blob['pumperId']
+        self.accountId = _saved_blob['accountId']
+        self.idToken = _saved_blob['idToken']
+        self.accessToken = _saved_blob['accessToken']
+        self.accessTokenExpiresAt = _saved_blob['accessTokenExpiresAt']
+        self.loginSession = _saved_blob['loginSession']
+
+        def est_time(t):
+            now = arrow.get()
+            if now < t:
+                sec = (t - now).seconds
+            else:
+                sec = (now - t).seconds
+            min = sec//60
+            hr = min//60
+            min = min % 60
+            sec = sec % 60
+            r = ''
+            if hr:
+                r += f'{hr} hr '
+            if min:
+                r += f'{min} min '
+            if sec:
+                r += f'{sec} sec '
+            if not r:
+                return 'now'
+            elif now < t:
+                return 'in '+r.strip()
+            else:
+                return r.strip()+' ago'
+
+
+        sa = _saved_blob['cache_creds_saved_at']
+        ex = _saved_blob['accessTokenExpiresAt']
+        logger.info(f"Loaded cached credentials from {CACHE_CREDENTIALS_PATH}: saved at {sa} ({est_time(sa)}), access token expiry {ex} ({est_time(ex)})")
+
+        return True
+
+
+    def cache_creds(self, email):
+        if not CACHE_CREDENTIALS:
+            logger.info("Credentials caching is disabled, skipping save")
+            return
+
+        _saved_blob = {
+            'cache_creds_version': 1.0,
+            'cache_creds_saved_at': arrow.get(),
+            'cache_creds_email': email,
+            'jwtData': self.jwtData,
+            'pumperId': self.pumperId,
+            'accountId': self.accountId,
+            'idToken': self.idToken,
+            'accessToken': self.accessToken,
+            'accessTokenExpiresAt': self.accessTokenExpiresAt,
+            'loginSession': self.loginSession
+        }
+
+        if not os.path.exists(CACHE_CREDENTIALS_PATH):
+            mkdir = os.path.dirname(CACHE_CREDENTIALS_PATH)
+            logger.debug(f"Running mkdir on {mkdir}")
+            os.makedirs(mkdir, exist_ok=True)
+
+        with open(CACHE_CREDENTIALS_PATH, 'wb') as f:
+            pickle.dump(_saved_blob, f)
+            logger.info(f"Saved cached credentials to {CACHE_CREDENTIALS_PATH}")
 
 
     def needs_relogin(self):
@@ -239,7 +347,7 @@ class TandemSourceApi:
     """
     def pumper_info(self):
         return self.get('api/pumpers/pumpers/%s' % (self.pumperId), {})
-    
+
     """
     Returns metadata for pump events. Returns a list of dict's per-pump on the account.
     [
@@ -248,7 +356,7 @@ class TandemSourceApi:
     """
     def pump_event_metadata(self):
         return self.get('api/reports/reportsfacade/%s/pumpeventmetadata' % (self.pumperId), {})
-    
+
     """
     Returns raw unparsed string for pump events
     tconnect_device_id is "tconnectDeviceId" from pump_event_metadata()
@@ -256,6 +364,7 @@ class TandemSourceApi:
     def pump_events_raw(self, tconnect_device_id, min_date=None, max_date=None):
         minDate = parse_ymd_date(min_date)
         maxDate = parse_ymd_date(max_date)
+        logger.debug(f'pump_events_raw({minDate}, {maxDate})')
 
         # 229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,399,256,213,406,394,212,404,214,405,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191
         eventIdsFilter = '229%2C5%2C28%2C4%2C26%2C99%2C279%2C3%2C16%2C59%2C21%2C55%2C20%2C280%2C64%2C65%2C66%2C61%2C33%2C371%2C171%2C369%2C460%2C172%2C370%2C461%2C372%2C399%2C256%2C213%2C406%2C394%2C212%2C404%2C214%2C405%2C447%2C313%2C60%2C14%2C6%2C90%2C230%2C140%2C12%2C11%2C53%2C13%2C63%2C203%2C307%2C191'

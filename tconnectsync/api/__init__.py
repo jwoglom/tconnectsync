@@ -4,6 +4,7 @@ from .android import AndroidApi
 from .controliq import ControlIQApi
 from .ws2 import WS2Api
 from .webui import WebUIScraper
+from .tandemsource import TandemSourceApi
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,17 @@ class TConnectApi:
         self._ws2 = None
         self._android = None
         self._webui = None
+        self._tandemsource = None
+
+    @property
+    def tandemsource(self):
+        if self._tandemsource and not self._tandemsource.needs_relogin():
+            return self._tandemsource
+
+        logger.debug("Instantiating new TandemSourceApi")
+
+        self._tandemsource = TandemSourceApi(self.email, self.password)
+        return self._tandemsource
 
 
     @property
