@@ -35,8 +35,9 @@ TYPE_TO_PYOBJ = {
     'float32': 'float',
 }
 
+HEADER_SIZE = 10
 def unpack_command_for(field_def):
-    return f'struct.unpack_from({field_def["type"].upper()}, raw[:EVENT_LEN], {field_def["offset"]})'
+    return f'struct.unpack_from({field_def["type"].upper()}, raw[:EVENT_LEN], {HEADER_SIZE + field_def["offset"]})'
 
 TEMPLATE = '''
 @dataclass
@@ -57,6 +58,14 @@ class {name}(BaseEvent):
             raw = RawEvent.build(raw),
 {build_p2}
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 '''
 

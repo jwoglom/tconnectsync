@@ -59,11 +59,11 @@ class LidBasalRateChange(BaseEvent):
 
     @staticmethod
     def build(raw):
-        commandedbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 0)
-        basebasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 4)
-        maxbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 8)
-        IDP, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
-        changetype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        commandedbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
+        basebasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
+        maxbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
+        IDP, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+        changetype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
 
         return LidBasalRateChange(
             raw = RawEvent.build(raw),
@@ -73,6 +73,14 @@ class LidBasalRateChange(BaseEvent):
             IDP = IDP,
             changetypeRaw = changetype,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -224,10 +232,10 @@ class LidAlertActivated(BaseEvent):
 
     @staticmethod
     def build(raw):
-        alertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
+        alertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
 
         return LidAlertActivated(
             raw = RawEvent.build(raw),
@@ -236,6 +244,14 @@ class LidAlertActivated(BaseEvent):
             param1 = param1,
             param2 = param2,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -389,10 +405,10 @@ class LidAlarmActivated(BaseEvent):
 
     @staticmethod
     def build(raw):
-        alarmid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
+        alarmid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
 
         return LidAlarmActivated(
             raw = RawEvent.build(raw),
@@ -401,6 +417,14 @@ class LidAlarmActivated(BaseEvent):
             param1 = param1,
             param2 = param2,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -418,10 +442,10 @@ class LidMalfunctionActivated(BaseEvent):
     # Dictionary unknown: malfs
     @staticmethod
     def build(raw):
-        malfid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
+        malfid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
 
         return LidMalfunctionActivated(
             raw = RawEvent.build(raw),
@@ -430,6 +454,14 @@ class LidMalfunctionActivated(BaseEvent):
             param1 = param1,
             param2 = param2,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -463,10 +495,10 @@ class LidPumpingSuspended(BaseEvent):
 
     @staticmethod
     def build(raw):
-        presuspendstate, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        insulinamount, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 6)
-        suspendreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 5)
-        rpatimeout, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 4)
+        presuspendstate, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        insulinamount, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        suspendreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
+        rpatimeout, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 14)
 
         return LidPumpingSuspended(
             raw = RawEvent.build(raw),
@@ -475,6 +507,14 @@ class LidPumpingSuspended(BaseEvent):
             suspendreasonRaw = suspendreason,
             rpatimeout = rpatimeout,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -490,14 +530,22 @@ class LidPumpingResumed(BaseEvent):
 
     @staticmethod
     def build(raw):
-        preresumestate, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        insulinamount, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 6)
+        preresumestate, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        insulinamount, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
 
         return LidPumpingResumed(
             raw = RawEvent.build(raw),
             preresumestate = preresumestate,
             insulinamount = insulinamount,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -514,9 +562,9 @@ class LidTimeChanged(BaseEvent):
 
     @staticmethod
     def build(raw):
-        timeprior, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        timeafter, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        rawrtctime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
+        timeprior, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        timeafter, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        rawrtctime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
 
         return LidTimeChanged(
             raw = RawEvent.build(raw),
@@ -524,6 +572,14 @@ class LidTimeChanged(BaseEvent):
             timeafter = timeafter,
             rawrtctime = rawrtctime,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -540,9 +596,9 @@ class LidDateChanged(BaseEvent):
 
     @staticmethod
     def build(raw):
-        dateprior, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        dateafter, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        rawrtctime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
+        dateprior, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        dateafter, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        rawrtctime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
 
         return LidDateChanged(
             raw = RawEvent.build(raw),
@@ -550,6 +606,14 @@ class LidDateChanged(BaseEvent):
             dateafter = dateafter,
             rawrtctime = rawrtctime,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -622,14 +686,14 @@ class LidBgReadingTaken(BaseEvent):
 
     @staticmethod
     def build(raw):
-        selectediob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
-        BG, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        bgentrytype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 0)
-        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 4)
-        targetbg, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
-        ISF, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 8)
-        bgsourcetype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 14)
-        cgmcalibration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
+        selectediob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        BG, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        bgentrytype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
+        targetbg, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        ISF, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
+        bgsourcetype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        cgmcalibration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
 
         return LidBgReadingTaken(
             raw = RawEvent.build(raw),
@@ -642,6 +706,14 @@ class LidBgReadingTaken(BaseEvent):
             bgsourcetypeRaw = bgsourcetype,
             cgmcalibrationRaw = cgmcalibration,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -674,11 +746,8 @@ class LidBolusCompleted(BaseEvent):
         TerminatedByAlarm = 1
         TerminatedByMalfunction = 2
         Completed = 3
-        Reserved = 4
         BolusRejected = 5
         AbortedByPlgs = 6
-        Reserved = 7
-        Reserved = 8
 
     @property
     def completionstatus(self):
@@ -686,11 +755,11 @@ class LidBolusCompleted(BaseEvent):
 
     @staticmethod
     def build(raw):
-        completionstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 0)
-        insulindelivered, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 8)
-        insulinrequested, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
-        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 4)
+        completionstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
+        insulindelivered, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
+        insulinrequested, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
+        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
 
         return LidBolusCompleted(
             raw = RawEvent.build(raw),
@@ -700,6 +769,14 @@ class LidBolusCompleted(BaseEvent):
             insulinrequested = insulinrequested,
             IOB = IOB,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -732,11 +809,8 @@ class LidBolexCompleted(BaseEvent):
         TerminatedByAlarm = 1
         TerminatedByMalfunction = 2
         Completed = 3
-        Reserved = 4
         BolusRejected = 5
         AbortedByPlgs = 6
-        Reserved = 7
-        Reserved = 8
 
     @property
     def completionstatus(self):
@@ -744,11 +818,11 @@ class LidBolexCompleted(BaseEvent):
 
     @staticmethod
     def build(raw):
-        completionstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 0)
-        insulindelivered, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 8)
-        insulinrequested, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
-        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 4)
+        completionstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
+        insulindelivered, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
+        insulinrequested, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
+        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
 
         return LidBolexCompleted(
             raw = RawEvent.build(raw),
@@ -758,6 +832,14 @@ class LidBolexCompleted(BaseEvent):
             insulinrequested = insulinrequested,
             IOB = IOB,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -907,14 +989,22 @@ class LidAlertCleared(BaseEvent):
 
     @staticmethod
     def build(raw):
-        alertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
+        alertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
 
         return LidAlertCleared(
             raw = RawEvent.build(raw),
             alertidRaw = alertid,
             faultlocatordata = faultlocatordata,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1065,12 +1155,20 @@ class LidAlarmCleared(BaseEvent):
 
     @staticmethod
     def build(raw):
-        alarmid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
+        alarmid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
 
         return LidAlarmCleared(
             raw = RawEvent.build(raw),
             alarmidRaw = alarmid,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1086,14 +1184,22 @@ class LidCartridgeFilled(BaseEvent):
 
     @staticmethod
     def build(raw):
-        insulinvolume, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        v2Volume, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 4)
+        insulinvolume, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        v2Volume, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
 
         return LidCartridgeFilled(
             raw = RawEvent.build(raw),
             insulinvolume = insulinvolume,
             v2Volume = v2Volume,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1113,12 +1219,12 @@ class LidShelfMode(BaseEvent):
 
     @staticmethod
     def build(raw):
-        msecsincereset, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        lipocurrent, = struct.unpack_from(INT16, raw[:EVENT_LEN], 6)
-        lipoAbc, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 5)
-        lipoIbc, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 4)
-        lipoRemcap, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        lipoMv, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 12)
+        msecsincereset, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        lipocurrent, = struct.unpack_from(INT16, raw[:EVENT_LEN], 16)
+        lipoAbc, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
+        lipoIbc, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 14)
+        lipoRemcap, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        lipoMv, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
 
         return LidShelfMode(
             raw = RawEvent.build(raw),
@@ -1129,6 +1235,14 @@ class LidShelfMode(BaseEvent):
             lipoRemcap = lipoRemcap,
             lipoMv = lipoMv,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1158,10 +1272,10 @@ class LidBolusActivated(BaseEvent):
 
     @staticmethod
     def build(raw):
-        selectediob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 4)
-        bolussize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 8)
+        selectediob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
+        bolussize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
 
         return LidBolusActivated(
             raw = RawEvent.build(raw),
@@ -1170,6 +1284,14 @@ class LidBolusActivated(BaseEvent):
             IOB = IOB,
             bolussize = bolussize,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1199,10 +1321,10 @@ class LidBolexActivated(BaseEvent):
 
     @staticmethod
     def build(raw):
-        selectediob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 4)
-        bolexsize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 8)
+        selectediob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
+        bolexsize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
 
         return LidBolexActivated(
             raw = RawEvent.build(raw),
@@ -1211,6 +1333,14 @@ class LidBolexActivated(BaseEvent):
             IOB = IOB,
             bolexsize = bolexsize,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1226,14 +1356,22 @@ class LidDataLogCorruption(BaseEvent):
 
     @staticmethod
     def build(raw):
-        block, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        reason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 7)
+        block, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        reason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
 
         return LidDataLogCorruption(
             raw = RawEvent.build(raw),
             block = block,
             reason = reason,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1265,14 +1403,22 @@ class LidCannulaFilled(BaseEvent):
 
     @staticmethod
     def build(raw):
-        primesize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 0)
-        completionstatus, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
+        primesize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
+        completionstatus, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
 
         return LidCannulaFilled(
             raw = RawEvent.build(raw),
             primesize = primesize,
             completionstatusRaw = completionstatus,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1305,9 +1451,9 @@ class LidTubingFilled(BaseEvent):
 
     @staticmethod
     def build(raw):
-        primesize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 0)
-        completionstatus, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        position, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
+        primesize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
+        completionstatus, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        position, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
 
         return LidTubingFilled(
             raw = RawEvent.build(raw),
@@ -1315,6 +1461,14 @@ class LidTubingFilled(BaseEvent):
             completionstatusRaw = completionstatus,
             position = position,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1368,13 +1522,13 @@ class LidBolusRequestedMsg1(BaseEvent):
 
     @staticmethod
     def build(raw):
-        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        bolustype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        correctionbolusincluded, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 0)
-        carbamount, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 6)
-        BG, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 4)
-        carbratio, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 12)
-        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 8)
+        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        bolustype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        correctionbolusincluded, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        carbamount, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        BG, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        carbratio, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
+        IOB, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
 
         return LidBolusRequestedMsg1(
             raw = RawEvent.build(raw),
@@ -1386,6 +1540,14 @@ class LidBolusRequestedMsg1(BaseEvent):
             carbratioRaw = carbratio,
             IOB = IOB,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1471,15 +1633,15 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @staticmethod
     def build(raw):
-        selectediob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
-        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        options, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        standardpercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 0)
-        duration, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 6)
-        ISF, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
-        targetbg, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 8)
-        useroverride, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
-        declinedcorrection, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 14)
+        selectediob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        options, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        standardpercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        duration, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        ISF, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        targetbg, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
+        useroverride, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        declinedcorrection, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
 
         return LidBolusRequestedMsg2(
             raw = RawEvent.build(raw),
@@ -1493,6 +1655,14 @@ class LidBolusRequestedMsg2(BaseEvent):
             useroverrideRaw = useroverride,
             declinedcorrectionRaw = declinedcorrection,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1510,10 +1680,10 @@ class LidBolusRequestedMsg3(BaseEvent):
 
     @staticmethod
     def build(raw):
-        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        foodbolussize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 4)
-        correctionbolussize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 8)
-        totalbolussize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
+        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        foodbolussize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
+        correctionbolussize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
+        totalbolussize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
 
         return LidBolusRequestedMsg3(
             raw = RawEvent.build(raw),
@@ -1522,6 +1692,14 @@ class LidBolusRequestedMsg3(BaseEvent):
             correctionbolussize = correctionbolussize,
             totalbolussize = totalbolussize,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1538,9 +1716,9 @@ class LidNewDay(BaseEvent):
 
     @staticmethod
     def build(raw):
-        commandedbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 0)
-        featuresbitmask, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        featurebitmaskindex, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
+        commandedbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
+        featuresbitmask, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        featurebitmaskindex, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
 
         return LidNewDay(
             raw = RawEvent.build(raw),
@@ -1548,6 +1726,14 @@ class LidNewDay(BaseEvent):
             featuresbitmask = featuresbitmask,
             featurebitmaskindex = featurebitmaskindex,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1565,10 +1751,10 @@ class LidArmInit(BaseEvent):
 
     @staticmethod
     def build(raw):
-        version, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        configabits, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        configbbits, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        numlogentries, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 12)
+        version, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        configabits, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        configbbits, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        numlogentries, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
 
         return LidArmInit(
             raw = RawEvent.build(raw),
@@ -1577,6 +1763,14 @@ class LidArmInit(BaseEvent):
             configbbits = configbbits,
             numlogentries = numlogentries,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1685,13 +1879,13 @@ class LidPlgsPeriodic(BaseEvent):
         SuspendCurrent = 2**1
         ResumeEgvRise = 2**4
         ResumeNadirLock = 2**6
-        Unavailable = 2**7
-        Unavailable = 2**8
-        Unavailable = 2**9
-        Unavailable = 2**10
-        Unavailable = 2**11
-        Unavailable = 2**12
-        Unavailable = 2**13
+        Unavailabletimesmall = 2**7
+        Unavailablesuspendoverride = 2**8
+        Unavailablecgmoff = 2**9
+        Unavailablehighegv = 2**10
+        Unavailablenottherapy = 2**11
+        Unavailablebolusactive = 2**12
+        Unavailablenocurrent = 2**13
 
     @property
     def status(self):
@@ -1699,14 +1893,14 @@ class LidPlgsPeriodic(BaseEvent):
 
     @staticmethod
     def build(raw):
-        timestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        FMR, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 6)
-        PGV, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 4)
-        fmrstatus, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
-        pgvvalid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
-        rulestate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 9)
-        hominstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 8)
-        status, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 12)
+        timestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        FMR, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        PGV, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        fmrstatus, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        pgvvalid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
+        rulestate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 19)
+        hominstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 18)
+        status, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
 
         return LidPlgsPeriodic(
             raw = RawEvent.build(raw),
@@ -1719,6 +1913,14 @@ class LidPlgsPeriodic(BaseEvent):
             hominstateRaw = hominstate,
             statusRaw = status,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1736,10 +1938,10 @@ class LidCgmAlertActivated(BaseEvent):
     # Dictionary unknown: dalerts
     @staticmethod
     def build(raw):
-        dalertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
+        dalertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
 
         return LidCgmAlertActivated(
             raw = RawEvent.build(raw),
@@ -1748,6 +1950,14 @@ class LidCgmAlertActivated(BaseEvent):
             param1 = param1,
             param2 = param2,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1762,12 +1972,20 @@ class LidCgmAlertCleared(BaseEvent):
     # Dictionary unknown: dalerts
     @staticmethod
     def build(raw):
-        dalertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
+        dalertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
 
         return LidCgmAlertCleared(
             raw = RawEvent.build(raw),
             dalertidRaw = dalertid,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1785,10 +2003,10 @@ class LidVersionInfo(BaseEvent):
 
     @staticmethod
     def build(raw):
-        version, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        configabits, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        configbbits, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        armcrc, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        version, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        configabits, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        configbbits, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        armcrc, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
 
         return LidVersionInfo(
             raw = RawEvent.build(raw),
@@ -1797,6 +2015,14 @@ class LidVersionInfo(BaseEvent):
             configbbits = configbbits,
             armcrc = armcrc,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1829,13 +2055,13 @@ class LidUpdateStatus(BaseEvent):
 
     @staticmethod
     def build(raw):
-        swupdatestatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        metadataandversionstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 0)
-        fulldlandcrcstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 6)
-        filedlandsideloadstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 4)
-        externalflashstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
-        updatesuccessful, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 9)
-        swpartnum, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 12)
+        swupdatestatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        metadataandversionstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
+        fulldlandcrcstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        filedlandsideloadstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        externalflashstatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        updatesuccessful, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 19)
+        swpartnum, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
 
         return LidUpdateStatus(
             raw = RawEvent.build(raw),
@@ -1847,6 +2073,14 @@ class LidUpdateStatus(BaseEvent):
             updatesuccessfulRaw = updatesuccessful,
             swpartnum = swpartnum,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1863,9 +2097,9 @@ class LidCgmStartSessionGx(BaseEvent):
 
     @staticmethod
     def build(raw):
-        currenttransmittertime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
+        currenttransmittertime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
 
         return LidCgmStartSessionGx(
             raw = RawEvent.build(raw),
@@ -1873,6 +2107,14 @@ class LidCgmStartSessionGx(BaseEvent):
             sessionstarttime = sessionstarttime,
             sessionduration = sessionduration,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1907,12 +2149,10 @@ class LidCgmJoinSessionGx(BaseEvent):
     class SessionjoinreasonEnum(Enum):
         DexblesReasonUser = 0
         DexblesReasonUnknown = 1
-        Reserved = 2
         DexblesReasonTxEndOfLife = 3
         DexblesReasonTransmitterError = 4
         DexblesReasonSessionStopSuccess = 5
         DexblesReasonTransmitterNotInSession = 6
-        Reserved = 7
         DexblesReasonNewSessionStartedSuccess = 8
         DexblesReasonSessionStartedInProgress = 9
         DexblesReasonTransmitterInSession = 10
@@ -1926,10 +2166,10 @@ class LidCgmJoinSessionGx(BaseEvent):
 
     @staticmethod
     def build(raw):
-        currenttransmittertime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
-        sessionjoinreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 14)
+        currenttransmittertime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        sessionjoinreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
 
         return LidCgmJoinSessionGx(
             raw = RawEvent.build(raw),
@@ -1938,6 +2178,14 @@ class LidCgmJoinSessionGx(BaseEvent):
             sessionduration = sessionduration,
             sessionjoinreasonRaw = sessionjoinreason,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -1973,12 +2221,10 @@ class LidCgmStopSessionGx(BaseEvent):
     class SessionstopreasonEnum(Enum):
         DexblesReasonUser = 0
         DexblesReasonUnknown = 1
-        Reserved = 2
         DexblesReasonTxEndOfLife = 3
         DexblesReasonTransmitterError = 4
         DexblesReasonSessionStopSuccess = 5
         DexblesReasonTransmitterNotInSession = 6
-        Reserved = 7
         DexblesReasonNewSessionStartedSuccess = 8
         DexblesReasonSessionStartedInProgress = 9
         DexblesReasonTransmitterInSession = 10
@@ -1992,11 +2238,11 @@ class LidCgmStopSessionGx(BaseEvent):
 
     @staticmethod
     def build(raw):
-        currenttransmittertime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        sessionstoptime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
-        sessionstopreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 14)
+        currenttransmittertime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        sessionstoptime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        sessionstopreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
 
         return LidCgmStopSessionGx(
             raw = RawEvent.build(raw),
@@ -2006,6 +2252,14 @@ class LidCgmStopSessionGx(BaseEvent):
             sessionduration = sessionduration,
             sessionstopreasonRaw = sessionstopreason,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2155,15 +2409,15 @@ class LidAaUserModeChange(BaseEvent):
 
     @staticmethod
     def build(raw):
-        exercisechoice, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
-        exercisetime, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 8)
-        currentusermode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        previoususermode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
-        requestedaction, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        sleepstartedbygui, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 7)
-        exercisestoppedbytimer, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
-        activesleepschedule, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 6)
-        eatingsoonstoppedbytimer, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
+        exercisechoice, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
+        exercisetime, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
+        currentusermode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        previoususermode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        requestedaction, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        sleepstartedbygui, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
+        exercisestoppedbytimer, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        activesleepschedule, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 16)
+        eatingsoonstoppedbytimer, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
 
         return LidAaUserModeChange(
             raw = RawEvent.build(raw),
@@ -2177,6 +2431,14 @@ class LidAaUserModeChange(BaseEvent):
             activesleepscheduleRaw = activesleepschedule,
             eatingsoonstoppedbytimerRaw = eatingsoonstoppedbytimer,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2295,13 +2557,13 @@ class LidAaPcmChange(BaseEvent):
 
     @staticmethod
     def build(raw):
-        currentpcm, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        previouspcm, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
-        pumpsuspended, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        calculationavailable, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 0)
-        cgmavailable, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 7)
-        closedlooppreferred, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 6)
-        sufficientclosedloopparams, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 5)
+        currentpcm, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        previouspcm, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        pumpsuspended, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        calculationavailable, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        cgmavailable, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
+        closedlooppreferred, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 16)
+        sufficientclosedloopparams, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
 
         return LidAaPcmChange(
             raw = RawEvent.build(raw),
@@ -2313,6 +2575,14 @@ class LidAaPcmChange(BaseEvent):
             closedlooppreferredRaw = closedlooppreferred,
             sufficientclosedloopparamsRaw = sufficientclosedloopparams,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2399,15 +2669,15 @@ class LidCgmDataGxb(BaseEvent):
 
     @staticmethod
     def build(raw):
-        glucosevaluestatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        cgmDataType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        rate, = struct.unpack_from(INT8, raw[:EVENT_LEN], 0)
-        algorithmstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 7)
-        RSSI, = struct.unpack_from(INT8, raw[:EVENT_LEN], 6)
-        currentglucosedisplayvalue, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 4)
-        egvTimestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
-        interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        glucosevaluestatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        cgmDataType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        rate, = struct.unpack_from(INT8, raw[:EVENT_LEN], 10)
+        algorithmstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
+        RSSI, = struct.unpack_from(INT8, raw[:EVENT_LEN], 16)
+        currentglucosedisplayvalue, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        egvTimestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+        interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
 
         return LidCgmDataGxb(
             raw = RawEvent.build(raw),
@@ -2421,6 +2691,14 @@ class LidCgmDataGxb(BaseEvent):
             egvInfoBitmaskRaw = egvInfoBitmask,
             interval = interval,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2457,11 +2735,11 @@ class LidBasalDelivery(BaseEvent):
 
     @staticmethod
     def build(raw):
-        commandedRateSource, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        commandedRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 6)
-        profileBasalRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 4)
-        algorithmRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
-        tempRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 8)
+        commandedRateSource, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        commandedRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        profileBasalRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        algorithmRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        tempRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
 
         return LidBasalDelivery(
             raw = RawEvent.build(raw),
@@ -2471,6 +2749,14 @@ class LidBasalDelivery(BaseEvent):
             algorithmRate = algorithmRate,
             tempRate = tempRate,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2541,11 +2827,7 @@ class LidBolusDelivery(BaseEvent):
     class BolussourceEnum(Enum):
         PumpButton = 0
         PumpGui = 1
-        Reserved = 2
-        Reserved = 3
-        Reserved = 4
         Remote = 5
-        Reserved = 6
         Algorithm = 7
         Ble = 8
         EatingSoonBolus = 9
@@ -2556,16 +2838,16 @@ class LidBolusDelivery(BaseEvent):
 
     @staticmethod
     def build(raw):
-        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        bolusDeliveryStatus, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        bolusType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 0)
-        bolusSource, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 7)
-        remoteId, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 6)
-        requestedNow, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 4)
-        requestedLater, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
-        extendedDurationRequested, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
-        deliveredTotal, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
-        correction, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 8)
+        bolusid, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        bolusDeliveryStatus, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        bolusType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        bolusSource, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
+        remoteId, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 16)
+        requestedNow, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        requestedLater, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        extendedDurationRequested, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+        deliveredTotal, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
+        correction, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
 
         return LidBolusDelivery(
             raw = RawEvent.build(raw),
@@ -2580,6 +2862,14 @@ class LidBolusDelivery(BaseEvent):
             deliveredTotal = deliveredTotal,
             correction = correction,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2597,10 +2887,10 @@ class LidVersionsA(BaseEvent):
 
     @staticmethod
     def build(raw):
-        armpartnumber, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        armswversion, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        blepartnumber, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        bleswversion, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 12)
+        armpartnumber, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        armswversion, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        blepartnumber, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        bleswversion, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
 
         return LidVersionsA(
             raw = RawEvent.build(raw),
@@ -2609,6 +2899,14 @@ class LidVersionsA(BaseEvent):
             blepartnumber = blepartnumber,
             bleswversion = bleswversion,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2673,9 +2971,9 @@ class LidAaDailyStatus(BaseEvent):
 
     @staticmethod
     def build(raw):
-        pumpcontrolstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        usermode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
-        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
+        pumpcontrolstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        usermode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
 
         return LidAaDailyStatus(
             raw = RawEvent.build(raw),
@@ -2683,6 +2981,14 @@ class LidAaDailyStatus(BaseEvent):
             usermodeRaw = usermode,
             sensortypeRaw = sensortype,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2716,11 +3022,11 @@ class LidCgmAlertActivatedDex(BaseEvent):
 
     @staticmethod
     def build(raw):
-        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
-        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
+        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
 
         return LidCgmAlertActivatedDex(
             raw = RawEvent.build(raw),
@@ -2730,6 +3036,14 @@ class LidCgmAlertActivatedDex(BaseEvent):
             param1 = param1,
             param2 = param2,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2760,14 +3074,22 @@ class LidCgmAlertClearedDex(BaseEvent):
 
     @staticmethod
     def build(raw):
-        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
+        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
 
         return LidCgmAlertClearedDex(
             raw = RawEvent.build(raw),
             dalertidRaw = dalertid,
             sensortypeRaw = sensortype,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2812,9 +3134,9 @@ class LidCgmAlertAckDex(BaseEvent):
 
     @staticmethod
     def build(raw):
-        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
-        acksource, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
+        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        acksource, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
 
         return LidCgmAlertAckDex(
             raw = RawEvent.build(raw),
@@ -2822,6 +3144,14 @@ class LidCgmAlertAckDex(BaseEvent):
             sensortypeRaw = sensortype,
             acksourceRaw = acksource,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2937,15 +3267,15 @@ class LidCgmDataFsl2(BaseEvent):
 
     @staticmethod
     def build(raw):
-        glucosevaluestatus, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        cgmDataType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
-        rate, = struct.unpack_from(INT16, raw[:EVENT_LEN], 0)
-        algorithmstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 7)
-        RSSI, = struct.unpack_from(INT8, raw[:EVENT_LEN], 6)
-        currentglucosedisplayvalue, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 4)
-        egvTimestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
-        interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        glucosevaluestatus, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        cgmDataType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        rate, = struct.unpack_from(INT16, raw[:EVENT_LEN], 10)
+        algorithmstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
+        RSSI, = struct.unpack_from(INT8, raw[:EVENT_LEN], 16)
+        currentglucosedisplayvalue, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        egvTimestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+        interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
 
         return LidCgmDataFsl2(
             raw = RawEvent.build(raw),
@@ -2959,6 +3289,14 @@ class LidCgmDataFsl2(BaseEvent):
             egvInfoBitmaskRaw = egvInfoBitmask,
             interval = interval,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -2974,14 +3312,22 @@ class LidCgmJoinSessionG7(BaseEvent):
 
     @staticmethod
     def build(raw):
-        cgmtimestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        sessionsignature, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
+        cgmtimestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        sessionsignature, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
 
         return LidCgmJoinSessionG7(
             raw = RawEvent.build(raw),
             cgmtimestamp = cgmtimestamp,
             sessionsignature = sessionsignature,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -3096,8 +3442,6 @@ class LidCgmDataG7(BaseEvent):
         ValidEgvValidRange = 2**6
         ValidAlgstateAlgstateIs32 = 2**7
         EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
-        Reserved = 2**9
-        Reserved = 2**10
 
     @property
     def egvInfoBitmask(self):
@@ -3105,15 +3449,15 @@ class LidCgmDataG7(BaseEvent):
 
     @staticmethod
     def build(raw):
-        glucosevaluestatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 2)
-        cgmDataType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 1)
-        rate, = struct.unpack_from(INT8, raw[:EVENT_LEN], 0)
-        algorithmstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 7)
-        RSSI, = struct.unpack_from(INT8, raw[:EVENT_LEN], 6)
-        currentglucosedisplayvalue, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 4)
-        egvTimestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
-        interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        glucosevaluestatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        cgmDataType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        rate, = struct.unpack_from(INT8, raw[:EVENT_LEN], 10)
+        algorithmstate, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
+        RSSI, = struct.unpack_from(INT8, raw[:EVENT_LEN], 16)
+        currentglucosedisplayvalue, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        egvTimestamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+        interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
 
         return LidCgmDataG7(
             raw = RawEvent.build(raw),
@@ -3127,6 +3471,14 @@ class LidCgmDataG7(BaseEvent):
             egvInfoBitmaskRaw = egvInfoBitmask,
             interval = interval,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -3142,14 +3494,22 @@ class LidCgmStartSessionFsl2(BaseEvent):
 
     @staticmethod
     def build(raw):
-        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 7)
+        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
 
         return LidCgmStartSessionFsl2(
             raw = RawEvent.build(raw),
             sessionstarttime = sessionstarttime,
             sessionduration = sessionduration,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -3167,10 +3527,10 @@ class LidCgmStopSessionFsl2(BaseEvent):
 
     @staticmethod
     def build(raw):
-        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        sessionstoptime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
-        sessionstopreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        sessionstoptime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        sessionstopreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
 
         return LidCgmStopSessionFsl2(
             raw = RawEvent.build(raw),
@@ -3179,6 +3539,14 @@ class LidCgmStopSessionFsl2(BaseEvent):
             sessionduration = sessionduration,
             sessionstopreason = sessionstopreason,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -3196,10 +3564,10 @@ class LidCgmJoinSessionFsl2(BaseEvent):
 
     @staticmethod
     def build(raw):
-        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        sessionjointime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
-        sessionjoinreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        sessionjointime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        sessionjoinreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
 
         return LidCgmJoinSessionFsl2(
             raw = RawEvent.build(raw),
@@ -3208,6 +3576,14 @@ class LidCgmJoinSessionFsl2(BaseEvent):
             sessionduration = sessionduration,
             sessionjoinreason = sessionjoinreason,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -3227,12 +3603,12 @@ class LidCgmStopSessionG7(BaseEvent):
 
     @staticmethod
     def build(raw):
-        currenttransmittertime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 0)
-        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        sessionstoptime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
-        sessionstopreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 14)
-        stopsessioncode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        currenttransmittertime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
+        sessionstarttime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        sessionstoptime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        sessionduration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        sessionstopreason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        stopsessioncode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
 
         return LidCgmStopSessionG7(
             raw = RawEvent.build(raw),
@@ -3243,6 +3619,14 @@ class LidCgmStopSessionG7(BaseEvent):
             sessionstopreason = sessionstopreason,
             stopsessioncode = stopsessioncode,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -3274,11 +3658,11 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
 
     @staticmethod
     def build(raw):
-        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
-        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 4)
-        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 8)
-        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 12)
+        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        faultlocatordata, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
 
         return LidCgmAlertActivatedFsl2(
             raw = RawEvent.build(raw),
@@ -3288,6 +3672,14 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
             param1 = param1,
             param2 = param2,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 
 @dataclass
@@ -3316,14 +3708,22 @@ class LidCgmAlertClearedFsl2(BaseEvent):
 
     @staticmethod
     def build(raw):
-        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 3)
-        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 2)
+        dalertid, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        sensortype, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
 
         return LidCgmAlertClearedFsl2(
             raw = RawEvent.build(raw),
             dalertidRaw = dalertid,
             sensortypeRaw = sensortype,
         )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.id
 
 EVENT_IDS = {
     3: LidBasalRateChange,

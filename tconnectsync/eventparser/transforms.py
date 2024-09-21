@@ -13,8 +13,12 @@ def enumNameFormat(text):
     if t.startswith('yes,'):
         return 'Yes'
     
+    rem = None
     for i in '-,.':
-        t = t.split(i)[0]
+        spl = t.split(i)
+        t = spl[0]
+        if len(spl) > 1:
+            rem = rem or spl[1]
     
     for i in '()/"\u201c\u201d':
         t = t.replace(i, '')
@@ -25,6 +29,13 @@ def enumNameFormat(text):
         return 'TrueVal'
     if t.lower() == 'none':
         return 'NoneVal'
+    if t.lower() == 'reserved':
+        return None
+    if t.lower() == 'unused':
+        return None
+    if t.lower() == 'unavailable' and rem:
+        suffix = enumNameFormat(rem)
+        t += f'{suffix[0].lower()}{suffix[1:]}'
 
     return f'{t[0].upper()}{t[1:]}'
 
@@ -36,7 +47,7 @@ def transform_enum(event_def, name, name_fmt, field, tx):
     out += ['']
     out += [f'class {enumNameFormat(name_fmt)}Enum(Enum):']
     out += [
-        f'    {enumNameFormat(v)} = {k}' for k, v in tx.items()
+        f'    {enumNameFormat(v)} = {k}' for k, v in tx.items() if enumNameFormat(v)
     ]
     out += ['']
     out += [
@@ -64,7 +75,7 @@ def transform_bitmask(event_def, name, name_fmt, field, tx):
     out += ['']
     out += [f'class {enumNameFormat(name_fmt)}Bitmask(IntFlag):',]
     out += [
-        f'    {enumNameFormat(v)} = 2**{k}' for k, v in tx.items() if 'unused' not in v.lower()
+        f'    {enumNameFormat(v)} = 2**{k}' for k, v in tx.items() if enumNameFormat(v)
     ]
     out += ['']
     out += [
