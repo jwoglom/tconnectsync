@@ -12,14 +12,14 @@ def enumNameFormat(text):
         return 'No'
     if t.startswith('yes,'):
         return 'Yes'
-    
+
     rem = None
     for i in '-,.':
         spl = t.split(i)
         t = spl[0]
         if len(spl) > 1:
             rem = rem or spl[1]
-    
+
     for i in '()/"\u201c\u201d':
         t = t.replace(i, '')
 
@@ -53,7 +53,7 @@ def transform_enum(event_def, name, name_fmt, field, tx):
     out += [
         '@property',
         f'def {name_fmt}(self):',
-        f'    return self.{enumNameFormat(name_fmt)}Enum[self.{name_fmt}Raw]',
+        f'    return self.{enumNameFormat(name_fmt)}Enum(self.{name_fmt}Raw)',
         ''
     ]
 
@@ -62,7 +62,7 @@ def transform_enum(event_def, name, name_fmt, field, tx):
 def transform_dictionary(event_def, name, name_fmt, field, tx):
     if tx == 'alerts':
         return transform_enum(event_def, name, name_fmt, field, ALERTS_DICT)
-    
+
     if tx == 'alarms':
         return transform_enum(event_def, name, name_fmt, field, ALARMS_DICT)
     return [f'# Dictionary unknown: {tx}']
@@ -81,7 +81,7 @@ def transform_bitmask(event_def, name, name_fmt, field, tx):
     out += [
         '@property',
         f'def {name_fmt}(self):',
-        f'    return self.{enumNameFormat(name_fmt)}Bitmask[self.{name_fmt}Raw]',
+        f'    return self.{enumNameFormat(name_fmt)}Bitmask(self.{name_fmt}Raw)',
         ''
     ]
 

@@ -55,7 +55,7 @@ class LidBasalRateChange(BaseEvent):
 
     @property
     def changetype(self):
-        return self.ChangetypeBitmask[self.changetypeRaw]
+        return self.ChangetypeBitmask(self.changetypeRaw)
 
     @staticmethod
     def build(raw):
@@ -228,7 +228,7 @@ class LidAlertActivated(BaseEvent):
 
     @property
     def alertid(self):
-        return self.AlertidEnum[self.alertidRaw]
+        return self.AlertidEnum(self.alertidRaw)
 
     @staticmethod
     def build(raw):
@@ -401,7 +401,7 @@ class LidAlarmActivated(BaseEvent):
 
     @property
     def alarmid(self):
-        return self.AlarmidEnum[self.alarmidRaw]
+        return self.AlarmidEnum(self.alarmidRaw)
 
     @staticmethod
     def build(raw):
@@ -491,7 +491,7 @@ class LidPumpingSuspended(BaseEvent):
 
     @property
     def suspendreason(self):
-        return self.SuspendreasonEnum[self.suspendreasonRaw]
+        return self.SuspendreasonEnum(self.suspendreasonRaw)
 
     @staticmethod
     def build(raw):
@@ -643,7 +643,7 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def selectediob(self):
-        return self.SelectediobEnum[self.selectediobRaw]
+        return self.SelectediobEnum(self.selectediobRaw)
 
     BgentrytypeMap = {
         "0": "Manual Entry by the User via Numpad",
@@ -656,7 +656,7 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def bgentrytype(self):
-        return self.BgentrytypeEnum[self.bgentrytypeRaw]
+        return self.BgentrytypeEnum(self.bgentrytypeRaw)
 
     BgsourcetypeMap = {
         "0": "Local Pump entry",
@@ -669,7 +669,7 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def bgsourcetype(self):
-        return self.BgsourcetypeEnum[self.bgsourcetypeRaw]
+        return self.BgsourcetypeEnum(self.bgsourcetypeRaw)
 
     CgmcalibrationMap = {
         "0": "No, it was not used to Calibrate.",
@@ -682,7 +682,7 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def cgmcalibration(self):
-        return self.CgmcalibrationEnum[self.cgmcalibrationRaw]
+        return self.CgmcalibrationEnum(self.cgmcalibrationRaw)
 
     @staticmethod
     def build(raw):
@@ -751,7 +751,7 @@ class LidBolusCompleted(BaseEvent):
 
     @property
     def completionstatus(self):
-        return self.CompletionstatusEnum[self.completionstatusRaw]
+        return self.CompletionstatusEnum(self.completionstatusRaw)
 
     @staticmethod
     def build(raw):
@@ -814,7 +814,7 @@ class LidBolexCompleted(BaseEvent):
 
     @property
     def completionstatus(self):
-        return self.CompletionstatusEnum[self.completionstatusRaw]
+        return self.CompletionstatusEnum(self.completionstatusRaw)
 
     @staticmethod
     def build(raw):
@@ -985,7 +985,7 @@ class LidAlertCleared(BaseEvent):
 
     @property
     def alertid(self):
-        return self.AlertidEnum[self.alertidRaw]
+        return self.AlertidEnum(self.alertidRaw)
 
     @staticmethod
     def build(raw):
@@ -1151,7 +1151,7 @@ class LidAlarmCleared(BaseEvent):
 
     @property
     def alarmid(self):
-        return self.AlarmidEnum[self.alarmidRaw]
+        return self.AlarmidEnum(self.alarmidRaw)
 
     @staticmethod
     def build(raw):
@@ -1268,7 +1268,7 @@ class LidBolusActivated(BaseEvent):
 
     @property
     def selectediob(self):
-        return self.SelectediobEnum[self.selectediobRaw]
+        return self.SelectediobEnum(self.selectediobRaw)
 
     @staticmethod
     def build(raw):
@@ -1317,7 +1317,7 @@ class LidBolexActivated(BaseEvent):
 
     @property
     def selectediob(self):
-        return self.SelectediobEnum[self.selectediobRaw]
+        return self.SelectediobEnum(self.selectediobRaw)
 
     @staticmethod
     def build(raw):
@@ -1399,7 +1399,7 @@ class LidCannulaFilled(BaseEvent):
 
     @property
     def completionstatus(self):
-        return self.CompletionstatusEnum[self.completionstatusRaw]
+        return self.CompletionstatusEnum(self.completionstatusRaw)
 
     @staticmethod
     def build(raw):
@@ -1447,7 +1447,7 @@ class LidTubingFilled(BaseEvent):
 
     @property
     def completionstatus(self):
-        return self.CompletionstatusEnum[self.completionstatusRaw]
+        return self.CompletionstatusEnum(self.completionstatusRaw)
 
     @staticmethod
     def build(raw):
@@ -1501,7 +1501,7 @@ class LidBolusRequestedMsg1(BaseEvent):
 
     @property
     def bolustype(self):
-        return self.BolustypeEnum[self.bolustypeRaw]
+        return self.BolustypeEnum(self.bolustypeRaw)
 
     CorrectionbolusincludedMap = {
         "0": "No",
@@ -1514,7 +1514,7 @@ class LidBolusRequestedMsg1(BaseEvent):
 
     @property
     def correctionbolusincluded(self):
-        return self.CorrectionbolusincludedEnum[self.correctionbolusincludedRaw]
+        return self.CorrectionbolusincludedEnum(self.correctionbolusincludedRaw)
 
     @property
     def carbratio(self):
@@ -1578,7 +1578,7 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def selectediob(self):
-        return self.SelectediobEnum[self.selectediobRaw]
+        return self.SelectediobEnum(self.selectediobRaw)
 
     OptionsMap = {
         "0": "Standard Bolus",
@@ -1603,7 +1603,7 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def options(self):
-        return self.OptionsEnum[self.optionsRaw]
+        return self.OptionsEnum(self.optionsRaw)
 
     UseroverrideMap = {
         "0": "\"No\", user did not override the bolus size",
@@ -1616,7 +1616,7 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def useroverride(self):
-        return self.UseroverrideEnum[self.useroverrideRaw]
+        return self.UseroverrideEnum(self.useroverrideRaw)
 
     DeclinedcorrectionMap = {
         "0": "\"No\", user did not decline the recommended correction",
@@ -1629,7 +1629,7 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def declinedcorrection(self):
-        return self.DeclinedcorrectionEnum[self.declinedcorrectionRaw]
+        return self.DeclinedcorrectionEnum(self.declinedcorrectionRaw)
 
     @staticmethod
     def build(raw):
@@ -1810,7 +1810,7 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def fmrstatus(self):
-        return self.FmrstatusEnum[self.fmrstatusRaw]
+        return self.FmrstatusEnum(self.fmrstatusRaw)
 
     PgvvalidMap = {
         "0": "FALSE",
@@ -1823,7 +1823,7 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def pgvvalid(self):
-        return self.PgvvalidEnum[self.pgvvalidRaw]
+        return self.PgvvalidEnum(self.pgvvalidRaw)
 
     RulestateMap = {
         "0": "HO_SUSPEND_RULE",
@@ -1838,7 +1838,7 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def rulestate(self):
-        return self.RulestateBitmask[self.rulestateRaw]
+        return self.RulestateBitmask(self.rulestateRaw)
 
     HominstateMap = {
         "0": "On and available",
@@ -1855,7 +1855,7 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def hominstate(self):
-        return self.HominstateEnum[self.hominstateRaw]
+        return self.HominstateEnum(self.hominstateRaw)
 
     StatusMap = {
         "0": "Suspend Predicted",
@@ -1889,7 +1889,7 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def status(self):
-        return self.StatusBitmask[self.statusRaw]
+        return self.StatusBitmask(self.statusRaw)
 
     @staticmethod
     def build(raw):
@@ -2051,7 +2051,7 @@ class LidUpdateStatus(BaseEvent):
 
     @property
     def updatesuccessful(self):
-        return self.UpdatesuccessfulEnum[self.updatesuccessfulRaw]
+        return self.UpdatesuccessfulEnum(self.updatesuccessfulRaw)
 
     @staticmethod
     def build(raw):
@@ -2162,7 +2162,7 @@ class LidCgmJoinSessionGx(BaseEvent):
 
     @property
     def sessionjoinreason(self):
-        return self.SessionjoinreasonEnum[self.sessionjoinreasonRaw]
+        return self.SessionjoinreasonEnum(self.sessionjoinreasonRaw)
 
     @staticmethod
     def build(raw):
@@ -2234,7 +2234,7 @@ class LidCgmStopSessionGx(BaseEvent):
 
     @property
     def sessionstopreason(self):
-        return self.SessionstopreasonEnum[self.sessionstopreasonRaw]
+        return self.SessionstopreasonEnum(self.sessionstopreasonRaw)
 
     @staticmethod
     def build(raw):
@@ -2290,7 +2290,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def exercisechoice(self):
-        return self.ExercisechoiceEnum[self.exercisechoiceRaw]
+        return self.ExercisechoiceEnum(self.exercisechoiceRaw)
 
     CurrentusermodeMap = {
         "0": "Normal",
@@ -2307,7 +2307,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def currentusermode(self):
-        return self.CurrentusermodeEnum[self.currentusermodeRaw]
+        return self.CurrentusermodeEnum(self.currentusermodeRaw)
 
     PrevioususermodeMap = {
         "0": "Normal",
@@ -2324,7 +2324,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def previoususermode(self):
-        return self.PrevioususermodeEnum[self.previoususermodeRaw]
+        return self.PrevioususermodeEnum(self.previoususermodeRaw)
 
     RequestedactionMap = {
         "0": "No User Request",
@@ -2349,7 +2349,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def requestedaction(self):
-        return self.RequestedactionEnum[self.requestedactionRaw]
+        return self.RequestedactionEnum(self.requestedactionRaw)
 
     SleepstartedbyguiMap = {
         "0": "FALSE",
@@ -2362,7 +2362,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def sleepstartedbygui(self):
-        return self.SleepstartedbyguiEnum[self.sleepstartedbyguiRaw]
+        return self.SleepstartedbyguiEnum(self.sleepstartedbyguiRaw)
 
     ExercisestoppedbytimerMap = {
         "0": "False",
@@ -2375,7 +2375,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def exercisestoppedbytimer(self):
-        return self.ExercisestoppedbytimerEnum[self.exercisestoppedbytimerRaw]
+        return self.ExercisestoppedbytimerEnum(self.exercisestoppedbytimerRaw)
 
     ActivesleepscheduleMap = {
         "0": "Sleep Schedule 1 is Active",
@@ -2392,7 +2392,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def activesleepschedule(self):
-        return self.ActivesleepscheduleBitmask[self.activesleepscheduleRaw]
+        return self.ActivesleepscheduleBitmask(self.activesleepscheduleRaw)
 
     EatingsoonstoppedbytimerMap = {
         "0": "False",
@@ -2405,7 +2405,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def eatingsoonstoppedbytimer(self):
-        return self.EatingsoonstoppedbytimerEnum[self.eatingsoonstoppedbytimerRaw]
+        return self.EatingsoonstoppedbytimerEnum(self.eatingsoonstoppedbytimerRaw)
 
     @staticmethod
     def build(raw):
@@ -2471,7 +2471,7 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def currentpcm(self):
-        return self.CurrentpcmEnum[self.currentpcmRaw]
+        return self.CurrentpcmEnum(self.currentpcmRaw)
 
     PreviouspcmMap = {
         "0": "No Control",
@@ -2488,7 +2488,7 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def previouspcm(self):
-        return self.PreviouspcmEnum[self.previouspcmRaw]
+        return self.PreviouspcmEnum(self.previouspcmRaw)
 
     PumpsuspendedMap = {
         "0": "FALSE",
@@ -2501,7 +2501,7 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def pumpsuspended(self):
-        return self.PumpsuspendedEnum[self.pumpsuspendedRaw]
+        return self.PumpsuspendedEnum(self.pumpsuspendedRaw)
 
     CalculationavailableMap = {
         "0": "FALSE",
@@ -2514,7 +2514,7 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def calculationavailable(self):
-        return self.CalculationavailableEnum[self.calculationavailableRaw]
+        return self.CalculationavailableEnum(self.calculationavailableRaw)
 
     CgmavailableMap = {
         "0": "FALSE",
@@ -2527,7 +2527,7 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def cgmavailable(self):
-        return self.CgmavailableEnum[self.cgmavailableRaw]
+        return self.CgmavailableEnum(self.cgmavailableRaw)
 
     ClosedlooppreferredMap = {
         "0": "FALSE",
@@ -2540,7 +2540,7 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def closedlooppreferred(self):
-        return self.ClosedlooppreferredEnum[self.closedlooppreferredRaw]
+        return self.ClosedlooppreferredEnum(self.closedlooppreferredRaw)
 
     SufficientclosedloopparamsMap = {
         "0": "FALSE",
@@ -2553,7 +2553,7 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def sufficientclosedloopparams(self):
-        return self.SufficientclosedloopparamsEnum[self.sufficientclosedloopparamsRaw]
+        return self.SufficientclosedloopparamsEnum(self.sufficientclosedloopparamsRaw)
 
     @staticmethod
     def build(raw):
@@ -2615,7 +2615,7 @@ class LidCgmDataGxb(BaseEvent):
 
     @property
     def glucosevaluestatus(self):
-        return self.GlucosevaluestatusEnum[self.glucosevaluestatusRaw]
+        return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
 
     CgmdatatypeMap = {
         "0": "Five Minute Reading (FMR)",
@@ -2634,7 +2634,7 @@ class LidCgmDataGxb(BaseEvent):
 
     @property
     def cgmDataType(self):
-        return self.CgmdatatypeBitmask[self.cgmDataTypeRaw]
+        return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
 
     @property
     def rate(self):
@@ -2665,7 +2665,7 @@ class LidCgmDataGxb(BaseEvent):
 
     @property
     def egvInfoBitmask(self):
-        return self.EgvinfobitmaskBitmask[self.egvInfoBitmaskRaw]
+        return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
 
     @staticmethod
     def build(raw):
@@ -2731,7 +2731,7 @@ class LidBasalDelivery(BaseEvent):
 
     @property
     def commandedRateSource(self):
-        return self.CommandedratesourceEnum[self.commandedRateSourceRaw]
+        return self.CommandedratesourceEnum(self.commandedRateSourceRaw)
 
     @staticmethod
     def build(raw):
@@ -2788,7 +2788,7 @@ class LidBolusDelivery(BaseEvent):
 
     @property
     def bolusDeliveryStatus(self):
-        return self.BolusdeliverystatusEnum[self.bolusDeliveryStatusRaw]
+        return self.BolusdeliverystatusEnum(self.bolusDeliveryStatusRaw)
 
     BolustypeMap = {
         "0": "Now",
@@ -2809,7 +2809,7 @@ class LidBolusDelivery(BaseEvent):
 
     @property
     def bolusType(self):
-        return self.BolustypeBitmask[self.bolusTypeRaw]
+        return self.BolustypeBitmask(self.bolusTypeRaw)
 
     BolussourceMap = {
         "0": "Pump Button",
@@ -2834,7 +2834,7 @@ class LidBolusDelivery(BaseEvent):
 
     @property
     def bolusSource(self):
-        return self.BolussourceEnum[self.bolusSourceRaw]
+        return self.BolussourceEnum(self.bolusSourceRaw)
 
     @staticmethod
     def build(raw):
@@ -2935,7 +2935,7 @@ class LidAaDailyStatus(BaseEvent):
 
     @property
     def pumpcontrolstate(self):
-        return self.PumpcontrolstateEnum[self.pumpcontrolstateRaw]
+        return self.PumpcontrolstateEnum(self.pumpcontrolstateRaw)
 
     UsermodeMap = {
         "0": "Normal",
@@ -2950,7 +2950,7 @@ class LidAaDailyStatus(BaseEvent):
 
     @property
     def usermode(self):
-        return self.UsermodeEnum[self.usermodeRaw]
+        return self.UsermodeEnum(self.usermodeRaw)
 
     SensortypeMap = {
         "0": "CGM_TYPE_NONE",
@@ -2967,7 +2967,7 @@ class LidAaDailyStatus(BaseEvent):
 
     @property
     def sensortype(self):
-        return self.SensortypeEnum[self.sensortypeRaw]
+        return self.SensortypeEnum(self.sensortypeRaw)
 
     @staticmethod
     def build(raw):
@@ -3018,7 +3018,7 @@ class LidCgmAlertActivatedDex(BaseEvent):
 
     @property
     def sensortype(self):
-        return self.SensortypeEnum[self.sensortypeRaw]
+        return self.SensortypeEnum(self.sensortypeRaw)
 
     @staticmethod
     def build(raw):
@@ -3070,7 +3070,7 @@ class LidCgmAlertClearedDex(BaseEvent):
 
     @property
     def sensortype(self):
-        return self.SensortypeEnum[self.sensortypeRaw]
+        return self.SensortypeEnum(self.sensortypeRaw)
 
     @staticmethod
     def build(raw):
@@ -3117,7 +3117,7 @@ class LidCgmAlertAckDex(BaseEvent):
 
     @property
     def sensortype(self):
-        return self.SensortypeEnum[self.sensortypeRaw]
+        return self.SensortypeEnum(self.sensortypeRaw)
 
     AcksourceMap = {
         "0": "Alert Acknowledged by User",
@@ -3130,7 +3130,7 @@ class LidCgmAlertAckDex(BaseEvent):
 
     @property
     def acksource(self):
-        return self.AcksourceEnum[self.acksourceRaw]
+        return self.AcksourceEnum(self.acksourceRaw)
 
     @staticmethod
     def build(raw):
@@ -3184,7 +3184,7 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def glucosevaluestatus(self):
-        return self.GlucosevaluestatusEnum[self.glucosevaluestatusRaw]
+        return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
 
     CgmdatatypeMap = {
         "0": "Five Minute Reading (FMR)",
@@ -3203,7 +3203,7 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def cgmDataType(self):
-        return self.CgmdatatypeBitmask[self.cgmDataTypeRaw]
+        return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
 
     @property
     def rate(self):
@@ -3232,7 +3232,7 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def algorithmstate(self):
-        return self.AlgorithmstateEnum[self.algorithmstateRaw]
+        return self.AlgorithmstateEnum(self.algorithmstateRaw)
 
     EgvinfobitmaskMap = {
         "0": "Five Minute Reading (FMR)",
@@ -3263,7 +3263,7 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def egvInfoBitmask(self):
-        return self.EgvinfobitmaskBitmask[self.egvInfoBitmaskRaw]
+        return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
 
     @staticmethod
     def build(raw):
@@ -3362,7 +3362,7 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def glucosevaluestatus(self):
-        return self.GlucosevaluestatusEnum[self.glucosevaluestatusRaw]
+        return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
 
     CgmdatatypeMap = {
         "0": "FMR",
@@ -3381,7 +3381,7 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def cgmDataType(self):
-        return self.CgmdatatypeBitmask[self.cgmDataTypeRaw]
+        return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
 
     @property
     def rate(self):
@@ -3416,7 +3416,7 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def algorithmstate(self):
-        return self.AlgorithmstateEnum[self.algorithmstateRaw]
+        return self.AlgorithmstateEnum(self.algorithmstateRaw)
 
     EgvinfobitmaskMap = {
         "0": "Five Minute Reading (FMR)",
@@ -3445,7 +3445,7 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def egvInfoBitmask(self):
-        return self.EgvinfobitmaskBitmask[self.egvInfoBitmaskRaw]
+        return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
 
     @staticmethod
     def build(raw):
@@ -3654,7 +3654,7 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
 
     @property
     def sensortype(self):
-        return self.SensortypeEnum[self.sensortypeRaw]
+        return self.SensortypeEnum(self.sensortypeRaw)
 
     @staticmethod
     def build(raw):
@@ -3704,7 +3704,7 @@ class LidCgmAlertClearedFsl2(BaseEvent):
 
     @property
     def sensortype(self):
-        return self.SensortypeEnum[self.sensortypeRaw]
+        return self.SensortypeEnum(self.sensortypeRaw)
 
     @staticmethod
     def build(raw):

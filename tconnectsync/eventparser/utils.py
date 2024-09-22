@@ -15,3 +15,9 @@ def batched(iterable, n):
         except StopIteration:
             return
         yield itertools.chain((first_el,), chunk_it)
+
+def bitmask_to_list(intflag):
+    n = type(intflag).__name__
+    if not str(intflag).startswith(n):
+        return []
+    return str(intflag)[len(n)+1:].split('|')

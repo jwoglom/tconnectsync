@@ -9,9 +9,11 @@ BASAL_EVENTTYPE = "Temp Basal"
 BOLUS_EVENTTYPE = "Combo Bolus"
 SITECHANGE_EVENTTYPE = "Site Change"
 BASALSUSPENSION_EVENTTYPE = "Basal Suspension"
+BASALRESUME_EVENTTYPE = "Basal Resume"
 ACTIVITY_EVENTTYPE = "Activity"
 EXERCISE_EVENTTYPE = "Exercise"
 SLEEP_EVENTTYPE = "Sleep"
+ALARM_EVENTTYPE = "Alarm"
 
 IOB_ACTIVITYTYPE = "tconnect_iob"
 
@@ -67,7 +69,7 @@ class NightscoutEntry:
             "created_at": created_at,
             "enteredBy": ENTERED_BY
         }
-    
+
     @staticmethod
     def entry(sgv, created_at):
         return {
@@ -100,6 +102,26 @@ class NightscoutEntry:
         }
 
     @staticmethod
+    def basalresume(created_at):
+        return {
+            "eventType": BASALRESUME_EVENTTYPE,
+            "reason": "Basal resumed",
+            "notes": "Basal resumed",
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY
+        }
+
+    @staticmethod
+    def alarm(created_at, reason=""):
+        return {
+            "eventType": ALARM_EVENTTYPE,
+            "reason": reason,
+            "notes": reason,
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY
+        }
+
+    @staticmethod
     def activity(created_at, duration, reason="", event_type=ACTIVITY_EVENTTYPE):
         return {
             "eventType": event_type,
@@ -109,7 +131,7 @@ class NightscoutEntry:
             "created_at": created_at,
             "enteredBy": ENTERED_BY
         }
-    
+
     # Tandem-scraped profile to Nightscout profile store entry
     @staticmethod
     def profile_store(profile: Profile, device_settings: DeviceSettings) -> dict:
@@ -158,7 +180,7 @@ class NightscoutEntry:
             "startDate": "1970-01-01T00:00:00.000Z",
             "units": "mg/dl"
         }
-        
+
 def tandem_to_ns_time(tandem_time: str) -> str:
     numbers, ampm = tandem_time.split(' ')
     hr, min = numbers.split(':')
