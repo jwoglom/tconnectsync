@@ -28,7 +28,7 @@ class TandemSourceAutoupdate:
     def process(self, tconnect, nightscout, time_start, time_end, pretend, features=None):
         if features is None:
             features = DEFAULT_FEATURES
-       
+
         # Read from android api, find exact interval to cut down on API calls
         # Refresh API token. If failure, die, have wrapper script re-run.
 
@@ -72,7 +72,7 @@ class TandemSourceAutoupdate:
                 if pretend:
                     logger.info('Would update now if not in pretend mode')
                 else:
-                    added = ProcessTimeRange(tconnect, nightscout, tconnectDevice['tconnectDeviceId'], pretend, features=features).process(time_start, time_end)
+                    added = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, features=features).process(time_start, time_end)
                     logger.info('Added %d items from ProcessTimeRange' % added)
 
                 # Track the time it took to find a new event between runs,
@@ -127,12 +127,12 @@ class TandemSourceAutoupdate:
 
                 # If it's been 3 loops since the last time we found new data,
                 # then we're not in sync with the rate at which pump data is being
-                # uploaded, so 
+                # uploaded, so
                 if len(self.time_diffs_between_attempts) >= 3:
                     # The pump hasn't sent us data that, based on previous cadence, we were expecting
-                    logger.warning(AutoupdateNoIndexChangeWarning("Sleeping %d seconds after unexpected no index change based on previous cadence. (New data might be delayed.)" % 
+                    logger.warning(AutoupdateNoIndexChangeWarning("Sleeping %d seconds after unexpected no index change based on previous cadence. (New data might be delayed.)" %
                         int(self.secret.AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS)))
-                    
+
                     logger.debug("Last event time: %s, time diffs between attempts: %s" % (self.last_event_time, self.time_diffs_between_attempts))
 
                     time.sleep(self.secret.AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS)
@@ -154,7 +154,7 @@ class TandemSourceAutoupdate:
                 if len(self.time_diffs_between_updates) > 10:
                     self.time_diffs_between_updates = self.time_diffs_between_updates[1:]
 
-                # If we have less than 3 data points, 
+                # If we have less than 3 data points,
                 if len(self.time_diffs_between_updates) > 2:
                     sleep_secs = sum(self.time_diffs_between_updates) / len(self.time_diffs_between_updates)
 
