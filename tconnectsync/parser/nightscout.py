@@ -1,6 +1,7 @@
 import arrow
 
 from ..domain.device_settings import Profile, DeviceSettings
+from ..domain.tandemsource.pump_settings import PumpProfile, PumpSettings
 from ..secret import TIMEZONE_NAME, NIGHTSCOUT_PROFILE_CARBS_HR_VALUE, NIGHTSCOUT_PROFILE_DELAY_VALUE
 
 ENTERED_BY = "Pump (tconnectsync)"
@@ -47,7 +48,7 @@ class NightscoutEntry:
     FINGER = "Finger"
 
     @staticmethod
-    def bolus(bolus, carbs, created_at, notes="", bg="", bg_type=""):
+    def bolus(bolus, carbs, created_at, notes="", bg="", bg_type="", pump_event_id=""):
         data = {
             "eventType": BOLUS_EVENTTYPE,
 			"created_at": created_at,
@@ -55,6 +56,7 @@ class NightscoutEntry:
 			"insulin": float(bolus),
 			"notes": notes,
 			"enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
         }
         if bg:
             if bg_type:
@@ -241,6 +243,57 @@ class NightscoutEntry:
             "units": "mg/dl"
         }
 
+
+
+    # TandemSource profile to Nightscout profile store entry
+    @staticmethod
+    def tandemsource_profile_store(profile: PumpProfile, pump_settings: PumpSettings) -> dict:
+        return {
+            # insulin duration in hours; Nightscout JS bug requires all top-level fields to be strings
+            "dia": "%s" % (profile.insulinDuration / 60),
+            "carbratio": [
+                {
+                    "time": minutes_to_ns_time(segment.startTime),
+                    "timeAsSeconds": segment.startTime * 60,
+                    "value": segment.carbRatio / 1000 # milliunits->units
+                } for segment in profile.tDependentSegs
+            ],
+
+            "carbs_hr": NIGHTSCOUT_PROFILE_CARBS_HR_VALUE,
+            "delay": NIGHTSCOUT_PROFILE_DELAY_VALUE,
+            "sens": [ # Correction factor / isf
+                {
+                    "time": minutes_to_ns_time(segment.startTime),
+                    "timeAsSeconds": segment.startTime * 60,
+                    "value": segment.isf
+                } for segment in profile.tDependentSegs
+            ],
+            "basal": [
+                {
+                    "time": minutes_to_ns_time(segment.startTime),
+                    "timeAsSeconds": segment.startTime * 60,
+                    "value": segment.basalRate / 1000 # milliunits->units
+                } for segment in profile.tDependentSegs
+            ],
+            "target_low": [
+                {
+                    "time": "00:00",
+                    "timeAsSeconds": 0,
+                    "value": pump_settings.cgmSettings.lowGlucoseAlert.mgPerDl
+                }
+            ],
+            "target_high": [
+                {
+                    "time": "00:00",
+                    "timeAsSeconds": 0,
+                    "value": pump_settings.cgmSettings.highGlucoseAlert.mgPerDl
+                }
+            ],
+            "timezone": TIMEZONE_NAME, # tconnectsync settings timezone
+            "startDate": "1970-01-01T00:00:00.000Z",
+            "units": "mg/dl"
+        }
+
 def tandem_to_ns_time(tandem_time: str) -> str:
     numbers, ampm = tandem_time.split(' ')
     hr, min = numbers.split(':')
@@ -258,6 +311,12 @@ def tandem_to_ns_time_seconds(tandem_time: str) -> int:
     elif ampm.lower().strip() == 'pm':
         return 60 * (60 * (12 + (int(hr) % 12)) + int(min))
     raise InvalidTimeException(tandem_time)
+
+def minutes_to_ns_time(minutes_time: int) -> str:
+    hr = minutes_time // 60
+    mn = minutes_time % 60
+
+    return "%02d:%02d" % (hr, mn)
 
 class InvalidBolusTypeException(RuntimeError):
     pass

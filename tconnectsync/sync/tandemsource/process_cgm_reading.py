@@ -30,8 +30,10 @@ class ProcessCGMReading:
         logger.debug("ProcessCGMReading: querying for last uploaded entry")
         last_upload = self.nightscout.last_uploaded_bg_entry(time_start=time_start, time_end=time_end)
         last_upload_time = None
-        if last_upload:
-            last_upload_time = arrow.get(last_upload["created_at"])
+        if last_upload and "dateString" in last_upload:
+            last_upload_time = arrow.get(last_upload["dateString"])
+        elif last_upload and "date" in last_upload:
+            last_upload_time = arrow.get(last_upload["date"])
         logger.info("ProcessCGMReading: Last Nightscout bg upload: %s" % last_upload_time)
 
         readings = []

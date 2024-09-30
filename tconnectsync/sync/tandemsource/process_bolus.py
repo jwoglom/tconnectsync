@@ -60,9 +60,9 @@ class ProcessBolus:
 
             ns_entries.append(self.bolus_to_nsentry(
                 bolusCompleted,
-                bolusRequested1 = m.get(events.LidBolusRequestedMsg1),
-                bolusRequested2 = m.get(events.LidBolusRequestedMsg2),
-                bolusRequested3 = m.get(events.LidBolusRequestedMsg3),
+                bolusRequested1 = m.get(eventtypes.LidBolusRequestedMsg1),
+                bolusRequested2 = m.get(eventtypes.LidBolusRequestedMsg2),
+                bolusRequested3 = m.get(eventtypes.LidBolusRequestedMsg3),
             ))
 
         return ns_entries
@@ -93,14 +93,18 @@ class ProcessBolus:
         event_ids = []
         for e in [bolusCompleted, bolusRequested1, bolusRequested2, bolusRequested3]:
             if e:
-                event_ids.append(e.eventId)
+                event_ids.append(str(e.eventId))
+
+        notes = ''
+        if bolusRequested2 and str(bolusRequested2.optionsRaw) in eventtypes.LidBolusRequestedMsg2.OptionsMap:
+            notes = eventtypes.LidBolusRequestedMsg2.OptionsMap['%d' % bolusRequested2.optionsRaw]
 
 
         return NightscoutEntry.bolus(
             bolus = bolusCompleted.insulindelivered,
             carbs = bolusRequested1.carbamount if bolusRequested1 and bolusRequested1.carbamount>0 else None,
             created_at = bolusCompleted.eventTimestamp.format(),
-            notes = (eventtypes.LidBolusRequestedMsg2.OptionsMap[bolusRequested2.optionsRaw] if bolusRequested2 else '') + suffix,
+            notes = notes + suffix,
             bg = bolusRequested1.BG if bolusRequested1 and bolusRequested1.BG > 0 else None,
             pump_event_id = ",".join(event_ids)
         )

@@ -19,6 +19,7 @@ requests = {extras = ["socks"], version = "*"}
 requests-oidc = "*"
 pyjwt = "*"
 cryptography = "*"
+dataclasses-json = "*"
 
 [scripts]
 tconnectsync = "python3 main.py"

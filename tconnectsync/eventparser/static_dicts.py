@@ -139,5 +139,6 @@ CGM_ALERTS_DICT = {
     "20": "CGM Transmitter Error",
     "26": "CGM Temperature",
     "27": "CGM Failed Connection",
-    "39": "CGM Transmitter Expired"
+    "39": "CGM Transmitter Expired",
+    "40": "Pump Bluetooth Error"
 }
