@@ -91,6 +91,6 @@ class ProcessTimeRange:
             else:
                 logger.info("Skipping %s, is not enabled from features %s" % (updater_class.__name__, self.features))
 
-
+        logger.info("Processed %d events" % processed_count)
         return processed_count
 

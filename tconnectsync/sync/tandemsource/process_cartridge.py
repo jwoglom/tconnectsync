@@ -88,7 +88,7 @@ class ProcessCartridge:
     def cannula_to_nsentry(self, cannulaFilled):
         return NightscoutEntry.sitechange(
             created_at = cannulaFilled.eventTimestamp.format(),
-            reason = "Cannula Filled" + (" (%du primed)" % round(cannulaFilled.primesize) if cannulaFilled.primesize else ""),
+            reason = "Cannula Filled" + (" (%du primed)" % round(cannulaFilled.primesize, 2) if cannulaFilled.primesize else ""),
             pump_event_id = "%s" % cannulaFilled.eventId
         )
 

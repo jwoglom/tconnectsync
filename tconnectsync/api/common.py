@@ -13,7 +13,7 @@ def parse_date(date):
 
 def parse_ymd_date(date):
     if type(date) == str:
-        return date
+        date = arrow.get(date)
     return (date or datetime.datetime.now()).strftime('%Y-%m-%d')
 
 def parsed_date_to_arrow(date):
@@ -122,11 +122,11 @@ def split_days_range(start_a, end_a, days: int = 5) -> List[Tuple[str, str]]:
         if (cur - cur_s).days >= days-1:
             ranges.append((cur_s, cur))
             cur_s = cur + datetime.timedelta(days=1)
-        
+
         cur += datetime.timedelta(days=1)
     if len(ranges) > 0 and (end - ranges[-1][-1]).days > 0:
         ranges.append((cur_s, end))
-    
+
     return ranges
 
 class ApiException(Exception):

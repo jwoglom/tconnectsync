@@ -62,7 +62,7 @@ class ProcessAlarm:
         if type(event) == eventtypes.LidAlarmActivated:
             return NightscoutEntry.alarm(
                 created_at = event.eventTimestamp.format(),
-                reason = event.alarmid,
+                reason = "%s" % event.alarmid.name,
                 pump_event_id = "%s" % event.eventId
             )
         elif type(event) == eventtypes.LidMalfunctionActivated:
