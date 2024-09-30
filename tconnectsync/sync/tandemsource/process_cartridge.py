@@ -49,9 +49,9 @@ class ProcessCartridge:
             elif type(event) == eventtypes.LidTubingFilled:
                 tubingFilledEvents.append(event)
 
-        cartFilledEvents.sort(lambda e: e.eventTimestamp)
-        cannulaFilledEvents.sort(lambda e: e.eventTimestamp)
-        tubingFilledEvents.sort(lambda e: e.eventTimestamp)
+        cartFilledEvents.sort(key=lambda e: e.eventTimestamp)
+        cannulaFilledEvents.sort(key=lambda e: e.eventTimestamp)
+        tubingFilledEvents.sort(key=lambda e: e.eventTimestamp)
 
         ns_entries = []
         for cartFilled in cartFilledEvents:

@@ -42,7 +42,7 @@ class ProcessCGMStartJoinStop:
 
             allEvents.append(event)
 
-        allEvents.sort(lambda e: e.eventTimestamp)
+        allEvents.sort(key=lambda e: e.eventTimestamp)
 
         ns_entries = []
         for event in allEvents:

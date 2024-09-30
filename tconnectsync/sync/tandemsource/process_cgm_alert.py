@@ -42,7 +42,7 @@ class ProcessCGMAlert:
 
             alertEvents.append(event)
 
-        alertEvents.sort(lambda e: e.eventTimestamp)
+        alertEvents.sort(key=lambda e: e.eventTimestamp)
 
         ns_entries = []
         for event in alertEvents:

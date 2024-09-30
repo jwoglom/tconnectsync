@@ -50,7 +50,7 @@ class ProcessBolus:
 
                 bolusCompletedEvents.append(event)
 
-        bolusCompletedEvents.sort(lambda e: e.eventTimestamp)
+        bolusCompletedEvents.sort(key=lambda e: e.eventTimestamp)
 
 
 
