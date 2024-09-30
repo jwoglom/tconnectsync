@@ -9,6 +9,8 @@ from .api import TConnectApi
 from .process import process_time_range
 from .autoupdate import Autoupdate
 from .sync.tandemsource.autoupdate import TandemSourceAutoupdate
+from .sync.tandemsource.choose_device import ChooseDevice as TandemSourceChooseDevice
+from .sync.tandemsource.process import ProcessTimeRange as TandemSourceProcessTimeRange
 from .check import check_login
 from .nightscout import NightscoutApi
 from .features import DEFAULT_FEATURES, ALL_FEATURES
@@ -94,22 +96,24 @@ def main(*args, **kwargs):
 
     nightscout = NightscoutApi(NS_URL, NS_SECRET, skip_verify=NS_SKIP_TLS_VERIFY, ignore_conn_errors=NS_IGNORE_CONN_ERRORS)
 
-    if args.check_login:
-        return check_login(tconnect, time_start, time_end)
+    # NOT YET MIGRATED
+    # if args.check_login:
+    #     return check_login(tconnect, time_start, time_end)
+
+    logging.warning("THIS VERSION OF TCONNECTSYNC READS DATA FROM TANDEM SOURCE, AND MAY CONTAIN BUGS!")
+    logging.info("You may notice different behavior compared to older versions which utilized t:connect data sources.")
+    logging.info("To report a bug or to get help, see https://github.com/jwoglom/tconnectsync/issues")
 
     logging.info("Enabled features: " + ", ".join(args.features))
 
-    if args.tandem_source:
-        if args.auto_update:
-            u = TandemSourceAutoupdate(secret)
-            sys.exit(u.process(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features))
+    if args.check_login:
+        args.pretend = True
 
     if args.auto_update:
-        print("Starting auto-update between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
-        u = Autoupdate(secret)
+        u = TandemSourceAutoupdate(secret)
         sys.exit(u.process(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features))
     else:
-        print("Processing data between", time_start, "and", time_end, "(PRETEND)" if args.pretend else "")
-        added = process_time_range(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features)
-        print("Added", added, "items")
+        tconnectDevice = TandemSourceChooseDevice(secret, tconnect).choose()
+        added = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, features=args.features).process(time_start, time_end)
+        sys.exit(added)
 

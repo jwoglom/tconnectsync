@@ -71,15 +71,15 @@ class ProcessBasal:
             return NightscoutEntry.basal(
                 value = event.commandedbasalrate,
                 duration_mins = duration.seconds / 60,
-                created_at = start,
+                created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.changetype)),
-                pump_event_id = event.eventId
+                pump_event_id = "%s" % event.eventId
             )
         if type(event) == eventtypes.LidBasalDelivery:
             return NightscoutEntry.basal(
                 value = event.commandedRate,
                 duration_mins = duration.seconds / 60,
-                created_at = start,
+                created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.commandedRateSource)),
-                pump_event_id = event.eventId
+                pump_event_id = "%s" % event.eventId
             )

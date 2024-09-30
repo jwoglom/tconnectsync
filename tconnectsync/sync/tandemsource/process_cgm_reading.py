@@ -69,6 +69,6 @@ class ProcessCGMReading:
     def to_nsentry(self, event):
         return NightscoutEntry.entry(
             sgv = event.currentglucosedisplayvalue,
-            created_at = self.timestamp_for(event),
-            pump_event_id = event.eventId,
+            created_at = self.timestamp_for(event).format(),
+            pump_event_id = "%s" % event.eventId,
         )

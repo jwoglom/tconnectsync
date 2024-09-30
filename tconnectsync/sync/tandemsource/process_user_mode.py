@@ -153,7 +153,7 @@ class ProcessUserMode:
 
             duration_mins = (stop.eventTimestamp - start.eventTimestamp).seconds / 60
             return NightscoutEntry.activity(
-                created_at=start.eventTimestamp,
+                created_at=start.eventTimestamp.format(),
                 reason=reason,
                 duration=duration_mins,
                 event_type=SLEEP_EVENTTYPE,
@@ -168,7 +168,7 @@ class ProcessUserMode:
 
             duration_mins = (time_end - start.eventTimestamp).seconds / 60
             return NightscoutEntry.activity(
-                created_at=start.eventTimestamp,
+                created_at=start.eventTimestamp.format(),
                 reason=reason + " - " + NOT_ENDED if reason else NOT_ENDED,
                 duration=duration_mins,
                 event_type=SLEEP_EVENTTYPE,
@@ -187,7 +187,7 @@ class ProcessUserMode:
 
             duration_mins = (stop.eventTimestamp - start.eventTimestamp).seconds / 60
             return NightscoutEntry.activity(
-                created_at=start.eventTimestamp,
+                created_at=start.eventTimestamp.format(),
                 reason=reason,
                 duration=duration_mins,
                 event_type=EXERCISE_EVENTTYPE,
@@ -200,7 +200,7 @@ class ProcessUserMode:
 
             duration_mins = (time_end.eventTimestamp - start.eventTimestamp).seconds / 60
             return NightscoutEntry.activity(
-                created_at=start.eventTimestamp,
+                created_at=start.eventTimestamp.format(),
                 reason=reason + " - " + NOT_ENDED,
                 duration=duration_mins,
                 event_type=EXERCISE_EVENTTYPE,

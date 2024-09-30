@@ -65,19 +65,19 @@ class ProcessCGMAlert:
     def alert_to_nsentry(self, alert):
         if type(alert) == eventtypes.LidCgmAlertActivated:
             return NightscoutEntry.cgm_alert(
-                created_at = alert.eventTimestamp,
+                created_at = alert.eventTimestamp.format(),
                 reason = ("CGM Alert (%s)" % alert.dalertid) if alert.dalertid else "CGM Alert (Unknown)",
-                pump_event_id = alert.eventId
+                pump_event_id = "%s" % alert.eventId
             )
         elif type(alert) == eventtypes.LidCgmAlertActivatedDex:
             return NightscoutEntry.cgm_alert(
-                created_at = alert.eventTimestamp,
+                created_at = alert.eventTimestamp.format(),
                 reason = ("Dexcom CGM Alert (%s)" % alert.dalertid) if alert.dalertid else "Dexcom CGM Alert (Unknown)",
-                pump_event_id = alert.eventId
+                pump_event_id = "%s" % alert.eventId
             )
         elif type(alert) == eventtypes.LidCgmAlertActivatedFsl2:
             return NightscoutEntry.cgm_alert(
-                created_at = alert.eventTimestamp,
+                created_at = alert.eventTimestamp.format(),
                 reason = ("Libre CGM Alert (%s)" % alert.dalertid) if alert.dalertid else "Libre CGM Alert (Unknown)",
-                pump_event_id = alert.eventId
+                pump_event_id = "%s" % alert.eventId
             )

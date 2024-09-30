@@ -80,21 +80,21 @@ class ProcessCartridge:
 
     def cart_to_nsentry(self, cartFilled):
         return NightscoutEntry.sitechange(
-            created_at = cartFilled.eventTimestamp,
+            created_at = cartFilled.eventTimestamp.format(),
             reason = "Cartridge Filled" + (" (%du filled)" % round(cartFilled.v2Volume) if cartFilled.v2Volume else ""),
-            pump_event_id = cartFilled.eventId
+            pump_event_id = "%s" % cartFilled.eventId
         )
 
     def cannula_to_nsentry(self, cannulaFilled):
         return NightscoutEntry.sitechange(
-            created_at = cannulaFilled.eventTimestamp,
+            created_at = cannulaFilled.eventTimestamp.format(),
             reason = "Cannula Filled" + (" (%du primed)" % round(cannulaFilled.primesize) if cannulaFilled.primesize else ""),
-            pump_event_id = cannulaFilled.eventId
+            pump_event_id = "%s" % cannulaFilled.eventId
         )
 
     def tubing_to_nsentry(self, tubingFilled):
         return NightscoutEntry.sitechange(
-            created_at = tubingFilled.eventTimestamp,
+            created_at = tubingFilled.eventTimestamp.format(),
             reason = "Tubing Filled" + (" (%du primed)" % round(tubingFilled.primesize) if tubingFilled.primesize else ""),
-            pump_event_id = tubingFilled.eventId
+            pump_event_id = "%s" % tubingFilled.eventId
         )

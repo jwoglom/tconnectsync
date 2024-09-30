@@ -82,13 +82,13 @@ class NightscoutApi:
 			try:
 				ret = internal(False)
 			except ApiException as e:
-				logger.warning("last_uploaded_entry with no t_to_space: %s", e)
+				#logger.warning("last_uploaded_entry with no t_to_space: %s", e)
 				ret = None
 			if ret is None and (time_start or time_end):
 				try:
 					ret = internal(True)
 				except ApiException as e:
-					logger.warning("last_uploaded_entry with t_to_space: %s", e)
+					#logger.warning("last_uploaded_entry with t_to_space: %s", e)
 					ret = None
 				if ret is not None:
 					logger.warning("last_uploaded_entry with eventType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (eventType, time_start, time_end))
@@ -98,7 +98,7 @@ class NightscoutApi:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
-	
+
 	def last_uploaded_bg_entry(self, time_start=None, time_end=None):
 		def internal(t_to_space):
 			dateFilter = time_range('dateString', time_start, time_end, t_to_space=t_to_space)
@@ -112,7 +112,7 @@ class NightscoutApi:
 			if j and len(j) > 0:
 				return j[0]
 			return None
-		
+
 		try:
 			ret = internal(False)
 			if ret is None and (time_start or time_end):
@@ -140,7 +140,7 @@ class NightscoutApi:
 			if j and len(j) > 0:
 				return j[0]
 			return None
-		
+
 		try:
 			ret = internal(False)
 			if ret is None and (time_start or time_end):
@@ -164,7 +164,7 @@ class NightscoutApi:
 		if status.status_code != 200:
 			raise Exception('HTTP error status code (%d) from Nightscout: %s' % (status.status_code, status.text))
 		return status.json()
-	
+
 	"""
 	Returns information on the currently configured Nightscout profile data store
 	(contains all profiles in Nightscout under one mongo object).

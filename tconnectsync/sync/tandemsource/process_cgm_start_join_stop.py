@@ -65,19 +65,19 @@ class ProcessCGMStartJoinStop:
     def to_nsentry(self, event):
         if type(event) in EventClass._CGM_START:
             return NightscoutEntry.cgm_start(
-                created_at = event.eventTimestamp,
+                created_at = event.eventTimestamp.format(),
                 reason = "CGM Session Started",
-                pump_event_id = event.eventId
+                pump_event_id = "%s" % event.eventId
             )
         elif type(event) in EventClass._CGM_JOIN:
             return NightscoutEntry.cgm_join(
-                created_at = event.eventTimestamp,
+                created_at = event.eventTimestamp.format(),
                 reason = "CGM Session Joined",
-                pump_event_id = event.eventId
+                pump_event_id = "%s" % event.eventId
             )
         elif type(event) in EventClass._CGM_STOP:
             return NightscoutEntry.cgm_stop(
-                created_at = event.eventTimestamp,
+                created_at = event.eventTimestamp.format(),
                 reason = "CGM Session Stopped",
-                pump_event_id = event.eventId
+                pump_event_id = "%s" % event.eventId
             )

@@ -29,7 +29,7 @@ class Autoupdate:
     def process(self, tconnect, nightscout, time_start, time_end, pretend, features=None):
         if features is None:
             features = DEFAULT_FEATURES
-       
+
         # Read from android api, find exact interval to cut down on API calls
         # Refresh API token. If failure, die, have wrapper script re-run.
 
@@ -55,7 +55,7 @@ class Autoupdate:
                         # just already be in sync with tconnect's pump data.
                         if self.last_event_index:
 
-                            # Find the timestamp of the last time we've successfully obtained data, 
+                            # Find the timestamp of the last time we've successfully obtained data,
                             # or the time when the autoupdate run started, if we haven't at all.
                             last_action_or_start = self.last_successful_process_time_range
                             if not last_action_or_start:
@@ -69,7 +69,7 @@ class Autoupdate:
                             if (now - last_action_or_start) >= 60 * self.secret.AUTOUPDATE_FAILURE_MINUTES:
                                 logger.error(AutoupdateFailureError(
                                         ("%s: An event index change was recorded, but no new data was found via the API. " % datetime.datetime.now()) +
-                                        "The %s was %d minutes ago. This is a problem with tconnectsync." % 
+                                        "The %s was %d minutes ago. This is a problem with tconnectsync." %
                                         ("last processed event" if self.last_successful_process_time_range else "start of autoupdate", (now - last_action_or_start)//60)))
 
                                 if self.secret.AUTOUPDATE_RESTART_ON_FAILURE:
@@ -77,9 +77,9 @@ class Autoupdate:
                                     return 1
                             else:
                                 logger.warning(AutoupdateFailureWarning(("%s: An event index change was recorded, but no new data was found via the API. " % datetime.datetime.now()) +
-                                            "The %s was %d minutes ago. Resetting TConnectApi to attempt to solve this problem." % 
+                                            "The %s was %d minutes ago. Resetting TConnectApi to attempt to solve this problem." %
                                             ("last processed event" if self.last_successful_process_time_range else "start of autoupdate", (now - last_action_or_start)//60)))
-                                
+
                                 # As a stop-gap, try to re-initialize TConnectApi (triggering a re-login)
                                 # Use __class__ instead of direct TConnectApi invocation to avoid initializing a real TConnectApi over a fake
                                 tconnect = tconnect.__class__(self.secret.TCONNECT_EMAIL, self.secret.TCONNECT_PASSWORD)
@@ -140,12 +140,12 @@ class Autoupdate:
 
                 # If it's been 3 loops since the last time we found new data,
                 # then we're not in sync with the rate at which pump data is being
-                # uploaded, so 
+                # uploaded, so
                 if len(self.time_diffs_between_attempts) >= 3:
                     # The pump hasn't sent us data that, based on previous cadence, we were expecting
-                    logger.warning(AutoupdateNoIndexChangeWarning("Sleeping %d seconds after unexpected no index change based on previous cadence. (New data might be delayed.)" % 
+                    logger.warning(AutoupdateNoIndexChangeWarning("Sleeping %d seconds after unexpected no index change based on previous cadence. (New data might be delayed.)" %
                         int(self.secret.AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS)))
-                    
+
                     logger.debug("Last event time: %s, time diffs between attempts: %s" % (self.last_event_time, self.time_diffs_between_attempts))
 
                     time.sleep(self.secret.AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS)
@@ -167,7 +167,7 @@ class Autoupdate:
                 if len(self.time_diffs_between_updates) > 10:
                     self.time_diffs_between_updates = self.time_diffs_between_updates[1:]
 
-                # If we have less than 3 data points, 
+                # If we have less than 3 data points,
                 if len(self.time_diffs_between_updates) > 2:
                     sleep_secs = sum(self.time_diffs_between_updates) / len(self.time_diffs_between_updates)
 

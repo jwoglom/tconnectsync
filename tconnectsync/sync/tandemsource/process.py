@@ -61,7 +61,6 @@ class ProcessTimeRange:
 
             clazz = EventClass.for_event(event)
             if clazz:
-                processed_count += 1
                 for_eventclass[clazz.name].append(event)
 
         count_by_eventclass = {k: len(v) for k,v in for_eventclass.items()}

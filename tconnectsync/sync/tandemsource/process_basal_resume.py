@@ -61,6 +61,6 @@ class ProcessBasalResume:
     def resume_to_nsentry(self, event):
         if type(event) == eventtypes.LidPumpingResumed:
             return NightscoutEntry.basalresume(
-                created_at = event.eventTimestamp,
-                pump_event_id = event.eventId
+                created_at = event.eventTimestamp.format(),
+                pump_event_id = "%s" % event.eventId
             )
