@@ -15,7 +15,7 @@ python-dotenv = "*"
 requests-mock = "*"
 pysocks = "*"
 urllib3 = "==1.26.6"
-requests = {extras = ["socks"], version = "*"}
+requests = {extras = ["socks"], version = "==2.31.0"}
 requests-oidc = "*"
 pyjwt = "*"
 cryptography = "*"
