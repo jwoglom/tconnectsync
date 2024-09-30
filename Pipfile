@@ -9,7 +9,7 @@ ptpython = "*"
 [packages]
 tconnectsync = {path = "."}
 bs4 = "*"
-arrow = "*"
+arrow = "==1.2.3"
 lxml = "*"
 python-dotenv = "*"
 requests-mock = "*"
