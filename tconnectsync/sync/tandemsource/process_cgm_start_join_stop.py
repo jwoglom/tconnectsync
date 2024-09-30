@@ -9,6 +9,8 @@ from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
 from ...parser.nightscout import (
     CGM_START_EVENTTYPE,
+    CGM_JOIN_EVENTTYPE,
+    CGM_STOP_EVENTTYPE,
     NightscoutEntry
 )
 
@@ -26,12 +28,23 @@ class ProcessCGMStartJoinStop:
         return features.PUMP_EVENTS in self.features or features.CGM_ALERTS in self.features
 
     def process(self, events, time_start, time_end):
-        logger.debug("ProcessCGMStartJoinStop: querying for last uploaded entry")
-        last_upload = self.nightscout.last_uploaded_entry(CGM_START_EVENTTYPE, time_start=time_start, time_end=time_end)
+        last_upload = None
         last_upload_time = None
-        if last_upload:
-            last_upload_time = arrow.get(last_upload["created_at"])
-        logger.info("ProcessCGMStartJoinStop: Last Nightscout cgmstart upload: %s" % last_upload_time)
+        for eventtype in [CGM_START_EVENTTYPE, CGM_JOIN_EVENTTYPE, CGM_STOP_EVENTTYPE]:
+            logger.debug("ProcessCGMStartJoinStop: querying for last uploaded entry for %s" % eventtype)
+            _last_upload = self.nightscout.last_uploaded_entry(eventtype, time_start=time_start, time_end=time_end)
+            _last_upload_time = None
+            if _last_upload:
+                _last_upload_time = arrow.get(_last_upload["created_at"])
+
+                if not last_upload_time:
+                    last_upload = _last_upload
+                    last_upload_time = _last_upload_time
+                elif _last_upload_time > last_upload_time:
+                    last_upload = _last_upload
+                    last_upload_time = _last_upload_time
+            logger.info("ProcessCGMStartJoinStop: Last Nightscout %s upload: %s" % (eventtype, _last_upload_time))
+        logger.info("ProcessCGMStartJoinStop: Overall last Nightscout upload: %s %s" % (last_upload_time, last_upload))
 
         allEvents = []
         for event in sorted(events, key=lambda x: x.eventTimestamp):
