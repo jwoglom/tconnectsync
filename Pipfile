@@ -23,3 +23,4 @@ cryptography = "*"
 [scripts]
 tconnectsync = "python3 main.py"
 test = "python3 -m unittest discover -vv"
+build_events = "bash -c 'cd tconnectsync/eventparser && python3 build_events.py > events.py'"

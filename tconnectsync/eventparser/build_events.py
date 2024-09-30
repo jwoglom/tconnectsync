@@ -65,7 +65,7 @@ class {name}(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 '''
 

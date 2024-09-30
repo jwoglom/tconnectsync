@@ -80,7 +80,7 @@ class LidBasalRateChange(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -251,7 +251,7 @@ class LidAlertActivated(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -424,7 +424,7 @@ class LidAlarmActivated(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -461,7 +461,7 @@ class LidMalfunctionActivated(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -514,7 +514,7 @@ class LidPumpingSuspended(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -545,7 +545,7 @@ class LidPumpingResumed(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -579,7 +579,7 @@ class LidTimeChanged(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -613,7 +613,7 @@ class LidDateChanged(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -713,7 +713,7 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -776,7 +776,7 @@ class LidBolusCompleted(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -839,7 +839,7 @@ class LidBolexCompleted(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1004,7 +1004,7 @@ class LidAlertCleared(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1168,7 +1168,7 @@ class LidAlarmCleared(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1199,7 +1199,7 @@ class LidCartridgeFilled(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1242,7 +1242,7 @@ class LidShelfMode(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1291,7 +1291,7 @@ class LidBolusActivated(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1340,7 +1340,7 @@ class LidBolexActivated(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1371,7 +1371,7 @@ class LidDataLogCorruption(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1418,7 +1418,7 @@ class LidCannulaFilled(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1468,7 +1468,7 @@ class LidTubingFilled(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1547,7 +1547,7 @@ class LidBolusRequestedMsg1(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1662,7 +1662,7 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1699,7 +1699,7 @@ class LidBolusRequestedMsg3(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1733,7 +1733,7 @@ class LidNewDay(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1770,7 +1770,7 @@ class LidArmInit(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1920,7 +1920,7 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -1979,7 +1979,7 @@ class LidCgmAlertActivated(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2029,7 +2029,7 @@ class LidCgmAlertCleared(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2066,7 +2066,7 @@ class LidVersionInfo(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2124,7 +2124,7 @@ class LidUpdateStatus(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2158,7 +2158,7 @@ class LidCgmStartSessionGx(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2229,7 +2229,7 @@ class LidCgmJoinSessionGx(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2303,7 +2303,7 @@ class LidCgmStopSessionGx(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2482,7 +2482,7 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2626,7 +2626,7 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2742,7 +2742,7 @@ class LidCgmDataGxb(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2800,7 +2800,7 @@ class LidBasalDelivery(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2913,7 +2913,7 @@ class LidBolusDelivery(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -2950,7 +2950,7 @@ class LidVersionsA(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3032,7 +3032,7 @@ class LidAaDailyStatus(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3109,7 +3109,7 @@ class LidCgmAlertActivatedDex(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3177,7 +3177,7 @@ class LidCgmAlertClearedDex(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3261,7 +3261,7 @@ class LidCgmAlertAckDex(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3406,7 +3406,7 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3437,7 +3437,7 @@ class LidCgmJoinSessionG7(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3588,7 +3588,7 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3619,7 +3619,7 @@ class LidCgmStartSessionFsl2(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3656,7 +3656,7 @@ class LidCgmStopSessionFsl2(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3693,7 +3693,7 @@ class LidCgmJoinSessionFsl2(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3736,7 +3736,7 @@ class LidCgmStopSessionG7(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3811,7 +3811,7 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 
 @dataclass
@@ -3877,7 +3877,7 @@ class LidCgmAlertClearedFsl2(BaseEvent):
 
     @property
     def eventId(self):
-        return self.raw.id
+        return self.raw.seqNum
 
 EVENT_IDS = {
     3: LidBasalRateChange,
