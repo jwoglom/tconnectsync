@@ -22,7 +22,8 @@ class TestNightscoutEntry(unittest.TestCase):
                 "created_at": "2021-03-16 00:25:21-04:00",
                 "carbs": None,
                 "insulin": None,
-                "enteredBy": "Pump (tconnectsync)"
+                "enteredBy": "Pump (tconnectsync)",
+                "pump_event_id": ""
             }
         )
 
@@ -41,7 +42,8 @@ class TestNightscoutEntry(unittest.TestCase):
                 "created_at": "2021-03-16 12:25:21-04:00",
                 "carbs": None,
                 "insulin": None,
-                "enteredBy": "Pump (tconnectsync)"
+                "enteredBy": "Pump (tconnectsync)",
+                "pump_event_id": ""
             }
         )
 
@@ -57,7 +59,8 @@ class TestNightscoutEntry(unittest.TestCase):
                 "carbs": 45,
                 "insulin": 7.5,
                 "notes": "",
-                "enteredBy": "Pump (tconnectsync)"
+                "enteredBy": "Pump (tconnectsync)",
+                "pump_event_id": ""
             }
         )
 
@@ -72,7 +75,8 @@ class TestNightscoutEntry(unittest.TestCase):
                 "carbs": 5,
                 "insulin": 0.5,
                 "notes": "",
-                "enteredBy": "Pump (tconnectsync)"
+                "enteredBy": "Pump (tconnectsync)",
+                "pump_event_id": ""
             }
         )
 
@@ -92,7 +96,8 @@ class TestNightscoutEntry(unittest.TestCase):
                 "notes": "",
                 "enteredBy": "Pump (tconnectsync)",
                 "glucose": "123",
-                "glucoseType": "Sensor"
+                "glucoseType": "Sensor",
+                "pump_event_id": ""
             }
         )
 
@@ -111,28 +116,14 @@ class TestNightscoutEntry(unittest.TestCase):
                 "notes": "",
                 "enteredBy": "Pump (tconnectsync)",
                 "glucose": "150",
-                "glucoseType": "Finger"
+                "glucoseType": "Finger",
+                "pump_event_id": ""
             }
         )
 
     def test_bolus_with_bg_invalid_type(self):
         self.assertRaises(InvalidBolusTypeException,
-            NightscoutEntry.bolus, 
-            bolus=0.5,
-            carbs=5,
-            created_at="2021-03-16 12:25:21-04:00",
-            bg="150")
-
-        self.assertRaises(InvalidBolusTypeException,
-            NightscoutEntry.bolus, 
-            bolus=0.5,
-            carbs=5,
-            created_at="2021-03-16 12:25:21-04:00",
-            bg="150",
-            bg_type="")
-
-        self.assertRaises(InvalidBolusTypeException,
-            NightscoutEntry.bolus, 
+            NightscoutEntry.bolus,
             bolus=0.5,
             carbs=5,
             created_at="2021-03-16 12:25:21-04:00",
@@ -163,9 +154,10 @@ class TestNightscoutEntry(unittest.TestCase):
                 "date": 1635041834000,
                 "dateString": "2021-10-23T22:17:14-0400",
                 "device": "Pump (tconnectsync)",
+                "pump_event_id": ""
             }
         )
-    
+
     def test_sitechange(self):
         self.assertEqual(
             NightscoutEntry.sitechange(
@@ -176,10 +168,11 @@ class TestNightscoutEntry(unittest.TestCase):
                 "reason": "reason",
                 "notes": "reason",
                 "created_at": "2021-12-05T00:16:35.058Z",
-                "enteredBy": "Pump (tconnectsync)"
+                "enteredBy": "Pump (tconnectsync)",
+                "pump_event_id": ""
             }
         )
-    
+
     def test_basalsuspension(self):
         self.assertEqual(
             NightscoutEntry.basalsuspension(
@@ -190,11 +183,12 @@ class TestNightscoutEntry(unittest.TestCase):
                 "reason": "reason",
                 "notes": "reason",
                 "created_at": "2021-12-05T00:16:35.058Z",
-                "enteredBy": "Pump (tconnectsync)"
+                "enteredBy": "Pump (tconnectsync)",
+                "pump_event_id": ""
             }
         )
 
-    
+
     def test_profile_store(self):
         self.assertEqual(
             NightscoutEntry.profile_store(

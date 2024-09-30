@@ -52,7 +52,7 @@ class NightscoutEntry:
         data = {
             "eventType": BOLUS_EVENTTYPE,
 			"created_at": created_at,
-			"carbs": int(carbs) if carbs else None,
+			"carbs": int(carbs) if carbs else 0,
 			"insulin": float(bolus),
 			"notes": notes,
 			"enteredBy": ENTERED_BY,

@@ -26,7 +26,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
     def stub_therapy_timeline(self, time_start, time_end):
         return copy.deepcopy(TestBasalSync.base)
-    
+
     def stub_ciq_therapy_events(self, time_start, time_end):
         return {
             "event": []
@@ -39,7 +39,7 @@ class TestProcessTimeRange(unittest.TestCase):
             "basalData": [],
             "bolusData": []
         }
-    
+
     def stub_ws2_basalsuspension(self, time_start, time_end):
         return {"BasalSuspension": []}
 
@@ -394,7 +394,7 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertDictEqual(nightscout.put_entries, {})
         self.assertListEqual(nightscout.deleted_entries, [])
         self.assertEqual(count, 0)
-    
+
     """Existing IOB in Nightscout. Uploads new iob reading and deletes old IOB."""
     def test_updates_ciq_iob_data(self):
         tconnect = TConnectApi()
@@ -442,7 +442,7 @@ class TestProcessTimeRange(unittest.TestCase):
             "activity/sentinel_existing_iob_id"
         ])
         self.assertEqual(count, 1)
-    
+
     """No pump activity events in Nightscout. New CIQ activity events."""
     def test_new_ciq_activity_events(self):
         tconnect = TConnectApi()
@@ -460,7 +460,7 @@ class TestProcessTimeRange(unittest.TestCase):
                 "events": [{
                     "duration": 1200,
                     "eventType": 2, # Exercise
-                    "continuation": None, 
+                    "continuation": None,
                     "timeZoneId": "America/Los_Angeles",
                     "x": 1619901912 # 2021-05-01 13:45:12-04:00
                 }, {
@@ -510,7 +510,7 @@ class TestProcessTimeRange(unittest.TestCase):
                 "events": [{
                     "duration": 1200,
                     "eventType": 2, # Exercise
-                    "continuation": None, 
+                    "continuation": None,
                     "timeZoneId": "America/Los_Angeles",
                     "x": 1619901912 # 2021-05-01 13:45:12-04:00
                 }, {
@@ -539,7 +539,7 @@ class TestProcessTimeRange(unittest.TestCase):
         self.assertListEqual(nightscout.deleted_entries, [])
         self.assertEqual(count, 0)
 
-    
+
     """
     Existing Sleep event in Nightscout with shorter duration than current, as well as a past Exercise event.
     Ensures that the old sleep event is deleted and a new one is created with the correct duration."""
@@ -559,7 +559,7 @@ class TestProcessTimeRange(unittest.TestCase):
                 "events": [{
                     "duration": 1200,
                     "eventType": 2, # Exercise
-                    "continuation": None, 
+                    "continuation": None,
                     "timeZoneId": "America/Los_Angeles",
                     "x": 1619901912 # 2021-05-01 13:45:12-04:00
                 }, {
@@ -623,7 +623,7 @@ class TestProcessTimeRange(unittest.TestCase):
         tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
         tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
 
-        def fake_basalsuspension(time_start, time_end):            
+        def fake_basalsuspension(time_start, time_end):
             self.assertEqual(time_start, start)
             self.assertEqual(time_end, end)
 
@@ -673,7 +673,7 @@ class TestProcessTimeRange(unittest.TestCase):
         tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
         tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
 
-        def fake_basalsuspension(time_start, time_end):            
+        def fake_basalsuspension(time_start, time_end):
             self.assertEqual(time_start, start)
             self.assertEqual(time_end, end)
 
@@ -737,7 +737,7 @@ class TestProcessTimeRange(unittest.TestCase):
         tconnect.controliq.therapy_timeline = self.stub_therapy_timeline
         tconnect.ws2.therapy_timeline_csv = self.stub_therapy_timeline_csv
 
-        def fake_basalsuspension(time_start, time_end):            
+        def fake_basalsuspension(time_start, time_end):
             self.assertEqual(time_start, start)
             self.assertEqual(time_end, end)
 
@@ -781,7 +781,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         pump_guid = '00000000-0000-0000-0000-000000000001'
         serial_number = '12345'
-        
+
         def fake_my_devices():
             return {
                 serial_number: Device(
@@ -830,7 +830,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         pump_guid = '00000000-0000-0000-0000-000000000001'
         serial_number = '12345'
-        
+
         def fake_my_devices():
             return {
                 serial_number: Device(
@@ -878,7 +878,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         pump_guid = '00000000-0000-0000-0000-000000000001'
         serial_number = '12345'
-        
+
         def fake_my_devices():
             return {
                 serial_number: Device(
@@ -932,7 +932,7 @@ class TestProcessTimeRange(unittest.TestCase):
 
         pump_guid = '00000000-0000-0000-0000-000000000001'
         serial_number = '12345'
-        
+
         def fake_my_devices():
             return {
                 serial_number: Device(
