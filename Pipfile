@@ -20,6 +20,7 @@ requests-oidc = "*"
 pyjwt = "*"
 cryptography = "*"
 dataclasses-json = "*"
+cffi = ">=1.15.1"
 
 [scripts]
 tconnectsync = "python3 main.py"
