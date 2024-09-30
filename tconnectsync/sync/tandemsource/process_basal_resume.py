@@ -23,7 +23,7 @@ class ProcessBasalResume:
         self.features = features
 
     def enabled(self):
-        return features.PUMP_EVENTS in self.features or features.BASAL in self.features
+        return features.PUMP_EVENTS in self.features
 
     def process(self, events, time_start, time_end):
         logger.debug("ProcessBasalResume: querying for last uploaded resume-suspension")

@@ -3,11 +3,11 @@
 ![Python Package workflow](https://github.com/jwoglom/tconnectsync/actions/workflows/python-package.yml/badge.svg)
 [![codecov](https://codecov.io/gh/jwoglom/tconnectsync/branch/master/graph/badge.svg)](https://codecov.io/gh/jwoglom/tconnectsync)
 
-Tconnectsync synchronizes data one-way from the Tandem Diabetes t:connect web/mobile application to Nightscout.
+Tconnectsync synchronizes data one-way from Tandem Source to Nightscout.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > Tandem has announced that t:connect will be shut down in favor of Tandem Source in the US beginning September 30, 2024.
-> tconnectsync is in the process of being updated to work with Tandem Source. Please check back for updates over the next few weeks.
+> tconnectsync has undergone major changes to support Tandem Source. **For Tandem Source support, you MUST upgrade to tconnectsync version 2.0 or above.**
 
 If you have a t:slim X2 pump with the companion t:connect mobile Android or iOS app, this will allow your pump bolus and basal data to be uploaded to [Nightscout](https://github.com/nightscout/cgm-remote-monitor) automatically.
 Together with a CGM uploader, such as [xDrip+](https://github.com/NightscoutFoundation/xDrip) or the official Dexcom mobile app plus Dexcom Share, this allows your CGM _and_ pump data to be automatically uploaded to Nightscout!
@@ -15,20 +15,17 @@ Together with a CGM uploader, such as [xDrip+](https://github.com/NightscoutFoun
 
 ## How It Works
 
-At a high level, tconnectsync works by querying Tandem's undocumented APIs to receive basal and bolus data from t:connect, and then uploads that data as treatment objects to Nightscout. It contains features for checking for new Tandem pump data continuously, and updating that data along with the pump's reported IOB value to Nightscout whenever there is new data.
+At a high level, tconnectsync works by querying Tandem's undocumented APIs to receive basal and bolus data from Tandem Source, and then uploads that data as treatment objects to Nightscout. It contains features for checking for new Tandem pump data continuously, and updating that data to Nightscout whenever there is new data.
 
 When you run the program with no arguments, it performs a single cycle of the following, and exits after completion:
 
-* Queries for basal information via the t:connect ControlIQ API.
-* Queries for bolus, basal, and IOB data via the t:connect non-ControlIQ API.
-* Merges the basal information received from the two APIs. (If using ControlIQ, then basal information appears only on the ControlIQ API. If not using ControlIQ, it appears only on the legacy API.)
-* Queries Nightscout for the most recently created Temp Basal object by tconnectsync, and uploads all data newer than that.
-* Queries Nightscout for the most recently created Bolus object by tconnectsync, and uploads all data newer than that.
+* Logs in to Tandem Source
+* Fetches your list of pumps, and unless overridden by an environment variable, fetches the event data for the pump which was most recently used
+* Processes the internal pump event metadata to extract basal, bolus, CGM, and other pump event data
+* Queries Nightscout to find the most recent data which was uploaded to it for each event category
+* Uploads any missing data to Nightscout
 
-If run with the `--auto-update` flag, then the application performs the following steps:
-
-* Queries an API endpoint used only by the t:connect mobile app which returns an internal event ID, corresponding to the most recent event published by the mobile app.
-* Whenever the internal event ID changes (denoting that the mobile app uploaded new data to synchronize), perform all of the above mentioned steps to synchronize data.
+If run with the `--auto-update` flag, then the application periodically looks for new data and synchronizes it to Nightscout in a loop every few minutes.
 
 ## What Gets Synced
 
@@ -39,28 +36,23 @@ When setting up tconnectsync, you can choose to configure which synchronization 
 Here are a few examples of reasons why you might want to adjust the enabled synchronization features:
 
 * If you currently input boluses into Nightscout manually with comments, then you may wish to _disable the `BOLUS` synchronization feature_ so that there are no duplicated boluses in Nightscout.
-* If you want to see Sleep and Exercise Mode data appear in Nightscout, then you may with to _enable the `PUMP_EVENTS` synchronization feature_.
-* If you want to automatically update your Nightscout insulin profile settings from your pump, then you may want to _enable the `PROFILES` synchronization feature_.
+* If you want to see Sleep and Exercise Mode data appear in Nightscout, then you may wish to _enable the `PUMP_EVENTS` synchronization feature_.
+* If you want to automatically update your Nightscout insulin profile settings from your pump, then you may wish to _enable the `PROFILES` synchronization feature_.
 
 These synchronization features are enabled by default:
 
 * `BASAL`: Basal data
 * `BOLUS`: Bolus data
+* `PUMP_EVENTS`: Events reported by the pump. Includes support for the following:
+  * Alarms, like cartridge out-of-insulin or pump malfunction
+  * Basal suspension (user or pump-initiated) and resume
+  * Cartridge, cannula, and tubing filled
+  * Sleep and exercise modes
+* `PROFILES`: Insulin profile information, including segments, basal rates, correction factors, carb ratios, and the profile which is active.
 
 The following synchronization features can be optionally enabled:
+* `CGM`: Adds Dexcom CGM readings from the pump to Nightscout as SGV (sensor glucose value) entries. This should only be used in a situation where xDrip/Dexcom Share/etc. is not used and the pump connection to the CGM will be the only source of CGM data to Nightscout. **THIS WILL DELIVER CGM DATA WITH A SIGNIFICANT (>30 MINUTE) LAG AND SHOULD NOT BE USED AS A REPLACEMENT FOR DEXCOM SHARE OR OTHER REAL TIME MONITORING.**
 
-* `PROFILES`: Insulin profile information, including segments, basal rates, correction factors, carb ratios, and the profile which is active.
-* `PUMP_EVENTS`: Events reported by the pump. Includes support for the following:
-  * Site/Cartridge Change (occurs for both a site change and a cartridge change)
-  * Empty Cartridge/Pump Shutdown (from my investigation, occurs either when the cartridge runs out of insulin OR you hard-shut off the pump)
-  * User Suspended (occurs when you manually disable insulin delivery)
-  * Exercise Mode (in Nightscout, appears with a start and end time)
-  * Sleep Mode (in Nightscout, appears with a start and end time)
-* `IOB`: Insulin-on-board data. Only the most recent IOB entry is saved to Nightscout, as an "activity". The Nightscout UI does not currently display this information. In order to read this value, you need to query the Nightscout activity API endpoint. If you don't know what that means, then there is no reason to enable this option.
-
-The following synchronization features are considered to be in alpha, and haven't been widely tested. If you want to use them, [set `ENABLE_TESTING_MODES=true` for them to show up](https://github.com/jwoglom/tconnectsync/blob/master/tconnectsync/features.py#L29):
-* `BOLUS_BG`: Adds BG readings which are associated with boluses on the pump into the Nightscout treatment object. It will determine whether the BG reading was automatically filled via the Dexcom connection on the pump or was manually entered by seeing if the BG reading matches the current CGM reading as known to the pump at that time. Support for this is nearly complete.
-* `CGM`: Adds Dexcom CGM readings from the pump to Nightscout as SGV (sensor glucose value) entries. This should only be used in a situation where xDrip/Dexcom Share/etc. is not used and the pump connection to the CGM will be the only source of CGM data to Nightscout. This requires additional testing before it should be considered ready.
 
 To specify custom synchronization features, pass the names of the desired features to the `--features` flag, e.g.:
 
@@ -97,9 +89,6 @@ You should specify the following parameters:
 TCONNECT_EMAIL='email@email.com'
 TCONNECT_PASSWORD='password'
 
-# Your pump's serial number (numeric)
-PUMP_SERIAL_NUMBER=11111111
-
 # URL of your Nightscout site
 NS_URL='https://yournightscouturl/'
 # Your Nightscout API_SECRET value
@@ -107,6 +96,9 @@ NS_SECRET='apisecret'
 
 # Current timezone of the pump
 TIMEZONE_NAME='America/New_York'
+
+# OPTIONAL: Your pump's serial number (numeric)
+PUMP_SERIAL_NUMBER=11111111
 ```
 
 This file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect). When specifying the timezone, enter a [TZ database name value](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
@@ -122,10 +114,10 @@ First, ensure that you have **Python 3** with **Pip** installed:
 * **On MacOS:** Open Terminal. Install [Homebrew](https://brew.sh/), and then run `brew install python3`
 * **On Linux:** Follow your distribution's specific instructions.
   - For Debian/Ubuntu based distros, `sudo apt install python3 python3-pip`
-  - For CentOS/Rocky Linux 8: 
+  - For CentOS/Rocky Linux 8:
     - `sudo dnf install python39-pip`
-    - `sudo alternatives --set python /usr/bin/python3.9` 
-* **On Windows:** 
+    - `sudo alternatives --set python /usr/bin/python3.9`
+* **On Windows:**
   - **With WSL:** Install Ubuntu under the [Windows Subsystem for Linux](https://ubuntu.com/wsl).
     Open the Ubuntu Terminal, then run `sudo apt install python3 python3-pip`.
     Perform the remainder of the steps under the Ubuntu environment.
@@ -407,7 +399,7 @@ An example of a user crontab `crontab -e` if not running system-wide, which runs
 
 You can use one of the same `run.sh` files referenced above, but remove the `--auto-update` flag since you are handling the functionality for running the script periodically yourself.
 
-### For Native Windows 
+### For Native Windows
 
 Create a batch file 'tconnectsync.bat' file containing:
 
