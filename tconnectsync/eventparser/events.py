@@ -1935,7 +1935,29 @@ class LidCgmAlertActivated(BaseEvent):
     param1: int
     param2: float
 
-    # Dictionary unknown: dalerts
+    DalertidMap = {
+        "11": "CGM Sensor Fail",
+        "13": "CGM Sensor Expired",
+        "14": "CGM Out Of Range",
+        "20": "CGM Transmitter Error",
+        "26": "CGM Temperature",
+        "27": "CGM Failed Connection",
+        "39": "CGM Transmitter Expired"
+    }
+
+    class DalertidEnum(Enum):
+        CgmSensorFail = 11
+        CgmSensorExpired = 13
+        CgmOutOfRange = 14
+        CgmTransmitterError = 20
+        CgmTemperature = 26
+        CgmFailedConnection = 27
+        CgmTransmitterExpired = 39
+
+    @property
+    def dalertid(self):
+        return self.DalertidEnum(self.dalertidRaw)
+
     @staticmethod
     def build(raw):
         dalertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
@@ -1969,7 +1991,29 @@ class LidCgmAlertCleared(BaseEvent):
     raw: RawEvent
     dalertidRaw: int
 
-    # Dictionary unknown: dalerts
+    DalertidMap = {
+        "11": "CGM Sensor Fail",
+        "13": "CGM Sensor Expired",
+        "14": "CGM Out Of Range",
+        "20": "CGM Transmitter Error",
+        "26": "CGM Temperature",
+        "27": "CGM Failed Connection",
+        "39": "CGM Transmitter Expired"
+    }
+
+    class DalertidEnum(Enum):
+        CgmSensorFail = 11
+        CgmSensorExpired = 13
+        CgmOutOfRange = 14
+        CgmTransmitterError = 20
+        CgmTemperature = 26
+        CgmFailedConnection = 27
+        CgmTransmitterExpired = 39
+
+    @property
+    def dalertid(self):
+        return self.DalertidEnum(self.dalertidRaw)
+
     @staticmethod
     def build(raw):
         dalertid, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
@@ -3004,7 +3048,29 @@ class LidCgmAlertActivatedDex(BaseEvent):
     param1: int
     param2: float
 
-    # Dictionary unknown: dalerts
+    DalertidMap = {
+        "11": "CGM Sensor Fail",
+        "13": "CGM Sensor Expired",
+        "14": "CGM Out Of Range",
+        "20": "CGM Transmitter Error",
+        "26": "CGM Temperature",
+        "27": "CGM Failed Connection",
+        "39": "CGM Transmitter Expired"
+    }
+
+    class DalertidEnum(Enum):
+        CgmSensorFail = 11
+        CgmSensorExpired = 13
+        CgmOutOfRange = 14
+        CgmTransmitterError = 20
+        CgmTemperature = 26
+        CgmFailedConnection = 27
+        CgmTransmitterExpired = 39
+
+    @property
+    def dalertid(self):
+        return self.DalertidEnum(self.dalertidRaw)
+
     SensortypeMap = {
         "0": "Invalid",
         "1": "CGM_TYPE_DEXCOM_G6",
@@ -3056,7 +3122,29 @@ class LidCgmAlertClearedDex(BaseEvent):
     dalertidRaw: int
     sensortypeRaw: int
 
-    # Dictionary unknown: dalerts
+    DalertidMap = {
+        "11": "CGM Sensor Fail",
+        "13": "CGM Sensor Expired",
+        "14": "CGM Out Of Range",
+        "20": "CGM Transmitter Error",
+        "26": "CGM Temperature",
+        "27": "CGM Failed Connection",
+        "39": "CGM Transmitter Expired"
+    }
+
+    class DalertidEnum(Enum):
+        CgmSensorFail = 11
+        CgmSensorExpired = 13
+        CgmOutOfRange = 14
+        CgmTransmitterError = 20
+        CgmTemperature = 26
+        CgmFailedConnection = 27
+        CgmTransmitterExpired = 39
+
+    @property
+    def dalertid(self):
+        return self.DalertidEnum(self.dalertidRaw)
+
     SensortypeMap = {
         "0": "Invalid",
         "1": "CGM_TYPE_DEXCOM_G6",
@@ -3103,7 +3191,29 @@ class LidCgmAlertAckDex(BaseEvent):
     sensortypeRaw: int
     acksourceRaw: int
 
-    # Dictionary unknown: dalerts
+    DalertidMap = {
+        "11": "CGM Sensor Fail",
+        "13": "CGM Sensor Expired",
+        "14": "CGM Out Of Range",
+        "20": "CGM Transmitter Error",
+        "26": "CGM Temperature",
+        "27": "CGM Failed Connection",
+        "39": "CGM Transmitter Expired"
+    }
+
+    class DalertidEnum(Enum):
+        CgmSensorFail = 11
+        CgmSensorExpired = 13
+        CgmOutOfRange = 14
+        CgmTransmitterError = 20
+        CgmTemperature = 26
+        CgmFailedConnection = 27
+        CgmTransmitterExpired = 39
+
+    @property
+    def dalertid(self):
+        return self.DalertidEnum(self.dalertidRaw)
+
     SensortypeMap = {
         "0": "Invalid",
         "1": "CGM_TYPE_DEXCOM_G6",
@@ -3642,7 +3752,29 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
     param1: int
     param2: float
 
-    # Dictionary unknown: dalerts
+    DalertidMap = {
+        "11": "CGM Sensor Fail",
+        "13": "CGM Sensor Expired",
+        "14": "CGM Out Of Range",
+        "20": "CGM Transmitter Error",
+        "26": "CGM Temperature",
+        "27": "CGM Failed Connection",
+        "39": "CGM Transmitter Expired"
+    }
+
+    class DalertidEnum(Enum):
+        CgmSensorFail = 11
+        CgmSensorExpired = 13
+        CgmOutOfRange = 14
+        CgmTransmitterError = 20
+        CgmTemperature = 26
+        CgmFailedConnection = 27
+        CgmTransmitterExpired = 39
+
+    @property
+    def dalertid(self):
+        return self.DalertidEnum(self.dalertidRaw)
+
     SensortypeMap = {
         "0": "Invalid",
         "2": "CGM_TYPE_LIBRE2"
@@ -3692,7 +3824,29 @@ class LidCgmAlertClearedFsl2(BaseEvent):
     dalertidRaw: int
     sensortypeRaw: int
 
-    # Dictionary unknown: dalerts
+    DalertidMap = {
+        "11": "CGM Sensor Fail",
+        "13": "CGM Sensor Expired",
+        "14": "CGM Out Of Range",
+        "20": "CGM Transmitter Error",
+        "26": "CGM Temperature",
+        "27": "CGM Failed Connection",
+        "39": "CGM Transmitter Expired"
+    }
+
+    class DalertidEnum(Enum):
+        CgmSensorFail = 11
+        CgmSensorExpired = 13
+        CgmOutOfRange = 14
+        CgmTransmitterError = 20
+        CgmTemperature = 26
+        CgmFailedConnection = 27
+        CgmTransmitterExpired = 39
+
+    @property
+    def dalertid(self):
+        return self.DalertidEnum(self.dalertidRaw)
+
     SensortypeMap = {
         "0": "Invalid",
         "2": "CGM_TYPE_LIBRE2"

@@ -2,6 +2,7 @@ import logging
 import arrow
 
 from ...features import DEFAULT_FEATURES
+from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
 from ...eventparser.utils import bitmask_to_list
 from ...eventparser import events as eventtypes
@@ -20,6 +21,9 @@ class ProcessAlarm:
         self.tconnect_device_id = tconnect_device_id
         self.pretend = pretend
         self.features = features
+
+    def enabled(self):
+        return features.PUMP_EVENTS in self.features
 
     def process(self, events, time_start, time_end):
         logger.debug("ProcessAlarm: querying for last uploaded alarm")
@@ -58,10 +62,12 @@ class ProcessAlarm:
         if type(event) == eventtypes.LidAlarmActivated:
             return NightscoutEntry.alarm(
                 created_at = event.eventTimestamp,
-                reason = event.alarmid
+                reason = event.alarmid,
+                pump_event_id = event.eventId
             )
         elif type(event) == eventtypes.LidMalfunctionActivated:
             return NightscoutEntry.alarm(
                 created_at = event.eventTimestamp,
-                reason = "Malfunction"
+                reason = "Malfunction",
+                pump_event_id = event.eventId
             )

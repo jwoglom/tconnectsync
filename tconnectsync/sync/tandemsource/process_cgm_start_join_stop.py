@@ -8,13 +8,13 @@ from ...eventparser.utils import bitmask_to_list
 from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
 from ...parser.nightscout import (
-    BASALRESUME_EVENTTYPE,
+    CGM_START_EVENTTYPE,
     NightscoutEntry
 )
 
 logger = logging.getLogger(__name__)
 
-class ProcessBasalResume:
+class ProcessCGMStartJoinStop:
     def __init__(self, tconnect, nightscout, tconnect_device_id, pretend, features=DEFAULT_FEATURES):
         self.tconnect = tconnect
         self.nightscout = nightscout
@@ -23,25 +23,30 @@ class ProcessBasalResume:
         self.features = features
 
     def enabled(self):
-        return features.PUMP_EVENTS in self.features or features.BASAL in self.features
+        return features.PUMP_EVENTS in self.features or features.CGM_ALERTS in self.features
 
     def process(self, events, time_start, time_end):
-        logger.debug("ProcessBasalResume: querying for last uploaded resume-suspension")
-        last_upload = self.nightscout.last_uploaded_entry(BASALRESUME_EVENTTYPE, time_start=time_start, time_end=time_end)
+        logger.debug("ProcessCGMStartJoinStop: querying for last uploaded entry")
+        last_upload = self.nightscout.last_uploaded_entry(CGM_START_EVENTTYPE, time_start=time_start, time_end=time_end)
         last_upload_time = None
         if last_upload:
             last_upload_time = arrow.get(last_upload["created_at"])
-        logger.info("Last Nightscout BasalResume upload: %s" % last_upload_time)
+        logger.info("ProcessCGMStartJoinStop: Last Nightscout cgmstart upload: %s" % last_upload_time)
 
-        ns_entries = []
+        allEvents = []
         for event in sorted(events, key=lambda x: x.eventTimestamp):
             if last_upload_time and arrow.get(event.eventTimestamp) < last_upload_time:
                 if self.pretend:
-                    logger.info("Skipping BasalResume event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
+                    logger.info("ProcessCGMStartJoinStop: Skipping %s before last upload time: %s (time range: %s - %s)" % (type(event), event, time_start, time_end))
                 continue
 
-            ns_entries.append(self.resume_to_nsentry(event))
+            allEvents.append(event)
 
+        allEvents.sort(lambda e: e.eventTimestamp)
+
+        ns_entries = []
+        for event in allEvents:
+            ns_entries.append(self.to_nsentry(event))
 
         return ns_entries
 
@@ -57,10 +62,22 @@ class ProcessBasalResume:
 
         return count
 
-
-    def resume_to_nsentry(self, event):
-        if type(event) == eventtypes.LidPumpingResumed:
-            return NightscoutEntry.basalresume(
+    def to_nsentry(self, event):
+        if type(event) in EventClass._CGM_START:
+            return NightscoutEntry.cgm_start(
                 created_at = event.eventTimestamp,
+                reason = "CGM Session Started",
+                pump_event_id = event.eventId
+            )
+        elif type(event) in EventClass._CGM_JOIN:
+            return NightscoutEntry.cgm_join(
+                created_at = event.eventTimestamp,
+                reason = "CGM Session Joined",
+                pump_event_id = event.eventId
+            )
+        elif type(event) in EventClass._CGM_STOP:
+            return NightscoutEntry.cgm_stop(
+                created_at = event.eventTimestamp,
+                reason = "CGM Session Stopped",
                 pump_event_id = event.eventId
             )

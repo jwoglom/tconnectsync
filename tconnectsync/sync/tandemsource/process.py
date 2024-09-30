@@ -9,6 +9,12 @@ from .process_basal import ProcessBasal
 from .process_basal_suspension import ProcessBasalSuspension
 from .process_basal_resume import ProcessBasalResume
 from .process_alarm import ProcessAlarm
+from .process_bolus import ProcessBolus
+from .process_cartridge import ProcessCartridge
+from .process_cgm_alert import ProcessCGMAlert
+from .process_cgm_start_join_stop import ProcessCGMStartJoinStop
+from .process_cgm_reading import ProcessCGMReading
+from .process_user_mode import ProcessUserMode
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +31,13 @@ class ProcessTimeRange:
         EventClass.BASAL.name: ProcessBasal,
         EventClass.BASAL_SUSPENSION.name: ProcessBasalSuspension,
         EventClass.BASAL_RESUME.name: ProcessBasalResume,
-        EventClass.ALARM.name: ProcessAlarm
+        EventClass.ALARM.name: ProcessAlarm,
+        EventClass.BOLUS.name: ProcessBolus,
+        EventClass.CARTRIDGE.name: ProcessCartridge,
+        EventClass.CGM_ALERT.name: ProcessCGMAlert,
+        EventClass.CGM_START_JOIN_STOP.name: ProcessCGMStartJoinStop,
+        EventClass.CGM_READING.name: ProcessCGMReading,
+        EventClass.USER_MODE.name: ProcessUserMode,
     }
 
     def process(self, time_start, time_end):
@@ -59,8 +71,12 @@ class ProcessTimeRange:
         for clazz, events in for_eventclass.items():
             if clazz in self.event_classes.keys():
                 c = self.event_classes[clazz](self.tconnect, self.nightscout, self.tconnect_device_id, self.pretend, self.features)
-                ns_entries = c.process(events, events_first_time, events_last_time)
-                processed_count += c.write(ns_entries)
+                if c.enabled():
+                    logger.info("%s is enabled from features %s" % (clazz, self.features))
+                    ns_entries = c.process(events, events_first_time, events_last_time)
+                    processed_count += c.write(ns_entries)
+                else:
+                    logger.info("Skipping %s, is not enabled from features %s" % (clazz, self.features))
 
 
         return processed_count

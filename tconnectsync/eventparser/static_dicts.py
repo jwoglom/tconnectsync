@@ -131,3 +131,13 @@ ALARMS_DICT = {
     "62": "DEFAULT_ALARM_62",
     "63": "DEFAULT_ALARM_63",
 }
+
+CGM_ALERTS_DICT = {
+    "11": "CGM Sensor Fail",
+    "13": "CGM Sensor Expired",
+    "14": "CGM Out Of Range",
+    "20": "CGM Transmitter Error",
+    "26": "CGM Temperature",
+    "27": "CGM Failed Connection",
+    "39": "CGM Transmitter Expired"
+}

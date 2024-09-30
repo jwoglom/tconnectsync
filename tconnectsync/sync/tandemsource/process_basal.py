@@ -2,6 +2,7 @@ import logging
 import arrow
 
 from ...features import DEFAULT_FEATURES
+from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
 from ...eventparser.utils import bitmask_to_list
 from ...eventparser import events as eventtypes
@@ -20,6 +21,9 @@ class ProcessBasal:
         self.tconnect_device_id = tconnect_device_id
         self.pretend = pretend
         self.features = features
+
+    def enabled(self):
+        return features.BASAL in self.features
 
     def process(self, events, time_start, time_end):
         logger.debug("ProcessBasal: querying for last uploaded entry")
@@ -68,12 +72,14 @@ class ProcessBasal:
                 value = event.commandedbasalrate,
                 duration_mins = duration.seconds / 60,
                 created_at = start,
-                reason = ', '.join(bitmask_to_list(event.changetype))
+                reason = ', '.join(bitmask_to_list(event.changetype)),
+                pump_event_id = event.eventId
             )
         if type(event) == eventtypes.LidBasalDelivery:
             return NightscoutEntry.basal(
                 value = event.commandedRate,
                 duration_mins = duration.seconds / 60,
                 created_at = start,
-                reason = ', '.join(bitmask_to_list(event.commandedRateSource))
+                reason = ', '.join(bitmask_to_list(event.commandedRateSource)),
+                pump_event_id = event.eventId
             )

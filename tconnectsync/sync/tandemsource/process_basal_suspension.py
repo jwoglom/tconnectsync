@@ -2,6 +2,7 @@ import logging
 import arrow
 
 from ...features import DEFAULT_FEATURES
+from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
 from ...eventparser.utils import bitmask_to_list
 from ...eventparser import events as eventtypes
@@ -20,6 +21,9 @@ class ProcessBasalSuspension:
         self.tconnect_device_id = tconnect_device_id
         self.pretend = pretend
         self.features = features
+
+    def enabled(self):
+        return features.PUMP_EVENTS in self.features or features.BASAL in self.features
 
     def process(self, events, time_start, time_end):
         logger.debug("ProcessBasalSuspension: querying for last uploaded suspension")
@@ -58,5 +62,6 @@ class ProcessBasalSuspension:
         if type(event) == eventtypes.LidPumpingSuspended:
             return NightscoutEntry.basalsuspension(
                 created_at = event.eventTimestamp,
-                reason = ', '.join(bitmask_to_list(event.suspendreason))
+                reason = ', '.join(bitmask_to_list(event.suspendreason)),
+                pump_event_id = event.eventId
             )

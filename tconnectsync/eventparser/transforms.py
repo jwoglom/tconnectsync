@@ -1,8 +1,8 @@
 import json
 try:
-    from static_dicts import ALERTS_DICT, ALARMS_DICT
+    from static_dicts import ALERTS_DICT, ALARMS_DICT, CGM_ALERTS_DICT
 except ImportError:
-    from .static_dicts import ALERTS_DICT, ALARMS_DICT
+    from .static_dicts import ALERTS_DICT, ALARMS_DICT, CGM_ALERTS_DICT
 
 def enumNameFormat(text):
     if not text:
@@ -65,6 +65,9 @@ def transform_dictionary(event_def, name, name_fmt, field, tx):
 
     if tx == 'alarms':
         return transform_enum(event_def, name, name_fmt, field, ALARMS_DICT)
+
+    if tx == 'dalerts':
+        return transform_enum(event_def, name, name_fmt, field, CGM_ALERTS_DICT)
     return [f'# Dictionary unknown: {tx}']
 
 def transform_bitmask(event_def, name, name_fmt, field, tx):

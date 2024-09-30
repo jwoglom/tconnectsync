@@ -14,6 +14,10 @@ ACTIVITY_EVENTTYPE = "Activity"
 EXERCISE_EVENTTYPE = "Exercise"
 SLEEP_EVENTTYPE = "Sleep"
 ALARM_EVENTTYPE = "Alarm"
+CGM_ALERT_EVENTTYPE = "CGM Alert"
+CGM_START_EVENTTYPE = "CGM Start Session"
+CGM_JOIN_EVENTTYPE = "CGM Join Session"
+CGM_STOP_EVENTTYPE = "CGM Stop Session"
 
 IOB_ACTIVITYTYPE = "tconnect_iob"
 
@@ -23,7 +27,7 @@ Conversion methods for parsing data into Nightscout objects.
 """
 class NightscoutEntry:
     @staticmethod
-    def basal(value, duration_mins, created_at, reason=""):
+    def basal(value, duration_mins, created_at, reason="", pump_event_id=""):
         return {
             "eventType": BASAL_EVENTTYPE,
             "reason": reason,
@@ -33,7 +37,8 @@ class NightscoutEntry:
             "created_at": created_at,
             "carbs": None,
             "insulin": None,
-            "enteredBy": ENTERED_BY
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
         }
 
     # Note that Nightscout is not consistent and uses "Sensor"/"Finger"
@@ -46,19 +51,24 @@ class NightscoutEntry:
         data = {
             "eventType": BOLUS_EVENTTYPE,
 			"created_at": created_at,
-			"carbs": int(carbs),
+			"carbs": int(carbs) if carbs else None,
 			"insulin": float(bolus),
 			"notes": notes,
 			"enteredBy": ENTERED_BY,
         }
         if bg:
-            if bg_type not in (NightscoutEntry.SENSOR, NightscoutEntry.FINGER):
-                raise InvalidBolusTypeException("bg_type: %s (%s)" % (bg_type, data))
+            if bg_type:
+                if bg_type not in (NightscoutEntry.SENSOR, NightscoutEntry.FINGER):
+                    raise InvalidBolusTypeException("bg_type: %s (%s)" % (bg_type, data))
 
-            data.update({
-                "glucose": str(bg),
-                "glucoseType": bg_type
-            })
+                data.update({
+                    "glucose": str(bg),
+                    "glucoseType": bg_type
+                })
+            else:
+                data.update({
+                    "glucose": str(bg)
+                })
         return data
 
     @staticmethod
@@ -71,65 +81,115 @@ class NightscoutEntry:
         }
 
     @staticmethod
-    def entry(sgv, created_at):
+    def entry(sgv, created_at, pump_event_id=""):
         return {
             "type": "sgv",
             "sgv": int(sgv),
             "date": int(1000 * arrow.get(created_at).timestamp()),
             "dateString": arrow.get(created_at).strftime('%Y-%m-%dT%H:%M:%S%z'),
             "device": ENTERED_BY,
+            "pump_event_id": pump_event_id,
             # delta, direction are undefined
         }
 
     @staticmethod
-    def sitechange(created_at, reason=""):
+    def sitechange(created_at, reason="", pump_event_id=""):
         return {
             "eventType": SITECHANGE_EVENTTYPE,
             "reason": reason,
             "notes": reason,
             "created_at": created_at,
-            "enteredBy": ENTERED_BY
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
         }
 
     @staticmethod
-    def basalsuspension(created_at, reason=""):
+    def basalsuspension(created_at, reason="", pump_event_id=""):
         return {
             "eventType": BASALSUSPENSION_EVENTTYPE,
             "reason": reason,
             "notes": reason,
             "created_at": created_at,
-            "enteredBy": ENTERED_BY
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
         }
 
     @staticmethod
-    def basalresume(created_at):
+    def basalresume(created_at, pump_event_id=""):
         return {
             "eventType": BASALRESUME_EVENTTYPE,
             "reason": "Basal resumed",
             "notes": "Basal resumed",
             "created_at": created_at,
-            "enteredBy": ENTERED_BY
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
         }
 
     @staticmethod
-    def alarm(created_at, reason=""):
+    def alarm(created_at, reason="", pump_event_id=""):
         return {
             "eventType": ALARM_EVENTTYPE,
             "reason": reason,
             "notes": reason,
             "created_at": created_at,
-            "enteredBy": ENTERED_BY
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
         }
 
     @staticmethod
-    def activity(created_at, duration, reason="", event_type=ACTIVITY_EVENTTYPE):
+    def cgm_alert(created_at, reason="", pump_event_id=""):
+        return {
+            "eventType": CGM_ALERT_EVENTTYPE,
+            "reason": reason,
+            "notes": reason,
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
+        }
+
+    @staticmethod
+    def cgm_start(created_at, reason="", pump_event_id=""):
+        return {
+            "eventType": CGM_START_EVENTTYPE,
+            "reason": reason,
+            "notes": reason,
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
+        }
+
+    @staticmethod
+    def cgm_join(created_at, reason="", pump_event_id=""):
+        return {
+            "eventType": CGM_JOIN_EVENTTYPE,
+            "reason": reason,
+            "notes": reason,
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
+        }
+
+    @staticmethod
+    def cgm_stop(created_at, reason="", pump_event_id=""):
+        return {
+            "eventType": CGM_STOP_EVENTTYPE,
+            "reason": reason,
+            "notes": reason,
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
+        }
+
+    @staticmethod
+    def activity(created_at, duration, reason="", event_type=ACTIVITY_EVENTTYPE, pump_event_id=""):
         return {
             "eventType": event_type,
             "reason": reason,
             "notes": reason,
             "duration": float(duration),
             "created_at": created_at,
-            "enteredBy": ENTERED_BY
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
         }
 
     # Tandem-scraped profile to Nightscout profile store entry
