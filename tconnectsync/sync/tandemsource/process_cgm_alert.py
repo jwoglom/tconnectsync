@@ -46,7 +46,9 @@ class ProcessCGMAlert:
 
         ns_entries = []
         for event in alertEvents:
-            ns_entries.append(self.alert_to_nsentry(event))
+            e = self.alert_to_nsentry(event)
+            if e:
+                ns_entries.append(e)
 
         return ns_entries
 
@@ -63,21 +65,28 @@ class ProcessCGMAlert:
         return count
 
     def alert_to_nsentry(self, alert):
+        if not alert.dalertid:
+            logger.info("ProcessCGMAlert: Skipping alert with unknown dalertid %d: %s" % (alert.dalertidRaw, alert))
+            return None
+
         if type(alert) == eventtypes.LidCgmAlertActivated:
             return NightscoutEntry.cgm_alert(
                 created_at = alert.eventTimestamp.format(),
-                reason = ("CGM Alert (%s)" % alert.dalertid) if alert.dalertid else "CGM Alert (Unknown)",
+                reason = ("CGM Alert (%s)" % alert.dalertid.name) if alert.dalertid else "CGM Alert (Unknown)",
                 pump_event_id = "%s" % alert.eventId
             )
         elif type(alert) == eventtypes.LidCgmAlertActivatedDex:
+            if alert.dalertid == eventtypes.LidCgmAlertActivatedDex.DalertidEnum.CgmOutOfRange:
+                logger.info("ProcessCGMAlert: Skipping alert with CgmOutOfRange dalertid %d: %s" % (alert.dalertidRaw, alert))
+                return None
             return NightscoutEntry.cgm_alert(
                 created_at = alert.eventTimestamp.format(),
-                reason = ("Dexcom CGM Alert (%s)" % alert.dalertid) if alert.dalertid else "Dexcom CGM Alert (Unknown)",
+                reason = ("Dexcom CGM Alert (%s)" % alert.dalertid.name) if alert.dalertid else "Dexcom CGM Alert (Unknown)",
                 pump_event_id = "%s" % alert.eventId
             )
         elif type(alert) == eventtypes.LidCgmAlertActivatedFsl2:
             return NightscoutEntry.cgm_alert(
                 created_at = alert.eventTimestamp.format(),
-                reason = ("Libre CGM Alert (%s)" % alert.dalertid) if alert.dalertid else "Libre CGM Alert (Unknown)",
+                reason = ("Libre CGM Alert (%s)" % alert.dalertid.name) if alert.dalertid else "Libre CGM Alert (Unknown)",
                 pump_event_id = "%s" % alert.eventId
             )

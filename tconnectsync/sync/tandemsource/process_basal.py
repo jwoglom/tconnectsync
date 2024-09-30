@@ -6,6 +6,7 @@ from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
 from ...eventparser.utils import bitmask_to_list
 from ...eventparser import events as eventtypes
+from .helpers import insulin_float_round, insulin_milliunits_to_real
 from ...domain.tandemsource.event_class import EventClass
 from ...parser.nightscout import (
     BASAL_EVENTTYPE,
@@ -69,7 +70,7 @@ class ProcessBasal:
     def basal_to_nsentry(self, start, duration, event):
         if type(event) == eventtypes.LidBasalRateChange:
             return NightscoutEntry.basal(
-                value = event.commandedbasalrate,
+                value = insulin_float_round(event.commandedbasalrate),
                 duration_mins = duration.seconds / 60,
                 created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.changetype)),
@@ -77,7 +78,7 @@ class ProcessBasal:
             )
         if type(event) == eventtypes.LidBasalDelivery:
             return NightscoutEntry.basal(
-                value = event.commandedRate,
+                value = insulin_milliunits_to_real(event.commandedRate),
                 duration_mins = duration.seconds / 60,
                 created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.commandedRateSource)),

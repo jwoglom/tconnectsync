@@ -7,6 +7,7 @@ from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
 from ...eventparser.utils import bitmask_to_list
 from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
+from .helpers import insulin_float_round
 from ...parser.nightscout import (
     BOLUS_EVENTTYPE,
     NightscoutEntry
@@ -101,10 +102,11 @@ class ProcessBolus:
 
 
         return NightscoutEntry.bolus(
-            bolus = bolusCompleted.insulindelivered,
+            bolus = insulin_float_round(bolusCompleted.insulindelivered),
             carbs = bolusRequested1.carbamount if bolusRequested1 and bolusRequested1.carbamount>0 else None,
             created_at = bolusCompleted.eventTimestamp.format(),
             notes = notes + suffix,
             bg = bolusRequested1.BG if bolusRequested1 and bolusRequested1.BG > 0 else None,
             pump_event_id = ",".join(event_ids)
         )
+

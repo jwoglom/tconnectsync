@@ -53,7 +53,7 @@ def transform_enum(event_def, name, name_fmt, field, tx):
     out += [
         '@property',
         f'def {name_fmt}(self):',
-        f'    try:'
+        f'    try:',
         f'        return self.{enumNameFormat(name_fmt)}Enum(self.{name_fmt}Raw)',
         f'    except ValueError as e:',
         f'        logger.error("Invalid {name_fmt}Raw in {enumNameFormat(name_fmt)} for "+str(self))',
@@ -89,7 +89,7 @@ def transform_bitmask(event_def, name, name_fmt, field, tx):
     out += [
         '@property',
         f'def {name_fmt}(self):',
-        f'    try:'
+        f'    try:',
         f'        return self.{enumNameFormat(name_fmt)}Bitmask(self.{name_fmt}Raw)',
         f'    except ValueError as e:',
         f'        logger.error("Invalid {name_fmt}Raw in {enumNameFormat(name_fmt)}Bitmask for "+str(self))',

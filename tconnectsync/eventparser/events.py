@@ -58,7 +58,8 @@ class LidBasalRateChange(BaseEvent):
 
     @property
     def changetype(self):
-        try:        return self.ChangetypeBitmask(self.changetypeRaw)
+        try:
+            return self.ChangetypeBitmask(self.changetypeRaw)
         except ValueError as e:
             logger.error("Invalid changetypeRaw in ChangetypeBitmask for "+str(self))
             logger.error(e)
@@ -235,7 +236,8 @@ class LidAlertActivated(BaseEvent):
 
     @property
     def alertid(self):
-        try:        return self.AlertidEnum(self.alertidRaw)
+        try:
+            return self.AlertidEnum(self.alertidRaw)
         except ValueError as e:
             logger.error("Invalid alertidRaw in Alertid for "+str(self))
             logger.error(e)
@@ -412,7 +414,8 @@ class LidAlarmActivated(BaseEvent):
 
     @property
     def alarmid(self):
-        try:        return self.AlarmidEnum(self.alarmidRaw)
+        try:
+            return self.AlarmidEnum(self.alarmidRaw)
         except ValueError as e:
             logger.error("Invalid alarmidRaw in Alarmid for "+str(self))
             logger.error(e)
@@ -506,7 +509,8 @@ class LidPumpingSuspended(BaseEvent):
 
     @property
     def suspendreason(self):
-        try:        return self.SuspendreasonEnum(self.suspendreasonRaw)
+        try:
+            return self.SuspendreasonEnum(self.suspendreasonRaw)
         except ValueError as e:
             logger.error("Invalid suspendreasonRaw in Suspendreason for "+str(self))
             logger.error(e)
@@ -662,7 +666,8 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def selectediob(self):
-        try:        return self.SelectediobEnum(self.selectediobRaw)
+        try:
+            return self.SelectediobEnum(self.selectediobRaw)
         except ValueError as e:
             logger.error("Invalid selectediobRaw in Selectediob for "+str(self))
             logger.error(e)
@@ -679,7 +684,8 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def bgentrytype(self):
-        try:        return self.BgentrytypeEnum(self.bgentrytypeRaw)
+        try:
+            return self.BgentrytypeEnum(self.bgentrytypeRaw)
         except ValueError as e:
             logger.error("Invalid bgentrytypeRaw in Bgentrytype for "+str(self))
             logger.error(e)
@@ -696,7 +702,8 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def bgsourcetype(self):
-        try:        return self.BgsourcetypeEnum(self.bgsourcetypeRaw)
+        try:
+            return self.BgsourcetypeEnum(self.bgsourcetypeRaw)
         except ValueError as e:
             logger.error("Invalid bgsourcetypeRaw in Bgsourcetype for "+str(self))
             logger.error(e)
@@ -713,7 +720,8 @@ class LidBgReadingTaken(BaseEvent):
 
     @property
     def cgmcalibration(self):
-        try:        return self.CgmcalibrationEnum(self.cgmcalibrationRaw)
+        try:
+            return self.CgmcalibrationEnum(self.cgmcalibrationRaw)
         except ValueError as e:
             logger.error("Invalid cgmcalibrationRaw in Cgmcalibration for "+str(self))
             logger.error(e)
@@ -786,7 +794,8 @@ class LidBolusCompleted(BaseEvent):
 
     @property
     def completionstatus(self):
-        try:        return self.CompletionstatusEnum(self.completionstatusRaw)
+        try:
+            return self.CompletionstatusEnum(self.completionstatusRaw)
         except ValueError as e:
             logger.error("Invalid completionstatusRaw in Completionstatus for "+str(self))
             logger.error(e)
@@ -853,7 +862,8 @@ class LidBolexCompleted(BaseEvent):
 
     @property
     def completionstatus(self):
-        try:        return self.CompletionstatusEnum(self.completionstatusRaw)
+        try:
+            return self.CompletionstatusEnum(self.completionstatusRaw)
         except ValueError as e:
             logger.error("Invalid completionstatusRaw in Completionstatus for "+str(self))
             logger.error(e)
@@ -1028,7 +1038,8 @@ class LidAlertCleared(BaseEvent):
 
     @property
     def alertid(self):
-        try:        return self.AlertidEnum(self.alertidRaw)
+        try:
+            return self.AlertidEnum(self.alertidRaw)
         except ValueError as e:
             logger.error("Invalid alertidRaw in Alertid for "+str(self))
             logger.error(e)
@@ -1198,7 +1209,8 @@ class LidAlarmCleared(BaseEvent):
 
     @property
     def alarmid(self):
-        try:        return self.AlarmidEnum(self.alarmidRaw)
+        try:
+            return self.AlarmidEnum(self.alarmidRaw)
         except ValueError as e:
             logger.error("Invalid alarmidRaw in Alarmid for "+str(self))
             logger.error(e)
@@ -1319,7 +1331,8 @@ class LidBolusActivated(BaseEvent):
 
     @property
     def selectediob(self):
-        try:        return self.SelectediobEnum(self.selectediobRaw)
+        try:
+            return self.SelectediobEnum(self.selectediobRaw)
         except ValueError as e:
             logger.error("Invalid selectediobRaw in Selectediob for "+str(self))
             logger.error(e)
@@ -1372,7 +1385,8 @@ class LidBolexActivated(BaseEvent):
 
     @property
     def selectediob(self):
-        try:        return self.SelectediobEnum(self.selectediobRaw)
+        try:
+            return self.SelectediobEnum(self.selectediobRaw)
         except ValueError as e:
             logger.error("Invalid selectediobRaw in Selectediob for "+str(self))
             logger.error(e)
@@ -1458,7 +1472,8 @@ class LidCannulaFilled(BaseEvent):
 
     @property
     def completionstatus(self):
-        try:        return self.CompletionstatusEnum(self.completionstatusRaw)
+        try:
+            return self.CompletionstatusEnum(self.completionstatusRaw)
         except ValueError as e:
             logger.error("Invalid completionstatusRaw in Completionstatus for "+str(self))
             logger.error(e)
@@ -1510,7 +1525,8 @@ class LidTubingFilled(BaseEvent):
 
     @property
     def completionstatus(self):
-        try:        return self.CompletionstatusEnum(self.completionstatusRaw)
+        try:
+            return self.CompletionstatusEnum(self.completionstatusRaw)
         except ValueError as e:
             logger.error("Invalid completionstatusRaw in Completionstatus for "+str(self))
             logger.error(e)
@@ -1568,7 +1584,8 @@ class LidBolusRequestedMsg1(BaseEvent):
 
     @property
     def bolustype(self):
-        try:        return self.BolustypeEnum(self.bolustypeRaw)
+        try:
+            return self.BolustypeEnum(self.bolustypeRaw)
         except ValueError as e:
             logger.error("Invalid bolustypeRaw in Bolustype for "+str(self))
             logger.error(e)
@@ -1585,7 +1602,8 @@ class LidBolusRequestedMsg1(BaseEvent):
 
     @property
     def correctionbolusincluded(self):
-        try:        return self.CorrectionbolusincludedEnum(self.correctionbolusincludedRaw)
+        try:
+            return self.CorrectionbolusincludedEnum(self.correctionbolusincludedRaw)
         except ValueError as e:
             logger.error("Invalid correctionbolusincludedRaw in Correctionbolusincluded for "+str(self))
             logger.error(e)
@@ -1653,7 +1671,8 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def selectediob(self):
-        try:        return self.SelectediobEnum(self.selectediobRaw)
+        try:
+            return self.SelectediobEnum(self.selectediobRaw)
         except ValueError as e:
             logger.error("Invalid selectediobRaw in Selectediob for "+str(self))
             logger.error(e)
@@ -1682,7 +1701,8 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def options(self):
-        try:        return self.OptionsEnum(self.optionsRaw)
+        try:
+            return self.OptionsEnum(self.optionsRaw)
         except ValueError as e:
             logger.error("Invalid optionsRaw in Options for "+str(self))
             logger.error(e)
@@ -1699,7 +1719,8 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def useroverride(self):
-        try:        return self.UseroverrideEnum(self.useroverrideRaw)
+        try:
+            return self.UseroverrideEnum(self.useroverrideRaw)
         except ValueError as e:
             logger.error("Invalid useroverrideRaw in Useroverride for "+str(self))
             logger.error(e)
@@ -1716,7 +1737,8 @@ class LidBolusRequestedMsg2(BaseEvent):
 
     @property
     def declinedcorrection(self):
-        try:        return self.DeclinedcorrectionEnum(self.declinedcorrectionRaw)
+        try:
+            return self.DeclinedcorrectionEnum(self.declinedcorrectionRaw)
         except ValueError as e:
             logger.error("Invalid declinedcorrectionRaw in Declinedcorrection for "+str(self))
             logger.error(e)
@@ -1901,7 +1923,8 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def fmrstatus(self):
-        try:        return self.FmrstatusEnum(self.fmrstatusRaw)
+        try:
+            return self.FmrstatusEnum(self.fmrstatusRaw)
         except ValueError as e:
             logger.error("Invalid fmrstatusRaw in Fmrstatus for "+str(self))
             logger.error(e)
@@ -1918,7 +1941,8 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def pgvvalid(self):
-        try:        return self.PgvvalidEnum(self.pgvvalidRaw)
+        try:
+            return self.PgvvalidEnum(self.pgvvalidRaw)
         except ValueError as e:
             logger.error("Invalid pgvvalidRaw in Pgvvalid for "+str(self))
             logger.error(e)
@@ -1937,7 +1961,8 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def rulestate(self):
-        try:        return self.RulestateBitmask(self.rulestateRaw)
+        try:
+            return self.RulestateBitmask(self.rulestateRaw)
         except ValueError as e:
             logger.error("Invalid rulestateRaw in RulestateBitmask for "+str(self))
             logger.error(e)
@@ -1958,7 +1983,8 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def hominstate(self):
-        try:        return self.HominstateEnum(self.hominstateRaw)
+        try:
+            return self.HominstateEnum(self.hominstateRaw)
         except ValueError as e:
             logger.error("Invalid hominstateRaw in Hominstate for "+str(self))
             logger.error(e)
@@ -1996,7 +2022,8 @@ class LidPlgsPeriodic(BaseEvent):
 
     @property
     def status(self):
-        try:        return self.StatusBitmask(self.statusRaw)
+        try:
+            return self.StatusBitmask(self.statusRaw)
         except ValueError as e:
             logger.error("Invalid statusRaw in StatusBitmask for "+str(self))
             logger.error(e)
@@ -2053,7 +2080,8 @@ class LidCgmAlertActivated(BaseEvent):
         "20": "CGM Transmitter Error",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
-        "39": "CGM Transmitter Expired"
+        "39": "CGM Transmitter Expired",
+        "40": "Pump Bluetooth Error"
     }
 
     class DalertidEnum(Enum):
@@ -2064,10 +2092,12 @@ class LidCgmAlertActivated(BaseEvent):
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
+        PumpBluetoothError = 40
 
     @property
     def dalertid(self):
-        try:        return self.DalertidEnum(self.dalertidRaw)
+        try:
+            return self.DalertidEnum(self.dalertidRaw)
         except ValueError as e:
             logger.error("Invalid dalertidRaw in Dalertid for "+str(self))
             logger.error(e)
@@ -2113,7 +2143,8 @@ class LidCgmAlertCleared(BaseEvent):
         "20": "CGM Transmitter Error",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
-        "39": "CGM Transmitter Expired"
+        "39": "CGM Transmitter Expired",
+        "40": "Pump Bluetooth Error"
     }
 
     class DalertidEnum(Enum):
@@ -2124,10 +2155,12 @@ class LidCgmAlertCleared(BaseEvent):
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
+        PumpBluetoothError = 40
 
     @property
     def dalertid(self):
-        try:        return self.DalertidEnum(self.dalertidRaw)
+        try:
+            return self.DalertidEnum(self.dalertidRaw)
         except ValueError as e:
             logger.error("Invalid dalertidRaw in Dalertid for "+str(self))
             logger.error(e)
@@ -2214,7 +2247,8 @@ class LidUpdateStatus(BaseEvent):
 
     @property
     def updatesuccessful(self):
-        try:        return self.UpdatesuccessfulEnum(self.updatesuccessfulRaw)
+        try:
+            return self.UpdatesuccessfulEnum(self.updatesuccessfulRaw)
         except ValueError as e:
             logger.error("Invalid updatesuccessfulRaw in Updatesuccessful for "+str(self))
             logger.error(e)
@@ -2329,7 +2363,8 @@ class LidCgmJoinSessionGx(BaseEvent):
 
     @property
     def sessionjoinreason(self):
-        try:        return self.SessionjoinreasonEnum(self.sessionjoinreasonRaw)
+        try:
+            return self.SessionjoinreasonEnum(self.sessionjoinreasonRaw)
         except ValueError as e:
             logger.error("Invalid sessionjoinreasonRaw in Sessionjoinreason for "+str(self))
             logger.error(e)
@@ -2405,7 +2440,8 @@ class LidCgmStopSessionGx(BaseEvent):
 
     @property
     def sessionstopreason(self):
-        try:        return self.SessionstopreasonEnum(self.sessionstopreasonRaw)
+        try:
+            return self.SessionstopreasonEnum(self.sessionstopreasonRaw)
         except ValueError as e:
             logger.error("Invalid sessionstopreasonRaw in Sessionstopreason for "+str(self))
             logger.error(e)
@@ -2465,7 +2501,8 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def exercisechoice(self):
-        try:        return self.ExercisechoiceEnum(self.exercisechoiceRaw)
+        try:
+            return self.ExercisechoiceEnum(self.exercisechoiceRaw)
         except ValueError as e:
             logger.error("Invalid exercisechoiceRaw in Exercisechoice for "+str(self))
             logger.error(e)
@@ -2486,7 +2523,8 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def currentusermode(self):
-        try:        return self.CurrentusermodeEnum(self.currentusermodeRaw)
+        try:
+            return self.CurrentusermodeEnum(self.currentusermodeRaw)
         except ValueError as e:
             logger.error("Invalid currentusermodeRaw in Currentusermode for "+str(self))
             logger.error(e)
@@ -2507,7 +2545,8 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def previoususermode(self):
-        try:        return self.PrevioususermodeEnum(self.previoususermodeRaw)
+        try:
+            return self.PrevioususermodeEnum(self.previoususermodeRaw)
         except ValueError as e:
             logger.error("Invalid previoususermodeRaw in Previoususermode for "+str(self))
             logger.error(e)
@@ -2536,7 +2575,8 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def requestedaction(self):
-        try:        return self.RequestedactionEnum(self.requestedactionRaw)
+        try:
+            return self.RequestedactionEnum(self.requestedactionRaw)
         except ValueError as e:
             logger.error("Invalid requestedactionRaw in Requestedaction for "+str(self))
             logger.error(e)
@@ -2553,7 +2593,8 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def sleepstartedbygui(self):
-        try:        return self.SleepstartedbyguiEnum(self.sleepstartedbyguiRaw)
+        try:
+            return self.SleepstartedbyguiEnum(self.sleepstartedbyguiRaw)
         except ValueError as e:
             logger.error("Invalid sleepstartedbyguiRaw in Sleepstartedbygui for "+str(self))
             logger.error(e)
@@ -2570,7 +2611,8 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def exercisestoppedbytimer(self):
-        try:        return self.ExercisestoppedbytimerEnum(self.exercisestoppedbytimerRaw)
+        try:
+            return self.ExercisestoppedbytimerEnum(self.exercisestoppedbytimerRaw)
         except ValueError as e:
             logger.error("Invalid exercisestoppedbytimerRaw in Exercisestoppedbytimer for "+str(self))
             logger.error(e)
@@ -2591,7 +2633,8 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def activesleepschedule(self):
-        try:        return self.ActivesleepscheduleBitmask(self.activesleepscheduleRaw)
+        try:
+            return self.ActivesleepscheduleBitmask(self.activesleepscheduleRaw)
         except ValueError as e:
             logger.error("Invalid activesleepscheduleRaw in ActivesleepscheduleBitmask for "+str(self))
             logger.error(e)
@@ -2608,7 +2651,8 @@ class LidAaUserModeChange(BaseEvent):
 
     @property
     def eatingsoonstoppedbytimer(self):
-        try:        return self.EatingsoonstoppedbytimerEnum(self.eatingsoonstoppedbytimerRaw)
+        try:
+            return self.EatingsoonstoppedbytimerEnum(self.eatingsoonstoppedbytimerRaw)
         except ValueError as e:
             logger.error("Invalid eatingsoonstoppedbytimerRaw in Eatingsoonstoppedbytimer for "+str(self))
             logger.error(e)
@@ -2678,7 +2722,8 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def currentpcm(self):
-        try:        return self.CurrentpcmEnum(self.currentpcmRaw)
+        try:
+            return self.CurrentpcmEnum(self.currentpcmRaw)
         except ValueError as e:
             logger.error("Invalid currentpcmRaw in Currentpcm for "+str(self))
             logger.error(e)
@@ -2699,7 +2744,8 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def previouspcm(self):
-        try:        return self.PreviouspcmEnum(self.previouspcmRaw)
+        try:
+            return self.PreviouspcmEnum(self.previouspcmRaw)
         except ValueError as e:
             logger.error("Invalid previouspcmRaw in Previouspcm for "+str(self))
             logger.error(e)
@@ -2716,7 +2762,8 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def pumpsuspended(self):
-        try:        return self.PumpsuspendedEnum(self.pumpsuspendedRaw)
+        try:
+            return self.PumpsuspendedEnum(self.pumpsuspendedRaw)
         except ValueError as e:
             logger.error("Invalid pumpsuspendedRaw in Pumpsuspended for "+str(self))
             logger.error(e)
@@ -2733,7 +2780,8 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def calculationavailable(self):
-        try:        return self.CalculationavailableEnum(self.calculationavailableRaw)
+        try:
+            return self.CalculationavailableEnum(self.calculationavailableRaw)
         except ValueError as e:
             logger.error("Invalid calculationavailableRaw in Calculationavailable for "+str(self))
             logger.error(e)
@@ -2750,7 +2798,8 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def cgmavailable(self):
-        try:        return self.CgmavailableEnum(self.cgmavailableRaw)
+        try:
+            return self.CgmavailableEnum(self.cgmavailableRaw)
         except ValueError as e:
             logger.error("Invalid cgmavailableRaw in Cgmavailable for "+str(self))
             logger.error(e)
@@ -2767,7 +2816,8 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def closedlooppreferred(self):
-        try:        return self.ClosedlooppreferredEnum(self.closedlooppreferredRaw)
+        try:
+            return self.ClosedlooppreferredEnum(self.closedlooppreferredRaw)
         except ValueError as e:
             logger.error("Invalid closedlooppreferredRaw in Closedlooppreferred for "+str(self))
             logger.error(e)
@@ -2784,7 +2834,8 @@ class LidAaPcmChange(BaseEvent):
 
     @property
     def sufficientclosedloopparams(self):
-        try:        return self.SufficientclosedloopparamsEnum(self.sufficientclosedloopparamsRaw)
+        try:
+            return self.SufficientclosedloopparamsEnum(self.sufficientclosedloopparamsRaw)
         except ValueError as e:
             logger.error("Invalid sufficientclosedloopparamsRaw in Sufficientclosedloopparams for "+str(self))
             logger.error(e)
@@ -2850,7 +2901,8 @@ class LidCgmDataGxb(BaseEvent):
 
     @property
     def glucosevaluestatus(self):
-        try:        return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
+        try:
+            return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
         except ValueError as e:
             logger.error("Invalid glucosevaluestatusRaw in Glucosevaluestatus for "+str(self))
             logger.error(e)
@@ -2873,7 +2925,8 @@ class LidCgmDataGxb(BaseEvent):
 
     @property
     def cgmDataType(self):
-        try:        return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
+        try:
+            return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
         except ValueError as e:
             logger.error("Invalid cgmDataTypeRaw in CgmdatatypeBitmask for "+str(self))
             logger.error(e)
@@ -2908,7 +2961,8 @@ class LidCgmDataGxb(BaseEvent):
 
     @property
     def egvInfoBitmask(self):
-        try:        return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
+        try:
+            return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
         except ValueError as e:
             logger.error("Invalid egvInfoBitmaskRaw in EgvinfobitmaskBitmask for "+str(self))
             logger.error(e)
@@ -2978,7 +3032,8 @@ class LidBasalDelivery(BaseEvent):
 
     @property
     def commandedRateSource(self):
-        try:        return self.CommandedratesourceEnum(self.commandedRateSourceRaw)
+        try:
+            return self.CommandedratesourceEnum(self.commandedRateSourceRaw)
         except ValueError as e:
             logger.error("Invalid commandedRateSourceRaw in Commandedratesource for "+str(self))
             logger.error(e)
@@ -3039,7 +3094,8 @@ class LidBolusDelivery(BaseEvent):
 
     @property
     def bolusDeliveryStatus(self):
-        try:        return self.BolusdeliverystatusEnum(self.bolusDeliveryStatusRaw)
+        try:
+            return self.BolusdeliverystatusEnum(self.bolusDeliveryStatusRaw)
         except ValueError as e:
             logger.error("Invalid bolusDeliveryStatusRaw in Bolusdeliverystatus for "+str(self))
             logger.error(e)
@@ -3064,7 +3120,8 @@ class LidBolusDelivery(BaseEvent):
 
     @property
     def bolusType(self):
-        try:        return self.BolustypeBitmask(self.bolusTypeRaw)
+        try:
+            return self.BolustypeBitmask(self.bolusTypeRaw)
         except ValueError as e:
             logger.error("Invalid bolusTypeRaw in BolustypeBitmask for "+str(self))
             logger.error(e)
@@ -3093,7 +3150,8 @@ class LidBolusDelivery(BaseEvent):
 
     @property
     def bolusSource(self):
-        try:        return self.BolussourceEnum(self.bolusSourceRaw)
+        try:
+            return self.BolussourceEnum(self.bolusSourceRaw)
         except ValueError as e:
             logger.error("Invalid bolusSourceRaw in Bolussource for "+str(self))
             logger.error(e)
@@ -3198,7 +3256,8 @@ class LidAaDailyStatus(BaseEvent):
 
     @property
     def pumpcontrolstate(self):
-        try:        return self.PumpcontrolstateEnum(self.pumpcontrolstateRaw)
+        try:
+            return self.PumpcontrolstateEnum(self.pumpcontrolstateRaw)
         except ValueError as e:
             logger.error("Invalid pumpcontrolstateRaw in Pumpcontrolstate for "+str(self))
             logger.error(e)
@@ -3217,7 +3276,8 @@ class LidAaDailyStatus(BaseEvent):
 
     @property
     def usermode(self):
-        try:        return self.UsermodeEnum(self.usermodeRaw)
+        try:
+            return self.UsermodeEnum(self.usermodeRaw)
         except ValueError as e:
             logger.error("Invalid usermodeRaw in Usermode for "+str(self))
             logger.error(e)
@@ -3238,7 +3298,8 @@ class LidAaDailyStatus(BaseEvent):
 
     @property
     def sensortype(self):
-        try:        return self.SensortypeEnum(self.sensortypeRaw)
+        try:
+            return self.SensortypeEnum(self.sensortypeRaw)
         except ValueError as e:
             logger.error("Invalid sensortypeRaw in Sensortype for "+str(self))
             logger.error(e)
@@ -3286,7 +3347,8 @@ class LidCgmAlertActivatedDex(BaseEvent):
         "20": "CGM Transmitter Error",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
-        "39": "CGM Transmitter Expired"
+        "39": "CGM Transmitter Expired",
+        "40": "Pump Bluetooth Error"
     }
 
     class DalertidEnum(Enum):
@@ -3297,10 +3359,12 @@ class LidCgmAlertActivatedDex(BaseEvent):
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
+        PumpBluetoothError = 40
 
     @property
     def dalertid(self):
-        try:        return self.DalertidEnum(self.dalertidRaw)
+        try:
+            return self.DalertidEnum(self.dalertidRaw)
         except ValueError as e:
             logger.error("Invalid dalertidRaw in Dalertid for "+str(self))
             logger.error(e)
@@ -3319,7 +3383,8 @@ class LidCgmAlertActivatedDex(BaseEvent):
 
     @property
     def sensortype(self):
-        try:        return self.SensortypeEnum(self.sensortypeRaw)
+        try:
+            return self.SensortypeEnum(self.sensortypeRaw)
         except ValueError as e:
             logger.error("Invalid sensortypeRaw in Sensortype for "+str(self))
             logger.error(e)
@@ -3368,7 +3433,8 @@ class LidCgmAlertClearedDex(BaseEvent):
         "20": "CGM Transmitter Error",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
-        "39": "CGM Transmitter Expired"
+        "39": "CGM Transmitter Expired",
+        "40": "Pump Bluetooth Error"
     }
 
     class DalertidEnum(Enum):
@@ -3379,10 +3445,12 @@ class LidCgmAlertClearedDex(BaseEvent):
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
+        PumpBluetoothError = 40
 
     @property
     def dalertid(self):
-        try:        return self.DalertidEnum(self.dalertidRaw)
+        try:
+            return self.DalertidEnum(self.dalertidRaw)
         except ValueError as e:
             logger.error("Invalid dalertidRaw in Dalertid for "+str(self))
             logger.error(e)
@@ -3401,7 +3469,8 @@ class LidCgmAlertClearedDex(BaseEvent):
 
     @property
     def sensortype(self):
-        try:        return self.SensortypeEnum(self.sensortypeRaw)
+        try:
+            return self.SensortypeEnum(self.sensortypeRaw)
         except ValueError as e:
             logger.error("Invalid sensortypeRaw in Sensortype for "+str(self))
             logger.error(e)
@@ -3445,7 +3514,8 @@ class LidCgmAlertAckDex(BaseEvent):
         "20": "CGM Transmitter Error",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
-        "39": "CGM Transmitter Expired"
+        "39": "CGM Transmitter Expired",
+        "40": "Pump Bluetooth Error"
     }
 
     class DalertidEnum(Enum):
@@ -3456,10 +3526,12 @@ class LidCgmAlertAckDex(BaseEvent):
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
+        PumpBluetoothError = 40
 
     @property
     def dalertid(self):
-        try:        return self.DalertidEnum(self.dalertidRaw)
+        try:
+            return self.DalertidEnum(self.dalertidRaw)
         except ValueError as e:
             logger.error("Invalid dalertidRaw in Dalertid for "+str(self))
             logger.error(e)
@@ -3478,7 +3550,8 @@ class LidCgmAlertAckDex(BaseEvent):
 
     @property
     def sensortype(self):
-        try:        return self.SensortypeEnum(self.sensortypeRaw)
+        try:
+            return self.SensortypeEnum(self.sensortypeRaw)
         except ValueError as e:
             logger.error("Invalid sensortypeRaw in Sensortype for "+str(self))
             logger.error(e)
@@ -3495,7 +3568,8 @@ class LidCgmAlertAckDex(BaseEvent):
 
     @property
     def acksource(self):
-        try:        return self.AcksourceEnum(self.acksourceRaw)
+        try:
+            return self.AcksourceEnum(self.acksourceRaw)
         except ValueError as e:
             logger.error("Invalid acksourceRaw in Acksource for "+str(self))
             logger.error(e)
@@ -3553,7 +3627,8 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def glucosevaluestatus(self):
-        try:        return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
+        try:
+            return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
         except ValueError as e:
             logger.error("Invalid glucosevaluestatusRaw in Glucosevaluestatus for "+str(self))
             logger.error(e)
@@ -3576,7 +3651,8 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def cgmDataType(self):
-        try:        return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
+        try:
+            return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
         except ValueError as e:
             logger.error("Invalid cgmDataTypeRaw in CgmdatatypeBitmask for "+str(self))
             logger.error(e)
@@ -3609,7 +3685,8 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def algorithmstate(self):
-        try:        return self.AlgorithmstateEnum(self.algorithmstateRaw)
+        try:
+            return self.AlgorithmstateEnum(self.algorithmstateRaw)
         except ValueError as e:
             logger.error("Invalid algorithmstateRaw in Algorithmstate for "+str(self))
             logger.error(e)
@@ -3644,7 +3721,8 @@ class LidCgmDataFsl2(BaseEvent):
 
     @property
     def egvInfoBitmask(self):
-        try:        return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
+        try:
+            return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
         except ValueError as e:
             logger.error("Invalid egvInfoBitmaskRaw in EgvinfobitmaskBitmask for "+str(self))
             logger.error(e)
@@ -3747,7 +3825,8 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def glucosevaluestatus(self):
-        try:        return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
+        try:
+            return self.GlucosevaluestatusEnum(self.glucosevaluestatusRaw)
         except ValueError as e:
             logger.error("Invalid glucosevaluestatusRaw in Glucosevaluestatus for "+str(self))
             logger.error(e)
@@ -3770,7 +3849,8 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def cgmDataType(self):
-        try:        return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
+        try:
+            return self.CgmdatatypeBitmask(self.cgmDataTypeRaw)
         except ValueError as e:
             logger.error("Invalid cgmDataTypeRaw in CgmdatatypeBitmask for "+str(self))
             logger.error(e)
@@ -3809,7 +3889,8 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def algorithmstate(self):
-        try:        return self.AlgorithmstateEnum(self.algorithmstateRaw)
+        try:
+            return self.AlgorithmstateEnum(self.algorithmstateRaw)
         except ValueError as e:
             logger.error("Invalid algorithmstateRaw in Algorithmstate for "+str(self))
             logger.error(e)
@@ -3842,7 +3923,8 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def egvInfoBitmask(self):
-        try:        return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
+        try:
+            return self.EgvinfobitmaskBitmask(self.egvInfoBitmaskRaw)
         except ValueError as e:
             logger.error("Invalid egvInfoBitmaskRaw in EgvinfobitmaskBitmask for "+str(self))
             logger.error(e)
@@ -4050,7 +4132,8 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
         "20": "CGM Transmitter Error",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
-        "39": "CGM Transmitter Expired"
+        "39": "CGM Transmitter Expired",
+        "40": "Pump Bluetooth Error"
     }
 
     class DalertidEnum(Enum):
@@ -4061,10 +4144,12 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
+        PumpBluetoothError = 40
 
     @property
     def dalertid(self):
-        try:        return self.DalertidEnum(self.dalertidRaw)
+        try:
+            return self.DalertidEnum(self.dalertidRaw)
         except ValueError as e:
             logger.error("Invalid dalertidRaw in Dalertid for "+str(self))
             logger.error(e)
@@ -4081,7 +4166,8 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
 
     @property
     def sensortype(self):
-        try:        return self.SensortypeEnum(self.sensortypeRaw)
+        try:
+            return self.SensortypeEnum(self.sensortypeRaw)
         except ValueError as e:
             logger.error("Invalid sensortypeRaw in Sensortype for "+str(self))
             logger.error(e)
@@ -4130,7 +4216,8 @@ class LidCgmAlertClearedFsl2(BaseEvent):
         "20": "CGM Transmitter Error",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
-        "39": "CGM Transmitter Expired"
+        "39": "CGM Transmitter Expired",
+        "40": "Pump Bluetooth Error"
     }
 
     class DalertidEnum(Enum):
@@ -4141,10 +4228,12 @@ class LidCgmAlertClearedFsl2(BaseEvent):
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
+        PumpBluetoothError = 40
 
     @property
     def dalertid(self):
-        try:        return self.DalertidEnum(self.dalertidRaw)
+        try:
+            return self.DalertidEnum(self.dalertidRaw)
         except ValueError as e:
             logger.error("Invalid dalertidRaw in Dalertid for "+str(self))
             logger.error(e)
@@ -4161,7 +4250,8 @@ class LidCgmAlertClearedFsl2(BaseEvent):
 
     @property
     def sensortype(self):
-        try:        return self.SensortypeEnum(self.sensortypeRaw)
+        try:
+            return self.SensortypeEnum(self.sensortypeRaw)
         except ValueError as e:
             logger.error("Invalid sensortypeRaw in Sensortype for "+str(self))
             logger.error(e)
