@@ -46,11 +46,11 @@ class ProcessTimeRange:
     ]
 
     def process(self, time_start, time_end):
-        logger.info(f"ProcessTimeRange {time_start=} {time_end=} {self.tconnect_device_id=} {self.features=}")
+        logger.info(f"ProcessTimeRange time_start={time_start} time_end={time_end} tconnect_device_id={self.tconnect_device_id} features={self.features}")
 
         pump_events_raw = self.tconnect.tandemsource.pump_events_raw(self.tconnect_device_id, time_start, time_end)
         pump_events_decoded = decode_raw_events(pump_events_raw)
-        logger.info(f"Read {len(pump_events_decoded)=} (est. {len(pump_events_decoded)/EVENT_LEN} events)")
+        logger.info(f"Read {len(pump_events_decoded)} bytes (est. {len(pump_events_decoded)/EVENT_LEN} events)")
         events = Events(pump_events_decoded)
 
         events_first_time = None
