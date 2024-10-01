@@ -1,6 +1,8 @@
 import struct
 import arrow
 
+from ..secret import TIMEZONE_NAME
+
 from dataclasses import dataclass
 
 EVENT_LEN = 26
@@ -29,7 +31,11 @@ class RawEvent:
             seqNum = seqNum,
             raw = raw
         )
-    
+
     @property
     def timestamp(self):
-        return arrow.get(TANDEM_EPOCH + self.timestampRaw)
+        # Event timestamps do not have TZ data attached to them when parsed,
+        # but represent the user's time zone setting. So we keep the time
+        # referenced on them, but force the timezone to what the user
+        # requests via the TZ secret.
+        return arrow.get(TANDEM_EPOCH + self.timestampRaw, tzinfo=TIMEZONE_NAME)
