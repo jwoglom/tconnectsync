@@ -44,7 +44,7 @@ class TandemSourceAutoupdate:
 
             event_id = None
             cur_max_date_with_events = arrow.get(tconnectDevice['maxDateWithEvents'])
-            if not self.last_max_date_with_events or cur_max_date_with_events > self.cur_max_date_with_events:
+            if not self.last_max_date_with_events or cur_max_date_with_events > self.last_max_date_with_events:
                 logger.info('New reported tandemsource data. (cur_max_date: %s last_max_date: %s)' % (cur_max_date_with_events, self.last_max_date_with_events))
 
                 if pretend:
