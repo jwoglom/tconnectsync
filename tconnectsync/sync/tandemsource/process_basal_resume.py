@@ -35,9 +35,9 @@ class ProcessBasalResume:
 
         ns_entries = []
         for event in sorted(events, key=lambda x: x.eventTimestamp):
-            if last_upload_time and arrow.get(event.eventTimestamp) < last_upload_time:
+            if last_upload_time and arrow.get(event.eventTimestamp) <= last_upload_time:
                 if self.pretend:
-                    logger.info("Skipping BasalResume event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
+                    logger.info("Skipping BasalResume event not after last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
                 continue
 
             ns_entries.append(self.resume_to_nsentry(event))

@@ -72,9 +72,9 @@ class ProcessUserMode:
         start_sleep = None
         start_exercise = None
         for event in sorted(events, key=lambda x: x.eventTimestamp):
-            if last_upload_time and arrow.get(event.eventTimestamp) < last_upload_time:
+            if last_upload_time and arrow.get(event.eventTimestamp) <= last_upload_time:
                 if self.pretend:
-                    logger.info("ProcessUserMode: Skipping usermode event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
+                    logger.info("ProcessUserMode: Skipping usermode event not after last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
                 continue
 
             if self.is_start_sleep(event):

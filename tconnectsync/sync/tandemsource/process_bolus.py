@@ -44,7 +44,7 @@ class ProcessBolus:
             bolusEventsForId[event.bolusid][type(event)] = event
 
             if type(event) == eventtypes.LidBolusCompleted:
-                if last_upload_time and arrow.get(event.eventTimestamp) < last_upload_time:
+                if last_upload_time and arrow.get(event.eventTimestamp) <= last_upload_time:
                     if self.pretend:
                         logger.info("Skipping bolusCompletedEvent before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
                     continue

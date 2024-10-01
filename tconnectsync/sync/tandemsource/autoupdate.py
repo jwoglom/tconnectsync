@@ -52,6 +52,7 @@ class TandemSourceAutoupdate:
                 else:
                     added, event_id = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, features=features).process(time_start, time_end)
                     logger.info('Added %d items from ProcessTimeRange' % added)
+                    self.last_successful_process_time_range = now
 
                 # Track the time it took to find a new event between runs,
                 # but skip this calculation the first process cycle (since

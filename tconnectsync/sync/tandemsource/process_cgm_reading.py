@@ -38,9 +38,9 @@ class ProcessCGMReading:
 
         readings = []
         for event in sorted(events, key=lambda x: self.timestamp_for(x)):
-            if last_upload_time and self.timestamp_for(event) < last_upload_time:
+            if last_upload_time and self.timestamp_for(event) <= last_upload_time:
                 if self.pretend:
-                    logger.info("ProcessCGMReading: Skipping %s before last upload time: %s (time range: %s - %s)" % (type(event), event, time_start, time_end))
+                    logger.info("ProcessCGMReading: Skipping %s not after last upload time: %s (time range: %s - %s)" % (type(event), event, time_start, time_end))
                 continue
 
             readings.append(event)

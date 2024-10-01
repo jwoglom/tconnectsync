@@ -37,9 +37,9 @@ class ProcessCartridge:
         cannulaFilledEvents = []
         tubingFilledEvents = []
         for event in sorted(events, key=lambda x: x.eventTimestamp):
-            if last_upload_time and arrow.get(event.eventTimestamp) < last_upload_time:
+            if last_upload_time and arrow.get(event.eventTimestamp) <= last_upload_time:
                 if self.pretend:
-                    logger.info("Skipping %s before last upload time: %s (time range: %s - %s)" % (type(event), event, time_start, time_end))
+                    logger.info("Skipping %s not after last upload time: %s (time range: %s - %s)" % (type(event), event, time_start, time_end))
                 continue
 
             if type(event) == eventtypes.LidCartridgeFilled:
