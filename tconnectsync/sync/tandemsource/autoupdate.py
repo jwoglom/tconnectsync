@@ -43,7 +43,7 @@ class TandemSourceAutoupdate:
             tconnectDevice = ChooseDevice(self.secret, tconnect).choose()
 
             event_id = None
-            cur_max_date_with_events = arrow.get(tconnectDevice['maxDateWithEvents'])
+            cur_max_date_with_events = arrow.get(tconnectDevice['maxDateWithEvents']).float_timestamp
             if not self.last_max_date_with_events or cur_max_date_with_events > self.last_max_date_with_events:
                 logger.info('New reported tandemsource data. (cur_max_date: %s last_max_date: %s)' % (cur_max_date_with_events, self.last_max_date_with_events))
 
