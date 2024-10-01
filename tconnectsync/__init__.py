@@ -4,6 +4,10 @@ import arrow
 import argparse
 import logging
 import pkg_resources
+import typing
+import typing_extensions
+if sys.version_info < (3, 8):
+    typing.Protocol = typing_extensions.Protocol
 
 from .api import TConnectApi
 from .process import process_time_range

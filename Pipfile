@@ -21,6 +21,7 @@ pyjwt = "==2.8.0"
 cryptography = "*"
 dataclasses-json = "*"
 cffi = ">=1.15.1"
+typing-extensions = "*"
 
 [scripts]
 tconnectsync = "python3 main.py"
