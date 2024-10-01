@@ -18,6 +18,7 @@ class TandemSourceAutoupdate:
         self.last_max_date_with_events = None
         self.last_event_time = 0
         self.last_attempt_time = 0
+        self.last_event_index = None
         self.time_diffs_between_attempts = []
         self.time_diffs_between_updates = []
 
@@ -41,6 +42,7 @@ class TandemSourceAutoupdate:
 
             tconnectDevice = ChooseDevice(self.secret, tconnect).choose()
 
+            event_id = None
             cur_max_date_with_events = arrow.get(tconnectDevice['maxDateWithEvents'])
             if not self.last_max_date_with_events or cur_max_date_with_events > self.cur_max_date_with_events:
                 logger.info('New reported tandemsource data. (cur_max_date: %s last_max_date: %s)' % (cur_max_date_with_events, self.last_max_date_with_events))
@@ -48,7 +50,7 @@ class TandemSourceAutoupdate:
                 if pretend:
                     logger.info('Would update now if not in pretend mode')
                 else:
-                    added = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, features=features).process(time_start, time_end)
+                    added, event_id = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, features=features).process(time_start, time_end)
                     logger.info('Added %d items from ProcessTimeRange' % added)
 
                 # Track the time it took to find a new event between runs,
@@ -59,8 +61,10 @@ class TandemSourceAutoupdate:
                     logger.debug('Updating tracking of time since last update: %s' % self.time_diffs_between_updates)
 
                 # Mark the last event index uploaded from the pump and timestamp
+                if event_id:
+                    self.last_event_index = event_id
+                    self.last_event_time = now
                 self.last_max_date_with_events = cur_max_date_with_events
-                self.last_event_time = now
                 self.last_attempt_time = now
                 self.time_diffs_between_attempts = []
             else:
