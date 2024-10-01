@@ -38,10 +38,14 @@ class ProcessBasal:
         for event in sorted(events, key=lambda x: x.eventTimestamp):
             if last_upload_time and arrow.get(event.eventTimestamp) <= last_upload_time:
                 if self.pretend:
-                    logger.info("Skipping basal event before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
+                    logger.info("Skipping basal event not after last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
                 continue
 
             with_duration.append([event.eventTimestamp, None, event])
+
+        if not with_duration:
+            logger.info("No basal events found to process")
+            return []
 
         for i in range(len(with_duration)-1):
             with_duration[i][1] = with_duration[i+1][0] - with_duration[i][0]
