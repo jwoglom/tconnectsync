@@ -10,65 +10,89 @@ on:
     branches: [ master, develop ]
 
 jobs:
+  build_old_python_versions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - &install_deps
+        name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flake8 pytest pipenv
+          pipenv install --system
+      - &pipenv_check
+        name: Run pipenv check
+        run: |
+          # DDoS attacks in wheel and setuptools packages, not relevant
+          # root certificate store, not relevant
+            pipenv check \
+              --ignore 51499 \
+              --ignore 52495 \
+              --ignore 52365 \
+              --ignore 59956 \
+              --ignore 58755 \
+              --ignore 67895 \
+              --ignore 61893 \
+              --ignore 61601 \
+              --ignore 62044 \
+              --ignore 67599 \
+              --ignore 72083 \
+              --ignore 71064 \
+              --ignore 71608 \
+              --ignore 72236
+      - &flake8_lint
+        name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - &check_run_help
+        name: Run tconnectsync --help
+        run: |
+          tconnectsync --help
+
   build:
 
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.11']
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest pipenv
-        pipenv install --system
-    - name: Run pipenv check
-      run: |
-       # DDoS attacks in wheel and setuptools packages, not relevant
-       # root certificate store, not relevant
-        pipenv check \
-          --ignore 51499 \
-          --ignore 52495 \
-          --ignore 52365 \
-          --ignore 59956 \
-          --ignore 58755 \
-          --ignore 67895 \
-          --ignore 61893 \
-          --ignore 61601 \
-          --ignore 62044 \
-          --ignore 67599 \
-          --ignore 72083 \
-          --ignore 71064 \
-          --ignore 71608 \
-          --ignore 72236
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest
-    - name: Check codecov configuration
-      run: |
-        curl -X POST --data-binary @.codecov.yml https://codecov.io/validate
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - *install_deps
+      - *pipenv_check
+      - *flake8_lint
+      - *check_run_help
+      - name: Test with pytest
+        run: |
+          pytest
+      - name: Check codecov configuration
+        run: |
+          curl -X POST --data-binary @.codecov.yml https://codecov.io/validate
 
-        if [[ "$(curl -s -o /dev/null -w "%{http_code}" -X POST --data-binary @.codecov.yml https://codecov.io/validate)" != "200" ]]; then
-          echo Error parsing codecov file
-          exit 1
-        fi
-    - name: Generate Coverage Report
-      run: |
-        pip install coverage
-        coverage run -m unittest
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        fail_ci_if_error: false
+          if [[ "$(curl -s -o /dev/null -w "%{http_code}" -X POST --data-binary @.codecov.yml https://codecov.io/validate)" != "200" ]]; then
+            echo Error parsing codecov file
+            exit 1
+          fi
+      - name: Generate Coverage Report
+        run: |
+          pip install coverage
+          coverage run -m unittest
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: false
