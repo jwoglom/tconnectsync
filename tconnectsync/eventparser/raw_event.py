@@ -38,4 +38,4 @@ class RawEvent:
         # but represent the user's time zone setting. So we keep the time
         # referenced on them, but force the timezone to what the user
         # requests via the TZ secret.
-        return arrow.get(TANDEM_EPOCH + self.timestampRaw, tzinfo=TIMEZONE_NAME)
+        return arrow.get(TANDEM_EPOCH + self.timestampRaw, tzinfo='UTC').replace(tzinfo=TIMEZONE_NAME)
