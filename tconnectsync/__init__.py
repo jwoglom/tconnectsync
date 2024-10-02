@@ -5,6 +5,8 @@ import argparse
 import logging
 import pkg_resources
 import typing
+
+# Required for cryptography lib in python 3.7
 if sys.version_info < (3, 8):
     import typing_extensions
     typing.Protocol = typing_extensions.Protocol
