@@ -117,13 +117,10 @@ def main(*args, **kwargs):
 
     if args.auto_update:
         u = TandemSourceAutoupdate(secret)
-        changed, last_event_id = u.process(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features)
-
-        # return exit code 0 if processed events
-        sys.exit(0 if changed>0 else 1)
+        sys.exit(u.process(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features))
     else:
         tconnectDevice = TandemSourceChooseDevice(secret, tconnect).choose()
-        added = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, features=args.features).process(time_start, time_end)
+        added, last_event_id = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, features=args.features).process(time_start, time_end)
 
         # return exit code 0 if processed events
         sys.exit(0 if added>0 else 1)
