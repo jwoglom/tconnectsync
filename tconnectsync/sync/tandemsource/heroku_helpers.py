@@ -1,5 +1,5 @@
 from ...features import DEFAULT_FEATURES
-from .choose_device import TandemSourceChooseDevice
+from .choose_device import ChooseDevice
 from .process import ProcessTimeRange
 from ... import secret
 
@@ -13,5 +13,5 @@ def run_oneshot(tconnect, nightscout, pretend=False, features=DEFAULT_FEATURES, 
     if not secret_arg:
         secret_arg = secret
 
-    tconnectDevice = TandemSourceChooseDevice(secret_arg, tconnect).choose()
+    tconnectDevice = ChooseDevice(secret_arg, tconnect).choose()
     return ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, features).process(time_start, time_end)
