@@ -204,7 +204,7 @@ class ProcessUserMode:
                 reason=reason + " - " + NOT_ENDED,
                 duration=duration_mins,
                 event_type=EXERCISE_EVENTTYPE,
-                pump_event_id = "%s,%s" % (start.eventId, stop.eventId)
+                pump_event_id = "%s" % start.eventId
             )
 
     def process_unended_sleep_stop(self, event, sleep_last_upload):
