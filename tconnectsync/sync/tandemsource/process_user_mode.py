@@ -198,7 +198,7 @@ class ProcessUserMode:
             if start.exercisechoice == eventtypes.LidAaUserModeChange.ExercisechoiceEnum.Timed:
                 reason = "Exercise (Timed)"
 
-            duration_mins = (time_end.eventTimestamp - start.eventTimestamp).seconds / 60
+            duration_mins = (time_end - start.eventTimestamp).seconds / 60
             return NightscoutEntry.activity(
                 created_at=start.eventTimestamp.format(),
                 reason=reason + " - " + NOT_ENDED,
