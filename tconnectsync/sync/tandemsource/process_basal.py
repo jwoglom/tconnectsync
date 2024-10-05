@@ -1,6 +1,7 @@
 import logging
 import arrow
 
+from ...secret import IGNORE_ZERO_UNIT_BASAL
 from ...features import DEFAULT_FEATURES
 from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
@@ -54,7 +55,9 @@ class ProcessBasal:
 
         ns_entries = []
         for item in with_duration:
-            ns_entries.append(self.basal_to_nsentry(*item))
+            ns = self.basal_to_nsentry(*item)
+            if ns:
+                ns_entries.append(ns)
 
         return ns_entries
 
@@ -73,16 +76,24 @@ class ProcessBasal:
 
     def basal_to_nsentry(self, start, duration, event):
         if type(event) == eventtypes.LidBasalRateChange:
+            value = insulin_float_round(event.commandedbasalrate)
+            if IGNORE_ZERO_UNIT_BASAL and value < 0.01:
+                logger.info("Ignoring basal entry with %.2f unit basal because IGNORE_ZERO_UNIT_BASAL=true: %s" % (value, event))
+                return None
             return NightscoutEntry.basal(
-                value = insulin_float_round(event.commandedbasalrate),
+                value = value,
                 duration_mins = duration.seconds / 60,
                 created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.changetype)),
                 pump_event_id = "%s" % event.eventId
             )
         if type(event) == eventtypes.LidBasalDelivery:
+            value = insulin_milliunits_to_real(event.commandedRate)
+            if IGNORE_ZERO_UNIT_BASAL and value < 0.01:
+                logger.info("Ignoring basal entry with %.2f unit basal because IGNORE_ZERO_UNIT_BASAL=true: %s" % (value, event))
+                return None
             return NightscoutEntry.basal(
-                value = insulin_milliunits_to_real(event.commandedRate),
+                value = value,
                 duration_mins = duration.seconds / 60,
                 created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.commandedRateSource)),
