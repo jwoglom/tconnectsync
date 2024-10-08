@@ -3,6 +3,7 @@ import unittest
 from tconnectsync.domain.bolus import Bolus
 
 from tconnectsync.domain.therapy_event import BolusTherapyEvent, CGMTherapyEvent
+from ..util.utilities import replace_with_user_tz
 
 class TestCGMTherapyEvent(unittest.TestCase):
     maxDiff = None
@@ -103,8 +104,8 @@ class TestBolusTherapyEvent(unittest.TestCase):
             description="Standard",
             complete="1",
             completion="Completed",
-            request_time="2022-07-21 12:27:36-04:00",
-            completion_time="2022-07-21 12:29:21-04:00",
+            request_time=replace_with_user_tz("2022-07-21 12:27:36-04:00"),
+            completion_time=replace_with_user_tz("2022-07-21 12:29:21-04:00"),
             insulin="4.17",
             requested_insulin="4.17",
             carbs="25",
@@ -176,8 +177,8 @@ class TestBolusTherapyEvent(unittest.TestCase):
             description="Automatic Bolus/Correction",
             complete="1",
             completion="Completed",
-            request_time="2022-07-21 11:53:08-04:00",
-            completion_time="2022-07-21 11:55:24-04:00",
+            request_time=replace_with_user_tz("2022-07-21 11:53:08-04:00"),
+            completion_time=replace_with_user_tz("2022-07-21 11:55:24-04:00"),
             insulin="2.9",
             requested_insulin="2.9",
             carbs="0",
@@ -259,8 +260,8 @@ class TestBolusTherapyEvent(unittest.TestCase):
             description="Extended 50.00%/0.00",
             complete="0",
             completion="",
-            request_time="2022-08-09 23:19:15-04:00",
-            completion_time="2022-08-09 23:20:04-04:00",
+            request_time=replace_with_user_tz("2022-08-09 23:19:15-04:00"),
+            completion_time=replace_with_user_tz("2022-08-09 23:20:04-04:00"),
             insulin="0.2",
             requested_insulin="0.2",
             carbs="0",
@@ -268,7 +269,7 @@ class TestBolusTherapyEvent(unittest.TestCase):
             user_override="1",
             extended_bolus="1",
             bolex_completion_time="",
-            bolex_start_time="2022-08-09 23:20:04-04:00"
+            bolex_start_time=replace_with_user_tz("2022-08-09 23:20:04-04:00")
         )))
     
     extendedBolusJson = {
@@ -347,16 +348,16 @@ class TestBolusTherapyEvent(unittest.TestCase):
             description="Extended 50.00%/0.00",
             complete="1",
             completion="Completed",
-            request_time="2022-08-09 23:19:15-04:00",
-            completion_time="2022-08-09 23:20:04-04:00",
+            request_time=replace_with_user_tz("2022-08-09 23:19:15-04:00"),
+            completion_time=replace_with_user_tz("2022-08-09 23:20:04-04:00"),
             insulin="0.2",
             requested_insulin="0.2",
             carbs="0",
             bg="131",
             user_override="1",
             extended_bolus="1",
-            bolex_completion_time="2022-08-09 23:35:03-04:00",
-            bolex_start_time="2022-08-09 23:20:04-04:00"
+            bolex_completion_time=replace_with_user_tz("2022-08-09 23:35:03-04:00"),
+            bolex_start_time=replace_with_user_tz("2022-08-09 23:20:04-04:00")
         )))
 
 
