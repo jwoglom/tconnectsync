@@ -82,7 +82,9 @@ class ProcessTimeRange:
                 if c.enabled():
                     logger.info("%s is enabled from features %s" % (clazz, self.features))
                     ns_entries = c.process(events, events_first_time, events_last_time)
-                    processed_count += c.write(ns_entries)
+                    w = c.write(ns_entries)
+                    if w:
+                        processed_count += w
                 else:
                     logger.info("Skipping %s, is not enabled from features %s" % (clazz, self.features))
 
@@ -95,6 +97,6 @@ class ProcessTimeRange:
             else:
                 logger.info("Skipping %s, is not enabled from features %s" % (updater_class.__name__, self.features))
 
-        logger.info("Processed %d events. Last event ID seen: %d" % (processed_count, last_event_id))
+        logger.info("Processed %d events. Last event ID seen: %d" % (processed_count if processed_count else 0, last_event_id if last_event_id else -1))
         return processed_count, last_event_id
 
