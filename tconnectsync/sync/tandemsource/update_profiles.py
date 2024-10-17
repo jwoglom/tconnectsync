@@ -8,7 +8,7 @@ from ...features import DEFAULT_FEATURES
 from ... import features
 from ...domain.tandemsource.pump_settings import PumpSettings
 from ...parser.nightscout import (
-    NightscoutEntry
+    NightscoutEntry, ENTERED_BY
 )
 from ...secret import NIGHTSCOUT_PROFILE_UPLOAD_MODE
 
@@ -52,6 +52,8 @@ class UpdateProfiles:
         logger.info("Current Nightscout profile: %s" % ns_profile_obj)
         if ns_profile_obj is None:
             ns_profile_obj = {}
+
+        logger.info("Current Nightscout profile was authored by: %s" % (ns_profile_obj.get('enteredBy')))
 
         diff, ns_profile_new = self.compare_profiles(pump_settings, ns_profile_obj)
         if not diff:
@@ -145,6 +147,7 @@ class UpdateProfiles:
             return False, ns_profile_obj
 
         logger.info("New Nightscout profile object: %s", new_ns_profile)
+        new_ns_profile['enteredBy'] = ENTERED_BY
         return True, new_ns_profile
 
     def nightscout_profiles_identical(self, configured: dict, translated: dict) -> bool:

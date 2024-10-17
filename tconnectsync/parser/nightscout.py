@@ -251,30 +251,33 @@ class NightscoutEntry:
         return {
             # insulin duration in hours; Nightscout JS bug requires all top-level fields to be strings
             "dia": "%s" % (profile.insulinDuration / 60),
-            "carbratio": [
+            "carbratio": list(sorted([
                 {
                     "time": minutes_to_ns_time(segment.startTime),
                     "timeAsSeconds": segment.startTime * 60,
                     "value": segment.carbRatio / 1000 # milliunits->units
-                } for segment in profile.tDependentSegs
-            ],
+                } for segment in profile.tDependentSegs if not segment.skip
+            ], key=lambda x: x["timeAsSeconds"])),
 
             "carbs_hr": NIGHTSCOUT_PROFILE_CARBS_HR_VALUE,
             "delay": NIGHTSCOUT_PROFILE_DELAY_VALUE,
-            "sens": [ # Correction factor / isf
+
+            "sens": list(sorted([ # Correction factor / isf
                 {
                     "time": minutes_to_ns_time(segment.startTime),
                     "timeAsSeconds": segment.startTime * 60,
                     "value": segment.isf
-                } for segment in profile.tDependentSegs
-            ],
-            "basal": [
+                } for segment in profile.tDependentSegs if not segment.skip
+            ], key=lambda x: x["timeAsSeconds"])),
+
+            "basal": list(sorted([
                 {
                     "time": minutes_to_ns_time(segment.startTime),
                     "timeAsSeconds": segment.startTime * 60,
                     "value": segment.basalRate / 1000 # milliunits->units
                 } for segment in profile.tDependentSegs
-            ],
+            ], key=lambda x: x["timeAsSeconds"])),
+
             "target_low": [
                 {
                     "time": "00:00",
