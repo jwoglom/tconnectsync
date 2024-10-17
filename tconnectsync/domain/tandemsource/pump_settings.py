@@ -25,6 +25,9 @@ class PumpProfile:
     carbEntry: int # 1 / 0
     maxBolus: int # milliunits
 
+    def __post_init__(self):
+        self.tDependentSegs = [i for i in self.tDependentSegs if not i.skip]
+
 @dataclass_json
 @dataclass
 class PumpProfiles:
