@@ -1,0 +1,66 @@
+{
+  "events": {
+    "81": {
+      "name": "LID_DAILY_BASAL",
+      "data": {
+        "dailyTotalBasal": {
+          "type": "float32",
+          "offset": 0,
+          "uom": "units"
+        },
+        "lastBasalRate": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units/hour"
+        },
+        "iob": {
+          "type": "float32",
+          "offset": 8,
+          "uom": "units"
+        },
+        "finalEventForDay": {
+          "type": "uint8",
+          "offset": 12
+        },
+        "batteryChargePercent": {
+          "type": "uint8",
+          "offset": 13
+        },
+        "batteryLipoMilliVolts": {
+          "type": "uint16",
+          "offset": 14
+        }
+      }
+    },
+    "48": {
+      "name": "LID_CARBS_ENTERED",
+      "data": {
+        "carbs": {
+          "type": "float32",
+          "offset": 0,
+          "uom": "carbs"
+        }
+      }
+    },
+    "36": {
+      "name": "LID_USB_CONNECTED",
+      "data": {
+        "negotiatedCurrent": {
+          "type": "float32",
+          "offset": 0,
+          "uom": "mA"
+        }
+      }
+    },
+    "37": {
+      "name": "LID_USB_DISCONNECTED",
+      "data": {
+        "negotiatedCurrent": {
+          "type": "float32",
+          "offset": 0,
+          "uom": "mA"
+        }
+      }
+    }
+  }
+}

@@ -154,13 +154,21 @@ def build_events_map(events):
 
 if __name__ == '__main__':
     import json
+    merged_events = {}
 
     output = f'{header}'
     with open("events.json", "r") as f:
         j = json.loads(f.read())
-        for event_id, event_def in j["events"].items():
-            output += build_event(event_id, event_def)
+        merged_events.update(j["events"])
 
-        output += build_events_map(j["events"])
+    with open("custom_events.json", "r") as f:
+        j = json.loads(f.read())
+        merged_events.update(j["events"])
+
+    for event_id, event_def in merged_events.items():
+        output += build_event(event_id, event_def)
+
+    output += build_events_map(merged_events)
+
 
     print(output)

@@ -4270,6 +4270,133 @@ class LidCgmAlertClearedFsl2(BaseEvent):
     def eventId(self):
         return self.raw.seqNum
 
+
+@dataclass
+class LidDailyBasal(BaseEvent):
+    """81: LID_DAILY_BASAL"""
+    ID = 81
+    NAME = "LID_DAILY_BASAL"
+
+    raw: RawEvent
+    dailytotalbasal: float # units
+    lastbasalrate: float # units/hour
+    iob: float # units
+    finaleventforday: int
+    batterychargepercent: int
+    batterylipomillivolts: int
+
+
+    @staticmethod
+    def build(raw):
+        dailytotalbasal, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
+        lastbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
+        iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
+        finaleventforday, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
+        batterychargepercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        batterylipomillivolts, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+
+        return LidDailyBasal(
+            raw = RawEvent.build(raw),
+            dailytotalbasal = dailytotalbasal,
+            lastbasalrate = lastbasalrate,
+            iob = iob,
+            finaleventforday = finaleventforday,
+            batterychargepercent = batterychargepercent,
+            batterylipomillivolts = batterylipomillivolts,
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.seqNum
+
+
+@dataclass
+class LidCarbsEntered(BaseEvent):
+    """48: LID_CARBS_ENTERED"""
+    ID = 48
+    NAME = "LID_CARBS_ENTERED"
+
+    raw: RawEvent
+    carbs: float # carbs
+
+
+    @staticmethod
+    def build(raw):
+        carbs, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
+
+        return LidCarbsEntered(
+            raw = RawEvent.build(raw),
+            carbs = carbs,
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.seqNum
+
+
+@dataclass
+class LidUsbConnected(BaseEvent):
+    """36: LID_USB_CONNECTED"""
+    ID = 36
+    NAME = "LID_USB_CONNECTED"
+
+    raw: RawEvent
+    negotiatedcurrent: float # mA
+
+
+    @staticmethod
+    def build(raw):
+        negotiatedcurrent, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
+
+        return LidUsbConnected(
+            raw = RawEvent.build(raw),
+            negotiatedcurrent = negotiatedcurrent,
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.seqNum
+
+
+@dataclass
+class LidUsbDisconnected(BaseEvent):
+    """37: LID_USB_DISCONNECTED"""
+    ID = 37
+    NAME = "LID_USB_DISCONNECTED"
+
+    raw: RawEvent
+    negotiatedcurrent: float # mA
+
+
+    @staticmethod
+    def build(raw):
+        negotiatedcurrent, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
+
+        return LidUsbDisconnected(
+            raw = RawEvent.build(raw),
+            negotiatedcurrent = negotiatedcurrent,
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def eventId(self):
+        return self.raw.seqNum
+
 EVENT_IDS = {
     3: LidBasalRateChange,
     4: LidAlertActivated,
@@ -4323,6 +4450,10 @@ EVENT_IDS = {
     447: LidCgmStopSessionG7,
     460: LidCgmAlertActivatedFsl2,
     461: LidCgmAlertClearedFsl2,
+    81: LidDailyBasal,
+    48: LidCarbsEntered,
+    36: LidUsbConnected,
+    37: LidUsbDisconnected,
 }
 
 EVENT_NAMES = {
@@ -4378,5 +4509,9 @@ EVENT_NAMES = {
     "LID_CGM_STOP_SESSION_G7": LidCgmStopSessionG7,
     "LID_CGM_ALERT_ACTIVATED_FSL2": LidCgmAlertActivatedFsl2,
     "LID_CGM_ALERT_CLEARED_FSL2": LidCgmAlertClearedFsl2,
+    "LID_DAILY_BASAL": LidDailyBasal,
+    "LID_CARBS_ENTERED": LidCarbsEntered,
+    "LID_USB_CONNECTED": LidUsbConnected,
+    "LID_USB_DISCONNECTED": LidUsbDisconnected,
 }
 
