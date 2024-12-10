@@ -3,17 +3,11 @@ import struct
 import logging
 from dataclasses import dataclass
 from enum import Enum, IntFlag
-from .raw_event import RawEvent
+from .raw_event import RawEvent, BaseEvent
 
 logger = logging.getLogger(__name__)
 
 EVENT_LEN = 26
-
-@dataclass
-class BaseEvent:
-    @staticmethod
-    def build(raw):
-        raise NotImplemented
 
 UINT8 = '>B'
 INT8 = '>b'

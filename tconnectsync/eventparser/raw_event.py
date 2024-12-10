@@ -10,8 +10,23 @@ UINT16 = '>H'
 UINT32 = '>I'
 TANDEM_EPOCH = 1199145600
 
+
 @dataclass
-class RawEvent:
+class BaseEvent:
+    @staticmethod
+    def build(raw):
+        raise NotImplemented
+
+    @property
+    def eventTimestamp(self):
+        raise NotImplemented
+
+    @property
+    def eventId(self):
+        raise NotImplemented
+
+@dataclass
+class RawEvent(BaseEvent):
     source: int
     id: int
     timestampRaw: int
@@ -39,3 +54,17 @@ class RawEvent:
         # referenced on them, but force the timezone to what the user
         # requests via the TZ secret.
         return arrow.get(TANDEM_EPOCH + self.timestampRaw, tzinfo='UTC').replace(tzinfo=TIMEZONE_NAME)
+
+    @property
+    def eventId(self):
+        return self.id
+
+    @property
+    def eventTimestamp(self):
+        return self.timestamp
+
+    @property
+    def raw(self):
+        return self
+
+
