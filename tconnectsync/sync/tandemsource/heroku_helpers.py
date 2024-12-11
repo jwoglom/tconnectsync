@@ -14,4 +14,4 @@ def run_oneshot(tconnect, nightscout, pretend=False, features=DEFAULT_FEATURES, 
         secret_arg = secret
 
     tconnectDevice = ChooseDevice(secret_arg, tconnect).choose()
-    return ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, features).process(time_start, time_end)
+    return ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, secret_arg, features).process(time_start, time_end)

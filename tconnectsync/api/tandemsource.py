@@ -19,6 +19,7 @@ from jwt.algorithms import RSAAlgorithm
 from ..util import timeago, cap_length
 from .common import parse_ymd_date, base_headers, base_session, ApiException, ApiLoginException
 from ..secret import CACHE_CREDENTIALS, CACHE_CREDENTIALS_PATH
+from ..eventparser.generic import Events, decode_raw_events, EVENT_LEN
 
 logger = logging.getLogger(__name__)
 
@@ -357,22 +358,42 @@ class TandemSourceApi:
     def pump_event_metadata(self):
         return self.get('api/reports/reportsfacade/%s/pumpeventmetadata' % (self.pumperId), {})
 
+    DEFAULT_EVENT_IDS = [229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,399,256,213,406,394,212,404,214,405,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191]
+
     """
     Returns raw unparsed string for pump events
     tconnect_device_id is "tconnectDeviceId" from pump_event_metadata()
     """
-    def pump_events_raw(self, tconnect_device_id, min_date=None, max_date=None):
+    def pump_events_raw(self, tconnect_device_id, min_date=None, max_date=None, event_ids_filter=DEFAULT_EVENT_IDS):
         minDate = parse_ymd_date(min_date)
         maxDate = parse_ymd_date(max_date)
-        logger.debug(f'pump_events_raw({minDate}, {maxDate})')
+        logger.debug(f'pump_events_raw({tconnect_device_id}, {minDate}, {maxDate})')
 
-        # 229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,399,256,213,406,394,212,404,214,405,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191
-        eventIdsFilter = '229%2C5%2C28%2C4%2C26%2C99%2C279%2C3%2C16%2C59%2C21%2C55%2C20%2C280%2C64%2C65%2C66%2C61%2C33%2C371%2C171%2C369%2C460%2C172%2C370%2C461%2C372%2C399%2C256%2C213%2C406%2C394%2C212%2C404%2C214%2C405%2C447%2C313%2C60%2C14%2C6%2C90%2C230%2C140%2C12%2C11%2C53%2C13%2C63%2C203%2C307%2C191'
-        return self.get('api/reports/reportsfacade/pumpevents/%s/%s?minDate=%s&maxDate=%s&eventIds=%s' % (
+        # default: 229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,399,256,213,406,394,212,404,214,405,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191
+        eventIdsFilter = '%2C'.join(map(str, event_ids_filter)) if event_ids_filter else None
+        return self.get('api/reports/reportsfacade/pumpevents/%s/%s?minDate=%s&maxDate=%s%s' % (
             self.pumperId,
             tconnect_device_id,
             minDate,
             maxDate,
-            eventIdsFilter
+            '&eventIds=%s' % eventIdsFilter if eventIdsFilter else ''
         ), {})
+
+    """
+    Fetch and decode pump events using eventparser.
+    Default of fetch_all_events=False will filter to the same eventids used in the Tandem Source backend.
+    If fetch_all_events=True, then all event types from the history log will be returned.
+    """
+    def pump_events(self, tconnect_device_id, min_date=None, max_date=None, fetch_all_event_types=False):
+        pump_events_raw = self.pump_events_raw(
+            tconnect_device_id,
+            min_date,
+            max_date,
+            event_ids_filter=None if fetch_all_event_types else self.DEFAULT_EVENT_IDS
+        )
+
+        pump_events_decoded = decode_raw_events(pump_events_raw)
+        logger.info(f"Read {len(pump_events_decoded)} bytes (est. {len(pump_events_decoded)/EVENT_LEN} events)")
+        return Events(pump_events_decoded)
+
 

@@ -2,7 +2,6 @@ import logging
 import collections
 
 from ...features import DEFAULT_FEATURES
-from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
 from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
 from .process_basal import ProcessBasal
@@ -20,12 +19,13 @@ from .update_profiles import UpdateProfiles
 logger = logging.getLogger(__name__)
 
 class ProcessTimeRange:
-    def __init__(self, tconnect, nightscout, tconnectDevice, pretend, features=DEFAULT_FEATURES):
+    def __init__(self, tconnect, nightscout, tconnectDevice, pretend, secret, features=DEFAULT_FEATURES):
         self.tconnect = tconnect
         self.nightscout = nightscout
         self.tconnect_device_id = tconnectDevice['tconnectDeviceId']
         self.max_date_with_events = tconnectDevice['maxDateWithEvents']
         self.pretend = pretend
+        self.secret = secret
         self.features = features
 
     event_classes = {
@@ -47,11 +47,7 @@ class ProcessTimeRange:
 
     def process(self, time_start, time_end):
         logger.info(f"ProcessTimeRange time_start={time_start} time_end={time_end} tconnect_device_id={self.tconnect_device_id} features={self.features}")
-
-        pump_events_raw = self.tconnect.tandemsource.pump_events_raw(self.tconnect_device_id, time_start, time_end)
-        pump_events_decoded = decode_raw_events(pump_events_raw)
-        logger.info(f"Read {len(pump_events_decoded)} bytes (est. {len(pump_events_decoded)/EVENT_LEN} events)")
-        events = Events(pump_events_decoded)
+        events = self.tconnect.tandemsource.pump_events(self.tconnect_device_id, time_start, time_end, fetch_all_event_types=self.secret.FETCH_ALL_EVENT_TYPES)
 
         events_first_time = None
         events_last_time = None

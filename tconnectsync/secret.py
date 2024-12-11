@@ -76,6 +76,9 @@ AUTOUPDATE_MAX_LOOP_INVOCATIONS = get_number('AUTOUPDATE_MAX_LOOP_INVOCATIONS', 
 
 NIGHTSCOUT_PROFILE_UPLOAD_MODE = get_one_of('NIGHTSCOUT_PROFILE_UPLOAD_MODE', 'add', ['add', 'replace'])
 
+# When set, all possible history log event types are fetched from Tandem Source
+FETCH_ALL_EVENT_TYPES = get_bool('FETCH_ALL_EVENT_TYPES', 'false')
+
 # Default Nightscout profile segment fields which aren't stored by Tandem
 NIGHTSCOUT_PROFILE_CARBS_HR_VALUE = get('NIGHTSCOUT_PROFILE_CARBS_HR_VALUE', '20')
 NIGHTSCOUT_PROFILE_DELAY_VALUE = get('NIGHTSCOUT_PROFILE_DELAY_VALUE', '20')
