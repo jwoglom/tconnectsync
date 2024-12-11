@@ -73,7 +73,7 @@ class ProcessCGMAlert:
             return NightscoutEntry.cgm_alert(
                 created_at = alert.eventTimestamp.format(),
                 reason = ("CGM Alert (%s)" % alert.dalertid.name) if alert.dalertid else "CGM Alert (Unknown)",
-                pump_event_id = "%s" % alert.eventId
+                pump_event_id = "%s" % alert.seqNum
             )
         elif type(alert) == eventtypes.LidCgmAlertActivatedDex:
             if alert.dalertid == eventtypes.LidCgmAlertActivatedDex.DalertidEnum.CgmOutOfRange:
@@ -82,11 +82,11 @@ class ProcessCGMAlert:
             return NightscoutEntry.cgm_alert(
                 created_at = alert.eventTimestamp.format(),
                 reason = ("Dexcom CGM Alert (%s)" % alert.dalertid.name) if alert.dalertid else "Dexcom CGM Alert (Unknown)",
-                pump_event_id = "%s" % alert.eventId
+                pump_event_id = "%s" % alert.seqNum
             )
         elif type(alert) == eventtypes.LidCgmAlertActivatedFsl2:
             return NightscoutEntry.cgm_alert(
                 created_at = alert.eventTimestamp.format(),
                 reason = ("Libre CGM Alert (%s)" % alert.dalertid.name) if alert.dalertid else "Libre CGM Alert (Unknown)",
-                pump_event_id = "%s" % alert.eventId
+                pump_event_id = "%s" % alert.seqNum
             )

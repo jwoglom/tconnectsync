@@ -81,8 +81,12 @@ class LidBasalRateChange(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -257,8 +261,12 @@ class LidAlertActivated(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -435,8 +443,12 @@ class LidAlarmActivated(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -472,8 +484,12 @@ class LidMalfunctionActivated(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -530,8 +546,12 @@ class LidPumpingSuspended(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -561,8 +581,12 @@ class LidPumpingResumed(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -595,8 +619,12 @@ class LidTimeChanged(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -629,8 +657,12 @@ class LidDateChanged(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -749,8 +781,12 @@ class LidBgReadingTaken(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -817,8 +853,12 @@ class LidBolusCompleted(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -885,8 +925,12 @@ class LidBolexCompleted(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1055,8 +1099,12 @@ class LidAlertCleared(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1224,8 +1272,12 @@ class LidAlarmCleared(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1255,8 +1307,12 @@ class LidCartridgeFilled(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1298,8 +1354,12 @@ class LidShelfMode(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1352,8 +1412,12 @@ class LidBolusActivated(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1406,8 +1470,12 @@ class LidBolexActivated(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1437,8 +1505,12 @@ class LidDataLogCorruption(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1489,8 +1561,12 @@ class LidCannulaFilled(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1544,8 +1620,12 @@ class LidTubingFilled(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1633,8 +1713,12 @@ class LidBolusRequestedMsg1(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1768,8 +1852,12 @@ class LidBolusRequestedMsg2(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1805,8 +1893,12 @@ class LidBolusRequestedMsg3(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1839,8 +1931,12 @@ class LidNewDay(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -1876,8 +1972,12 @@ class LidArmInit(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2051,8 +2151,12 @@ class LidPlgsPeriodic(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2117,8 +2221,12 @@ class LidCgmAlertActivated(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2174,8 +2282,12 @@ class LidCgmAlertCleared(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2211,8 +2323,12 @@ class LidVersionInfo(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2274,8 +2390,12 @@ class LidUpdateStatus(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2308,8 +2428,12 @@ class LidCgmStartSessionGx(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2384,8 +2508,12 @@ class LidCgmJoinSessionGx(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2463,8 +2591,12 @@ class LidCgmStopSessionGx(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2682,8 +2814,12 @@ class LidAaUserModeChange(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2861,8 +2997,12 @@ class LidAaPcmChange(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -2992,8 +3132,12 @@ class LidCgmDataGxb(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3055,8 +3199,12 @@ class LidBasalDelivery(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3183,8 +3331,12 @@ class LidBolusDelivery(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3220,8 +3372,12 @@ class LidVersionsA(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3317,8 +3473,12 @@ class LidAaDailyStatus(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3406,8 +3566,12 @@ class LidCgmAlertActivatedDex(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3486,8 +3650,12 @@ class LidCgmAlertClearedDex(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3587,8 +3755,12 @@ class LidCgmAlertAckDex(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3752,8 +3924,12 @@ class LidCgmDataFsl2(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3783,8 +3959,12 @@ class LidCgmJoinSessionG7(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3954,8 +4134,12 @@ class LidCgmDataG7(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -3985,8 +4169,12 @@ class LidCgmStartSessionFsl2(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4022,8 +4210,12 @@ class LidCgmStopSessionFsl2(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4059,8 +4251,12 @@ class LidCgmJoinSessionFsl2(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4102,8 +4298,12 @@ class LidCgmStopSessionG7(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4189,8 +4389,12 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4267,8 +4471,12 @@ class LidCgmAlertClearedFsl2(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4310,8 +4518,12 @@ class LidDailyBasal(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4338,8 +4550,12 @@ class LidCarbsEntered(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4366,8 +4582,12 @@ class LidUsbConnected(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 
 @dataclass
@@ -4394,8 +4614,12 @@ class LidUsbDisconnected(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 EVENT_IDS = {
     3: LidBasalRateChange,

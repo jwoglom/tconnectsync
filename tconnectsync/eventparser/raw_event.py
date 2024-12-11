@@ -26,7 +26,7 @@ class BaseEvent:
         raise NotImplemented
 
 @dataclass
-class RawEvent(BaseEvent):
+class RawEvent:
     source: int
     id: int
     timestampRaw: int
@@ -62,9 +62,5 @@ class RawEvent(BaseEvent):
     @property
     def eventTimestamp(self):
         return self.timestamp
-
-    @property
-    def raw(self):
-        return self
 
 

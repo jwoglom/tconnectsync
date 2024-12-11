@@ -46,7 +46,7 @@ class ProcessBolus:
             if type(event) == eventtypes.LidBolusCompleted:
                 if last_upload_time and arrow.get(event.eventTimestamp) <= last_upload_time:
                     if self.pretend:
-                        logger.info("Skipping bolusCompletedEvent before last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
+                        logger.info("Skipping bolusCompletedEvent not after last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
                     continue
 
                 bolusCompletedEvents.append(event)
@@ -91,10 +91,10 @@ class ProcessBolus:
 
         suffix = (' ' + (' '.join(suffixes))) if suffixes else ''
 
-        event_ids = []
+        seq_nums = []
         for e in [bolusCompleted, bolusRequested1, bolusRequested2, bolusRequested3]:
             if e:
-                event_ids.append(str(e.eventId))
+                seq_nums.append(str(e.seqNum))
 
         notes = ''
         if bolusRequested2 and str(bolusRequested2.optionsRaw) in eventtypes.LidBolusRequestedMsg2.OptionsMap:
@@ -107,6 +107,6 @@ class ProcessBolus:
             created_at = bolusCompleted.eventTimestamp.format(),
             notes = notes + suffix,
             bg = bolusRequested1.BG if bolusRequested1 and bolusRequested1.BG > 0 else None,
-            pump_event_id = ",".join(event_ids)
+            pump_event_id = ",".join(seq_nums)
         )
 

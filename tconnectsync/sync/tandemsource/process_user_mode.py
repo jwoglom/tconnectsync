@@ -157,7 +157,7 @@ class ProcessUserMode:
                 reason=reason,
                 duration=duration_mins,
                 event_type=SLEEP_EVENTTYPE,
-                pump_event_id = "%s,%s" % (start.eventId, stop.eventId)
+                pump_event_id = "%s,%s" % (start.seqNum, stop.seqNum)
             )
         elif start:
             reason = None
@@ -172,7 +172,7 @@ class ProcessUserMode:
                 reason=reason + " - " + NOT_ENDED if reason else NOT_ENDED,
                 duration=duration_mins,
                 event_type=SLEEP_EVENTTYPE,
-                pump_event_id = "%s" % start.eventId
+                pump_event_id = "%s" % start.seqNum
             )
 
 
@@ -191,7 +191,7 @@ class ProcessUserMode:
                 reason=reason,
                 duration=duration_mins,
                 event_type=EXERCISE_EVENTTYPE,
-                pump_event_id = "%s,%s" % (start.eventId, stop.eventId)
+                pump_event_id = "%s,%s" % (start.seqNum, stop.seqNum)
             )
         elif start:
             reason = "Exercise"
@@ -204,7 +204,7 @@ class ProcessUserMode:
                 reason=reason + " - " + NOT_ENDED,
                 duration=duration_mins,
                 event_type=EXERCISE_EVENTTYPE,
-                pump_event_id = "%s" % start.eventId
+                pump_event_id = "%s" % start.seqNum
             )
 
     def process_unended_sleep_stop(self, event, sleep_last_upload):
@@ -220,7 +220,7 @@ class ProcessUserMode:
             reason=sleep_last_upload["reason"].replace(" - %s" % NOT_ENDED, ""),
             duration=duration_mins,
             event_type=SLEEP_EVENTTYPE,
-            pump_event_id="%s,%s" % (sleep_last_upload.get("pump_event_id",""), event.eventId)
+            pump_event_id="%s,%s" % (sleep_last_upload.get("pump_event_id",""), event.seqNum)
         )
 
     def process_unended_exercise_stop(self, event, exercise_last_upload):
@@ -240,5 +240,5 @@ class ProcessUserMode:
             reason=reason,
             duration=duration_mins,
             event_type=EXERCISE_EVENTTYPE,
-            pump_event_id="%s,%s" % (exercise_last_upload.get("pump_event_id",""), event.eventId)
+            pump_event_id="%s,%s" % (exercise_last_upload.get("pump_event_id",""), event.seqNum)
         )

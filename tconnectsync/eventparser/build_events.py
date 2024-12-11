@@ -61,8 +61,12 @@ class {name}(BaseEvent):
         return self.raw.timestamp
 
     @property
-    def eventId(self):
+    def seqNum(self):
         return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
 
 '''
 

@@ -85,7 +85,7 @@ class ProcessBasal:
                 duration_mins = duration.seconds / 60,
                 created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.changetype)),
-                pump_event_id = "%s" % event.eventId
+                pump_event_id = "%s" % event.seqNum
             )
         if type(event) == eventtypes.LidBasalDelivery:
             value = insulin_milliunits_to_real(event.commandedRate)
@@ -97,5 +97,5 @@ class ProcessBasal:
                 duration_mins = duration.seconds / 60,
                 created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.commandedRateSource)),
-                pump_event_id = "%s" % event.eventId
+                pump_event_id = "%s" % event.seqNum
             )

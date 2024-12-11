@@ -194,6 +194,20 @@ class NightscoutEntry:
             "pump_event_id": pump_event_id
         }
 
+    @staticmethod
+    def devicestatus(created_at, batteryVoltage, batteryString, pump_event_id=""):
+        return {
+            "device": ENTERED_BY,
+            "created_at": created_at,
+            "pump": {
+                "battery": {
+                    "voltage": float(batteryVoltage),
+                    "string": batteryString
+                },
+            },
+            "pump_event_id": pump_event_id
+        }
+
     # Tandem-scraped profile to Nightscout profile store entry
     @staticmethod
     def profile_store(profile: Profile, device_settings: DeviceSettings) -> dict:

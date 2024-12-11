@@ -62,5 +62,5 @@ class ProcessBasalResume:
         if type(event) == eventtypes.LidPumpingResumed:
             return NightscoutEntry.basalresume(
                 created_at = event.eventTimestamp.format(),
-                pump_event_id = "%s" % event.eventId
+                pump_event_id = "%s" % event.seqNum
             )

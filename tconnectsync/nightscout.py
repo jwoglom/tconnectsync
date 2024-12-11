@@ -154,6 +154,33 @@ class NightscoutApi:
 			else:
 				raise e
 
+	def last_uploaded_devicestatus(self, time_start=None, time_end=None):
+		def internal(t_to_space):
+			dateFilter = time_range('created_at', time_start, time_end, t_to_space=t_to_space)
+			latest = requests.get(urljoin(self.url, 'api/v1/devicestatus?find[device]=' + urllib.parse.quote(ENTERED_BY) + dateFilter + '&ts=' + str(time.time())), headers={
+				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
+			}, verify=self.verify)
+			if latest.status_code != 200:
+				raise ApiException(latest.status_code, "Nightscout devicestatus %s response: %s" % (latest.status_code, latest.text))
+
+			j = latest.json()
+			if j and len(j) > 0:
+				return j[0]
+			return None
+
+		try:
+			ret = internal(False)
+			if ret is None and (time_start or time_end):
+				ret = internal(True)
+				if ret is not None:
+					logger.warning("devicestatus with activityType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (activityType, time_start, time_end))
+			return ret
+		except requests.exceptions.ConnectionError as e:
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
+			else:
+				raise e
+
 	"""
 	Returns general status information about the Nightscout server.
 	"""

@@ -55,18 +55,18 @@ class ProcessTimeRange:
 
         events_first_time = None
         events_last_time = None
-        last_event_id = None # aka seqnum
+        last_event_seqnum = None
         for_eventclass = collections.defaultdict(list)
         for event in events:
             if not events_first_time:
                 events_first_time = event.eventTimestamp
             if not events_last_time:
                 events_last_time = event.eventTimestamp
-            if not last_event_id:
-                last_event_id = event.eventId
+            if not last_event_seqnum:
+                last_event_seqnum = event.seqNum
             events_first_time = min(events_first_time, event.eventTimestamp)
             events_last_time = max(events_last_time, event.eventTimestamp)
-            last_event_id = max(event.eventId, last_event_id)
+            last_event_seqnum = max(event.seqNum, last_event_seqnum)
 
             clazz = EventClass.for_event(event)
             if clazz:
@@ -97,6 +97,6 @@ class ProcessTimeRange:
             else:
                 logger.info("Skipping %s, is not enabled from features %s" % (updater_class.__name__, self.features))
 
-        logger.info("Processed %d events. Last event ID seen: %d" % (processed_count if processed_count else 0, last_event_id if last_event_id else -1))
-        return processed_count, last_event_id
+        logger.info("Processed %d events. Last event ID seen: %d" % (processed_count if processed_count else 0, last_event_seqnum if last_event_seqnum else -1))
+        return processed_count, last_event_seqnum
 
