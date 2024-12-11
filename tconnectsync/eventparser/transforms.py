@@ -111,11 +111,22 @@ def transform_ratio(event_def, name, name_fmt, field, tx):
 
     return out
 
+def transform_battery_charge_percent(event_def, name, name_fmt, field, tx):
+    out = []
+    out += [
+        '@property',
+        f'def batteryChargePercent(self):',
+        f'    return (256*(self.batterychargepercentmsbRaw%2)+self.batterychargepercentlsbRaw)/512',
+        ''
+    ]
+
+    return out
 
 
 TRANSFORMS = {
     'enum': transform_enum,
     'dictionary': transform_dictionary,
     'bitmask': transform_bitmask,
-    'ratio': transform_ratio
+    'ratio': transform_ratio,
+    'battery_charge_percent': transform_battery_charge_percent
 }

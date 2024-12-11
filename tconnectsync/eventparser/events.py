@@ -598,20 +598,20 @@ class LidTimeChanged(BaseEvent):
     raw: RawEvent
     timeprior: int # ms
     timeafter: int # ms
-    rawrtctime: int # ms
+    Rawrtctime: int # ms
 
 
     @staticmethod
     def build(raw):
         timeprior, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
         timeafter, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
-        rawrtctime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        Rawrtctime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
 
         return LidTimeChanged(
             raw = RawEvent.build(raw),
             timeprior = timeprior,
             timeafter = timeafter,
-            rawrtctime = rawrtctime,
+            Rawrtctime = Rawrtctime,
         )
 
     @property
@@ -636,20 +636,20 @@ class LidDateChanged(BaseEvent):
     raw: RawEvent
     dateprior: int # day
     dateafter: int # day
-    rawrtctime: int # ms
+    Rawrtctime: int # ms
 
 
     @staticmethod
     def build(raw):
         dateprior, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
         dateafter, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
-        rawrtctime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        Rawrtctime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
 
         return LidDateChanged(
             raw = RawEvent.build(raw),
             dateprior = dateprior,
             dateafter = dateafter,
-            rawrtctime = rawrtctime,
+            Rawrtctime = Rawrtctime,
         )
 
     @property
@@ -4489,18 +4489,21 @@ class LidDailyBasal(BaseEvent):
     dailytotalbasal: float # units
     lastbasalrate: float # units/hour
     iob: float # units
-    finaleventforday: int
-    batterychargepercent: int
+    batterychargepercentmsbRaw: int
+    batterychargepercentlsbRaw: int
     batterylipomillivolts: int
 
+    @property
+    def batteryChargePercent(self):
+        return (256*(self.batteryChargePercentMSBRaw%2)+self.batteryChargePercentLSBRaw)/512
 
     @staticmethod
     def build(raw):
         dailytotalbasal, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
         lastbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
-        finaleventforday, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
-        batterychargepercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        batterychargepercentmsbRaw, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
+        batterychargepercentlsbRaw, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
         batterylipomillivolts, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
 
         return LidDailyBasal(
@@ -4508,8 +4511,8 @@ class LidDailyBasal(BaseEvent):
             dailytotalbasal = dailytotalbasal,
             lastbasalrate = lastbasalrate,
             iob = iob,
-            finaleventforday = finaleventforday,
-            batterychargepercent = batterychargepercent,
+            batterychargepercentmsbRaw = batterychargepercentmsbRaw,
+            batterychargepercentlsbRaw = batterychargepercentlsbRaw,
             batterylipomillivolts = batterylipomillivolts,
         )
 

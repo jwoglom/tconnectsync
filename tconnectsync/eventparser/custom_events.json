@@ -18,13 +18,14 @@
           "offset": 8,
           "uom": "units"
         },
-        "finalEventForDay": {
+        "batteryChargePercentMSBRaw": {
           "type": "uint8",
           "offset": 12
         },
-        "batteryChargePercent": {
+        "batteryChargePercentLSBRaw": {
           "type": "uint8",
-          "offset": 13
+          "offset": 13,
+          "transform": [["battery_charge_percent", ""]]
         },
         "batteryLipoMilliVolts": {
           "type": "uint16",

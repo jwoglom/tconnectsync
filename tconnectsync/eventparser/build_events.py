@@ -83,13 +83,13 @@ def eventNameFormat(text):
 def fieldNameFormat(text):
     if not text or all([i.isupper() for i in text]):
         return text
-    return firstLower(text.replace('_', ' ').title().replace(' ', ''))
+    return firstLower(text.replace('_', ' ').title().replace(' ', '')).replace('raw', 'Raw')
 
 
 def build_fields(event_def):
     ret = []
     for name, field in event_def["data"].items():
-        suffix = 'Raw' if "transform" in field else ''
+        suffix = 'Raw' if "transform" in field and name[-3:] != 'Raw' else ''
         f = f'{fieldNameFormat(name)}{suffix}: {TYPE_TO_PYOBJ[field["type"]]}'
         if "uom" in field:
             f += ' # ' + field['uom']
@@ -105,7 +105,7 @@ def build_decode(event_def):
         p1 = f'{fieldNameFormat(name)}, = {unpack_command_for(field)}'
         p1s.append(p1)
 
-        suffix = 'Raw' if "transform" in field else ''
+        suffix = 'Raw' if "transform" in field and name[-3:] != 'Raw' else ''
 
         p2 = f'{fieldNameFormat(name)}{suffix} = {fieldNameFormat(name)},'
         p2s.append(p2)

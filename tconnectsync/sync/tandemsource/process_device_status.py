@@ -58,7 +58,7 @@ class ProcessDeviceStatus:
         return NightscoutEntry.devicestatus(
             created_at=event.eventTimestamp.format(),
             batteryVoltage=(float(event.batterylipomillivolts or 0)/1000),
-            batteryString="%s%s" % (event.batterychargepercent, '%'),
+            batteryString="%s%s" % (event.batteryChargePercent, '%'),
             pump_event_id = "%s" % event.seqNum
         )
 
