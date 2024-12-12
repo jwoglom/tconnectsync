@@ -24,7 +24,7 @@ class ProcessDeviceStatus:
         self.features = features
 
     def enabled(self):
-        return features.PUMP_EVENTS in self.features
+        return features.DEVICE_STATUS in self.features
 
     def process(self, events, time_start, time_end):
         logger.debug("ProcessDeviceStatus: querying for last uploaded devicestatus")
@@ -36,8 +36,8 @@ class ProcessDeviceStatus:
 
 
         last_daily_basal_event = None
-        for event in sorted(events, key=lambda x: self.timestamp_for(x)):
-            if last_upload_time and self.timestamp_for(event) <= last_upload_time:
+        for event in sorted(events, key=lambda x: x.raw.timestamp):
+            if last_upload_time and event.raw.timestamp <= last_upload_time:
                 if self.pretend:
                     logger.info("ProcessDeviceStatus: Skipping %s not after last upload time: %s (time range: %s - %s)" % (type(event), event, time_start, time_end))
                 continue
@@ -48,17 +48,18 @@ class ProcessDeviceStatus:
 
         if not last_daily_basal_event:
             logger.info("ProcessDeviceStatus: No last_daily_basal_event found for add (time range: %s - %s)" % (time_start, time_end))
+            return []
 
 
         ns_entries = []
         ns_entries.append(self.daily_basal_to_nsentry(last_daily_basal_event))
         return ns_entries
 
-    def daily_basal_to_nsentry(event):
+    def daily_basal_to_nsentry(self, event):
         return NightscoutEntry.devicestatus(
             created_at=event.eventTimestamp.format(),
             batteryVoltage=(float(event.batterylipomillivolts or 0)/1000),
-            batteryString="%s%s" % (event.batteryChargePercent, '%'),
+            batteryString="%.0f%s" % (100*event.batteryChargePercent, '%'),
             pump_event_id = "%s" % event.seqNum
         )
 
