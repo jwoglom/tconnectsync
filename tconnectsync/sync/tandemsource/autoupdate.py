@@ -50,7 +50,7 @@ class TandemSourceAutoupdate:
                 if pretend:
                     logger.info('Would update now if not in pretend mode')
                 else:
-                    added, event_seqnum = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, secret, features=features).process(time_start, time_end)
+                    added, event_seqnum = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, self.secret, features=features).process(time_start, time_end)
                     logger.info('Added %d items from ProcessTimeRange' % added)
                     self.last_successful_process_time_range = now
 

@@ -173,7 +173,7 @@ class NightscoutApi:
 			if ret is None and (time_start or time_end):
 				ret = internal(True)
 				if ret is not None:
-					logger.warning("devicestatus with activityType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (activityType, time_start, time_end))
+					logger.warning("devicestatus time_start=%s time_end=%s only returned data when timestamps contained a space" % (time_start, time_end))
 			return ret
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
