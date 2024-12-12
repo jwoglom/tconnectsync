@@ -40,10 +40,19 @@ class ProcessAlarm:
                     logger.info("Skipping Alarm event not after last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
                 continue
 
+            if self.skip_event(event):
+                continue
+
             ns_entries.append(self.alarm_to_nsentry(event))
 
 
         return ns_entries
+
+    def skip_event(self, event):
+        return event.alarmid in (
+            eventtypes.LidAlarmActivated.AlarmidEnum.ResumePumpAlarm,
+            eventtypes.LidAlarmActivated.AlarmidEnum.ResumePumpAlarm2
+        )
 
     def write(self, ns_entries):
         count = 0
