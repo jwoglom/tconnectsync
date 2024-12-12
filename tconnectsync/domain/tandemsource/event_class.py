@@ -24,6 +24,7 @@ class EventClass(set, Enum):
     CGM_START_JOIN_STOP = {*_CGM_START, *_CGM_JOIN, *_CGM_STOP}
     CGM_READING = {events.LidCgmDataGxb, events.LidCgmDataG7, events.LidCgmDataFsl2}
     USER_MODE = {events.LidAaUserModeChange}
+    DEVICE_STATUS = {events.LidDailyBasal}
 
     @staticmethod
     def for_event(evt):

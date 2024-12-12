@@ -13,6 +13,7 @@ from .process_cartridge import ProcessCartridge
 from .process_cgm_alert import ProcessCGMAlert
 from .process_cgm_start_join_stop import ProcessCGMStartJoinStop
 from .process_cgm_reading import ProcessCGMReading
+from .process_device_status import ProcessDeviceStatus
 from .process_user_mode import ProcessUserMode
 from .update_profiles import UpdateProfiles
 
@@ -39,6 +40,7 @@ class ProcessTimeRange:
         EventClass.CGM_START_JOIN_STOP.name: ProcessCGMStartJoinStop,
         EventClass.CGM_READING.name: ProcessCGMReading,
         EventClass.USER_MODE.name: ProcessUserMode,
+        EventClass.DEVICE_STATUS.name: ProcessDeviceStatus
     }
 
     updater_classes = [
