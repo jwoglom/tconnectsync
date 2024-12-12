@@ -71,6 +71,9 @@ class NightscoutApi:
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
 			if latest.status_code != 200:
+				if 'as a valid ISO-8601 date' in latest.text:
+					logger.warning("Nightscout last_uploaded_entry %s could not process ISO-8601 date: start=%s end=%s dateFilter=%s" % (eventType, time_start, time_end, dateFilter))
+					return None
 				raise ApiException(latest.status_code, "Nightscout last_uploaded_entry %s response: %s" % (latest.status_code, latest.text))
 
 			j = latest.json()
@@ -106,6 +109,9 @@ class NightscoutApi:
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
 			if latest.status_code != 200:
+				if 'as a valid ISO-8601 date' in latest.text:
+					logger.warning("Nightscout last_uploaded_bg_entry could not process ISO-8601 date: start=%s end=%s dateFilter=%s" % (time_start, time_end, dateFilter))
+					return None
 				raise ApiException(latest.status_code, "Nightscout last_uploaded_bg_entry %s response: %s" % (latest.status_code, latest.text))
 
 			j = latest.json()
@@ -134,6 +140,9 @@ class NightscoutApi:
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
 			if latest.status_code != 200:
+				if 'as a valid ISO-8601 date' in latest.text:
+					logger.warning("Nightscout activity %s could not process ISO-8601 date: start=%s end=%s dateFilter=%s" % (activityType, time_start, time_end, dateFilter))
+					return None
 				raise ApiException(latest.status_code, "Nightscout activity %s response: %s" % (latest.status_code, latest.text))
 
 			j = latest.json()
@@ -161,6 +170,9 @@ class NightscoutApi:
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
 			if latest.status_code != 200:
+				if 'as a valid ISO-8601 date' in latest.text:
+					logger.warning("Nightscout devicestatus could not process ISO-8601 date: start=%s end=%s dateFilter=%s" % (time_start, time_end, dateFilter))
+					return None
 				raise ApiException(latest.status_code, "Nightscout devicestatus %s response: %s" % (latest.status_code, latest.text))
 
 			j = latest.json()
