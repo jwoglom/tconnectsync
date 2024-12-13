@@ -49,7 +49,7 @@ class UpdateProfiles:
         logger.info("Current pump settings: %s" % pump_settings)
 
         ns_profile_obj = self.nightscout.current_profile()
-        logger.info("Current Nightscout profile: %s" % ns_profile_obj)
+        logger.debug("Current Nightscout profile: %s" % ns_profile_obj)
         if ns_profile_obj is None:
             ns_profile_obj = {}
 
@@ -95,7 +95,7 @@ class UpdateProfiles:
 
         ns = ns_profile_obj.get('store', {})
 
-        logger.info("compare_profiles profile names: device: %s ns: %s", device.keys(), ns.keys())
+        logger.debug("compare_profiles profile names: device: %s ns: %s", device.keys(), ns.keys())
 
         new_ns_profile = copy.deepcopy(ns_profile_obj)
         if not 'store' in new_ns_profile:
@@ -113,12 +113,12 @@ class UpdateProfiles:
 
         existent_profiles_in_ns = set(device.keys()) & set(ns.keys())
         for profile_name in existent_profiles_in_ns:
-            logger.debug("Checking for differences for %s profile between pump and nightscout", profile_name)
+            #logger.debug("Checking for differences for %s profile between pump and nightscout", profile_name)
             pump_configured_profile = device[profile_name]
             ns_translated_profile = NightscoutEntry.tandemsource_profile_store(pump_configured_profile, pump_settings)
             ns_configured_profile = ns[profile_name]
 
-            logger.debug("Comparing %s profile from pump: %s to nightscout: %s", profile_name, ns_translated_profile, ns_configured_profile)
+            #logger.debug("Comparing %s profile from pump: %s to nightscout: %s", profile_name, ns_translated_profile, ns_configured_profile)
             if self.nightscout_profiles_identical(ns_configured_profile, ns_translated_profile):
                 logger.info("Profile %s identical between pump and nightscout", profile_name)
                 continue
