@@ -69,7 +69,12 @@ class TandemSourceAutoupdate:
                 self.last_attempt_time = now
                 self.time_diffs_between_attempts = []
             else:
-                logger.info('No new reported tandemsource data. (cur_max_date: %s)' % cur_max_date_with_events)
+                logger.info('No new reported tandemsource data. cur_max_date: %s (%dm ago) last_event_time: %s (%dm ago)' % (
+                    arrow.get(cur_max_date_with_events) if cur_max_date_with_events else None,
+                    (now - cur_max_date_with_events)//60 if cur_max_date_with_events else None,
+                    arrow.get(self.last_event_time) if self.last_event_time else None,
+                    (now - self.last_event_time)//60 if self.last_event_time else None
+                ))
 
                 # If we haven't seen the pump event index update in AUTOUPDATE_NO_DATA_FAILURE_MINUTES,
                 # then trigger an error and potentially restart.
@@ -93,7 +98,7 @@ class TandemSourceAutoupdate:
                 # above no indexes warning.
                 elif self.last_successful_process_time_range and (now - self.last_successful_process_time_range) >= 60 * self.secret.AUTOUPDATE_FAILURE_MINUTES:
                     logger.error(AutoupdateNoNewDataDetectedError(
-                        "%s: No new data has been detected via the API for %d minutes. " % (datetime.datetime.now(), (now - self.last_successful_process_time_range)//60) +
+                        "%s: No new data has been detected via the API for %d minutes (last: %s). " % (datetime.datetime.now(), (now - self.last_successful_process_time_range)//60, self.last_successful_process_time_range) +
                         "tconnectsync might not be functioning properly."))
 
                     if self.secret.AUTOUPDATE_RESTART_ON_FAILURE:
