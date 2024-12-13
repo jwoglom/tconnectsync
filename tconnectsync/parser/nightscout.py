@@ -195,14 +195,15 @@ class NightscoutEntry:
         }
 
     @staticmethod
-    def devicestatus(created_at, batteryVoltage, batteryString, pump_event_id=""):
+    def devicestatus(created_at, batteryVoltage, batteryPercent, pump_event_id=""):
         return {
             "device": ENTERED_BY,
             "created_at": created_at,
             "pump": {
                 "battery": {
                     "voltage": float(batteryVoltage),
-                    "string": batteryString
+                    "percent": int(batteryPercent) if batteryPercent else None,
+                    "status": "%.0f%s" % (batteryPercent, '%')
                 },
             },
             "pump_event_id": pump_event_id

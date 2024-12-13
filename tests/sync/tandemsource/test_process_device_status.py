@@ -38,7 +38,8 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'device': 'Pump (tconnectsync)',
             'pump': {
                 'battery': {
-                    'string': '48%',
+                    'status': '48%',
+                    'percent': 48,
                     'voltage': 14.08
                 }
             },
@@ -90,7 +91,8 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'device': 'Pump (tconnectsync)',
             'pump': {
                 'battery': {
-                    'string': '47%',
+                    'status': '47%',
+                    'percent': 47,
                     'voltage': 13.824
                 }
             },
@@ -132,7 +134,8 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'device': 'Pump (tconnectsync)',
             'pump': {
                 'battery': {
-                    'string': '46%',
+                    'status': '46%',
+                    'percent': 46,
                     'voltage': 13.568
                 }
             },
