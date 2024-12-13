@@ -37,6 +37,7 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'created_at': '2024-12-03 23:40:23-05:00',
             'device': 'Pump (tconnectsync)',
             'pump': {
+                'clock': '2024-12-03 23:40:23-05:00',
                 'battery': {
                     'status': '48%',
                     'percent': 48,
@@ -90,6 +91,7 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'created_at': '2024-12-04 02:30:23-05:00',
             'device': 'Pump (tconnectsync)',
             'pump': {
+                'clock': '2024-12-04 02:30:23-05:00',
                 'battery': {
                     'status': '47%',
                     'percent': 47,
@@ -133,6 +135,7 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'created_at': '2024-12-04 05:50:23-05:00',
             'device': 'Pump (tconnectsync)',
             'pump': {
+                'clock': '2024-12-04 05:50:23-05:00',
                 'battery': {
                     'status': '46%',
                     'percent': 46,

@@ -200,6 +200,7 @@ class NightscoutEntry:
             "device": ENTERED_BY,
             "created_at": created_at,
             "pump": {
+                "clock": created_at,
                 "battery": {
                     "voltage": float(batteryVoltage),
                     "percent": int(batteryPercent) if batteryPercent else None,
