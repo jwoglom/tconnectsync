@@ -120,7 +120,7 @@ def main(*args, **kwargs):
         sys.exit(u.process(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features))
     else:
         tconnectDevice = TandemSourceChooseDevice(secret, tconnect).choose()
-        added, last_event_id = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, features=args.features).process(time_start, time_end)
+        added, last_event_id = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, secret=secret, features=args.features).process(time_start, time_end)
 
         # return exit code 0 if processed events
         sys.exit(0 if added>0 else 1)
