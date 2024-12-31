@@ -4495,7 +4495,7 @@ class LidDailyBasal(BaseEvent):
 
     @property
     def batteryChargePercent(self):
-        return (256*(self.batterychargepercentmsbRaw%2)+self.batterychargepercentlsbRaw)/512
+        return (256*(self.batterychargepercentmsbRaw-14)+self.batterychargepercentlsbRaw)/(3*256)
 
     @staticmethod
     def build(raw):
