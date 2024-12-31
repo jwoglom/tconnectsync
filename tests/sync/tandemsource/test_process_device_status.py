@@ -39,8 +39,8 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'pump': {
                 'clock': '2024-12-03 23:40:23-05:00',
                 'battery': {
-                    'status': '48%',
-                    'percent': 48,
+                    'status': '32%',
+                    'percent': 32,
                     'voltage': 14.08
                 }
             },
@@ -93,8 +93,8 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'pump': {
                 'clock': '2024-12-04 02:30:23-05:00',
                 'battery': {
-                    'status': '47%',
-                    'percent': 47,
+                    'status': '31%',
+                    'percent': 31,
                     'voltage': 13.824
                 }
             },
@@ -137,8 +137,8 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'pump': {
                 'clock': '2024-12-04 05:50:23-05:00',
                 'battery': {
-                    'status': '46%',
-                    'percent': 46,
+                    'status': '30%',
+                    'percent': 30,
                     'voltage': 13.568
                 }
             },
