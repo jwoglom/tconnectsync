@@ -50,6 +50,7 @@ class ProcessDeviceStatus:
             logger.info("ProcessDeviceStatus: No last_daily_basal_event found for add (time range: %s - %s)" % (time_start, time_end))
             return []
 
+        logger.info("ProcessDeviceStatus: last_daily_basal_event=%s" % (last_daily_basal_event))
 
         ns_entries = []
         ns_entries.append(self.daily_basal_to_nsentry(last_daily_basal_event))
