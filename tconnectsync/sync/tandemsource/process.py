@@ -1,7 +1,7 @@
 import logging
 import collections
 
-from ...features import DEFAULT_FEATURES
+from ...features import DEVICE_STATUS, DEFAULT_FEATURES
 from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
 from .process_basal import ProcessBasal
@@ -48,8 +48,10 @@ class ProcessTimeRange:
     ]
 
     def process(self, time_start, time_end):
-        logger.info(f"ProcessTimeRange time_start={time_start} time_end={time_end} tconnect_device_id={self.tconnect_device_id} features={self.features}")
-        events = self.tconnect.tandemsource.pump_events(self.tconnect_device_id, time_start, time_end, fetch_all_event_types=self.secret.FETCH_ALL_EVENT_TYPES)
+        fetch_all_event_types = self.secret.FETCH_ALL_EVENT_TYPES or DEVICE_STATUS in self.features
+
+        logger.info(f"ProcessTimeRange time_start={time_start} time_end={time_end} tconnect_device_id={self.tconnect_device_id} features={self.features} fetch_all_event_types={fetch_all_event_types}")
+        events = self.tconnect.tandemsource.pump_events(self.tconnect_device_id, time_start, time_end, fetch_all_event_types=fetch_all_event_types)
 
         events_first_time = None
         events_last_time = None
