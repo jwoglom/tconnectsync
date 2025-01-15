@@ -63,4 +63,11 @@ class RawEvent:
     def eventTimestamp(self):
         return self.timestamp
 
-
+    def todict(self):
+        return dict(
+            id=self.id,
+            name="RawEvent",
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            raw=''.join('{:02x}'.format(x) for x in self.raw),
+        )

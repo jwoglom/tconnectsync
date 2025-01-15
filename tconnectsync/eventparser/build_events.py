@@ -68,6 +68,15 @@ class {name}(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+{fields_dict}
+        )
+
 '''
 
 def firstLower(text):
@@ -96,6 +105,14 @@ def build_fields(event_def):
         ret.append(f)
     return '\n'.join([f'{" "*4}{f}' for f in ret])
 
+
+def build_fields_dict(event_def):
+    ret = []
+    for name, field in event_def["data"].items():
+        suffix = 'Raw' if "transform" in field and name[-3:] != 'Raw' else ''
+        f = f'{fieldNameFormat(name)}{suffix}=self.{fieldNameFormat(name)}{suffix},'
+        ret.append(f)
+    return '\n'.join([f'{" "*12}{f}' for f in ret])
 
 
 def build_decode(event_def):
@@ -134,6 +151,7 @@ def build_event(event_id, event_def):
     return TEMPLATE.format(
         name = eventNameFormat(event_def["name"]),
         fields = build_fields(event_def),
+        fields_dict = build_fields_dict(event_def),
         build_p1 = build_decode(event_def)[0],
         build_p2 = build_decode(event_def)[1],
         transform_funcs = build_transform_funcs(event_def),

@@ -88,6 +88,19 @@ class LidBasalRateChange(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            commandedbasalrate=self.commandedbasalrate,
+            basebasalrate=self.basebasalrate,
+            maxbasalrate=self.maxbasalrate,
+            IDP=self.IDP,
+            changetypeRaw=self.changetypeRaw,
+        )
+
 
 @dataclass
 class LidAlertActivated(BaseEvent):
@@ -267,6 +280,18 @@ class LidAlertActivated(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            alertidRaw=self.alertidRaw,
+            faultlocatordata=self.faultlocatordata,
+            param1=self.param1,
+            param2=self.param2,
+        )
 
 
 @dataclass
@@ -450,6 +475,18 @@ class LidAlarmActivated(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            alarmidRaw=self.alarmidRaw,
+            faultlocatordata=self.faultlocatordata,
+            param1=self.param1,
+            param2=self.param2,
+        )
+
 
 @dataclass
 class LidMalfunctionActivated(BaseEvent):
@@ -490,6 +527,18 @@ class LidMalfunctionActivated(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            malfidRaw=self.malfidRaw,
+            faultlocatordata=self.faultlocatordata,
+            param1=self.param1,
+            param2=self.param2,
+        )
 
 
 @dataclass
@@ -553,6 +602,18 @@ class LidPumpingSuspended(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            presuspendstate=self.presuspendstate,
+            insulinamount=self.insulinamount,
+            suspendreasonRaw=self.suspendreasonRaw,
+            rpatimeout=self.rpatimeout,
+        )
+
 
 @dataclass
 class LidPumpingResumed(BaseEvent):
@@ -587,6 +648,16 @@ class LidPumpingResumed(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            preresumestate=self.preresumestate,
+            insulinamount=self.insulinamount,
+        )
 
 
 @dataclass
@@ -626,6 +697,17 @@ class LidTimeChanged(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            timeprior=self.timeprior,
+            timeafter=self.timeafter,
+            Rawrtctime=self.Rawrtctime,
+        )
+
 
 @dataclass
 class LidDateChanged(BaseEvent):
@@ -663,6 +745,17 @@ class LidDateChanged(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dateprior=self.dateprior,
+            dateafter=self.dateafter,
+            Rawrtctime=self.Rawrtctime,
+        )
 
 
 @dataclass
@@ -788,6 +881,22 @@ class LidBgReadingTaken(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            selectediobRaw=self.selectediobRaw,
+            BG=self.BG,
+            bgentrytypeRaw=self.bgentrytypeRaw,
+            IOB=self.IOB,
+            targetbg=self.targetbg,
+            ISF=self.ISF,
+            bgsourcetypeRaw=self.bgsourcetypeRaw,
+            cgmcalibrationRaw=self.cgmcalibrationRaw,
+        )
+
 
 @dataclass
 class LidBolusCompleted(BaseEvent):
@@ -860,6 +969,19 @@ class LidBolusCompleted(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            completionstatusRaw=self.completionstatusRaw,
+            bolusid=self.bolusid,
+            insulindelivered=self.insulindelivered,
+            insulinrequested=self.insulinrequested,
+            IOB=self.IOB,
+        )
+
 
 @dataclass
 class LidBolexCompleted(BaseEvent):
@@ -931,6 +1053,19 @@ class LidBolexCompleted(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            completionstatusRaw=self.completionstatusRaw,
+            bolusid=self.bolusid,
+            insulindelivered=self.insulindelivered,
+            insulinrequested=self.insulinrequested,
+            IOB=self.IOB,
+        )
 
 
 @dataclass
@@ -1106,6 +1241,16 @@ class LidAlertCleared(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            alertidRaw=self.alertidRaw,
+            faultlocatordata=self.faultlocatordata,
+        )
+
 
 @dataclass
 class LidAlarmCleared(BaseEvent):
@@ -1279,6 +1424,15 @@ class LidAlarmCleared(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            alarmidRaw=self.alarmidRaw,
+        )
+
 
 @dataclass
 class LidCartridgeFilled(BaseEvent):
@@ -1313,6 +1467,16 @@ class LidCartridgeFilled(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            insulinvolume=self.insulinvolume,
+            v2Volume=self.v2Volume,
+        )
 
 
 @dataclass
@@ -1360,6 +1524,20 @@ class LidShelfMode(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            msecsincereset=self.msecsincereset,
+            lipocurrent=self.lipocurrent,
+            lipoAbc=self.lipoAbc,
+            lipoIbc=self.lipoIbc,
+            lipoRemcap=self.lipoRemcap,
+            lipoMv=self.lipoMv,
+        )
 
 
 @dataclass
@@ -1419,6 +1597,18 @@ class LidBolusActivated(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            selectediobRaw=self.selectediobRaw,
+            bolusid=self.bolusid,
+            IOB=self.IOB,
+            bolussize=self.bolussize,
+        )
+
 
 @dataclass
 class LidBolexActivated(BaseEvent):
@@ -1477,6 +1667,18 @@ class LidBolexActivated(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            selectediobRaw=self.selectediobRaw,
+            bolusid=self.bolusid,
+            IOB=self.IOB,
+            bolexsize=self.bolexsize,
+        )
+
 
 @dataclass
 class LidDataLogCorruption(BaseEvent):
@@ -1511,6 +1713,16 @@ class LidDataLogCorruption(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            block=self.block,
+            reason=self.reason,
+        )
 
 
 @dataclass
@@ -1567,6 +1779,16 @@ class LidCannulaFilled(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            primesize=self.primesize,
+            completionstatusRaw=self.completionstatusRaw,
+        )
 
 
 @dataclass
@@ -1626,6 +1848,17 @@ class LidTubingFilled(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            primesize=self.primesize,
+            completionstatusRaw=self.completionstatusRaw,
+            position=self.position,
+        )
 
 
 @dataclass
@@ -1719,6 +1952,21 @@ class LidBolusRequestedMsg1(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            bolusid=self.bolusid,
+            bolustypeRaw=self.bolustypeRaw,
+            correctionbolusincludedRaw=self.correctionbolusincludedRaw,
+            carbamount=self.carbamount,
+            BG=self.BG,
+            carbratioRaw=self.carbratioRaw,
+            IOB=self.IOB,
+        )
 
 
 @dataclass
@@ -1859,6 +2107,23 @@ class LidBolusRequestedMsg2(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            selectediobRaw=self.selectediobRaw,
+            bolusid=self.bolusid,
+            optionsRaw=self.optionsRaw,
+            standardpercent=self.standardpercent,
+            duration=self.duration,
+            ISF=self.ISF,
+            targetbg=self.targetbg,
+            useroverrideRaw=self.useroverrideRaw,
+            declinedcorrectionRaw=self.declinedcorrectionRaw,
+        )
+
 
 @dataclass
 class LidBolusRequestedMsg3(BaseEvent):
@@ -1900,6 +2165,18 @@ class LidBolusRequestedMsg3(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            bolusid=self.bolusid,
+            foodbolussize=self.foodbolussize,
+            correctionbolussize=self.correctionbolussize,
+            totalbolussize=self.totalbolussize,
+        )
+
 
 @dataclass
 class LidNewDay(BaseEvent):
@@ -1937,6 +2214,17 @@ class LidNewDay(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            commandedbasalrate=self.commandedbasalrate,
+            featuresbitmask=self.featuresbitmask,
+            featurebitmaskindex=self.featurebitmaskindex,
+        )
 
 
 @dataclass
@@ -1978,6 +2266,18 @@ class LidArmInit(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            version=self.version,
+            configabits=self.configabits,
+            configbbits=self.configbbits,
+            numlogentries=self.numlogentries,
+        )
 
 
 @dataclass
@@ -2158,6 +2458,22 @@ class LidPlgsPeriodic(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            timestamp=self.timestamp,
+            FMR=self.FMR,
+            PGV=self.PGV,
+            fmrstatusRaw=self.fmrstatusRaw,
+            pgvvalidRaw=self.pgvvalidRaw,
+            rulestateRaw=self.rulestateRaw,
+            hominstateRaw=self.hominstateRaw,
+            statusRaw=self.statusRaw,
+        )
+
 
 @dataclass
 class LidCgmAlertActivated(BaseEvent):
@@ -2228,6 +2544,18 @@ class LidCgmAlertActivated(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dalertidRaw=self.dalertidRaw,
+            faultlocatordata=self.faultlocatordata,
+            param1=self.param1,
+            param2=self.param2,
+        )
+
 
 @dataclass
 class LidCgmAlertCleared(BaseEvent):
@@ -2289,6 +2617,15 @@ class LidCgmAlertCleared(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dalertidRaw=self.dalertidRaw,
+        )
+
 
 @dataclass
 class LidVersionInfo(BaseEvent):
@@ -2329,6 +2666,18 @@ class LidVersionInfo(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            version=self.version,
+            configabits=self.configabits,
+            configbbits=self.configbbits,
+            armcrc=self.armcrc,
+        )
 
 
 @dataclass
@@ -2397,6 +2746,21 @@ class LidUpdateStatus(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            swupdatestatus=self.swupdatestatus,
+            metadataandversionstatus=self.metadataandversionstatus,
+            fulldlandcrcstatus=self.fulldlandcrcstatus,
+            filedlandsideloadstatus=self.filedlandsideloadstatus,
+            externalflashstatus=self.externalflashstatus,
+            updatesuccessfulRaw=self.updatesuccessfulRaw,
+            swpartnum=self.swpartnum,
+        )
+
 
 @dataclass
 class LidCgmStartSessionGx(BaseEvent):
@@ -2434,6 +2798,17 @@ class LidCgmStartSessionGx(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            currenttransmittertime=self.currenttransmittertime,
+            sessionstarttime=self.sessionstarttime,
+            sessionduration=self.sessionduration,
+        )
 
 
 @dataclass
@@ -2514,6 +2889,18 @@ class LidCgmJoinSessionGx(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            currenttransmittertime=self.currenttransmittertime,
+            sessionstarttime=self.sessionstarttime,
+            sessionduration=self.sessionduration,
+            sessionjoinreasonRaw=self.sessionjoinreasonRaw,
+        )
 
 
 @dataclass
@@ -2597,6 +2984,19 @@ class LidCgmStopSessionGx(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            currenttransmittertime=self.currenttransmittertime,
+            sessionstarttime=self.sessionstarttime,
+            sessionstoptime=self.sessionstoptime,
+            sessionduration=self.sessionduration,
+            sessionstopreasonRaw=self.sessionstopreasonRaw,
+        )
 
 
 @dataclass
@@ -2821,6 +3221,23 @@ class LidAaUserModeChange(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            exercisechoiceRaw=self.exercisechoiceRaw,
+            exercisetime=self.exercisetime,
+            currentusermodeRaw=self.currentusermodeRaw,
+            previoususermodeRaw=self.previoususermodeRaw,
+            requestedactionRaw=self.requestedactionRaw,
+            sleepstartedbyguiRaw=self.sleepstartedbyguiRaw,
+            exercisestoppedbytimerRaw=self.exercisestoppedbytimerRaw,
+            activesleepscheduleRaw=self.activesleepscheduleRaw,
+            eatingsoonstoppedbytimerRaw=self.eatingsoonstoppedbytimerRaw,
+        )
+
 
 @dataclass
 class LidAaPcmChange(BaseEvent):
@@ -3004,6 +3421,21 @@ class LidAaPcmChange(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            currentpcmRaw=self.currentpcmRaw,
+            previouspcmRaw=self.previouspcmRaw,
+            pumpsuspendedRaw=self.pumpsuspendedRaw,
+            calculationavailableRaw=self.calculationavailableRaw,
+            cgmavailableRaw=self.cgmavailableRaw,
+            closedlooppreferredRaw=self.closedlooppreferredRaw,
+            sufficientclosedloopparamsRaw=self.sufficientclosedloopparamsRaw,
+        )
+
 
 @dataclass
 class LidCgmDataGxb(BaseEvent):
@@ -3139,6 +3571,23 @@ class LidCgmDataGxb(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            glucosevaluestatusRaw=self.glucosevaluestatusRaw,
+            cgmDataTypeRaw=self.cgmDataTypeRaw,
+            rateRaw=self.rateRaw,
+            algorithmstate=self.algorithmstate,
+            RSSI=self.RSSI,
+            currentglucosedisplayvalue=self.currentglucosedisplayvalue,
+            egvTimestamp=self.egvTimestamp,
+            egvInfoBitmaskRaw=self.egvInfoBitmaskRaw,
+            interval=self.interval,
+        )
+
 
 @dataclass
 class LidBasalDelivery(BaseEvent):
@@ -3205,6 +3654,19 @@ class LidBasalDelivery(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            commandedRateSourceRaw=self.commandedRateSourceRaw,
+            commandedRate=self.commandedRate,
+            profileBasalRate=self.profileBasalRate,
+            algorithmRate=self.algorithmRate,
+            tempRate=self.tempRate,
+        )
 
 
 @dataclass
@@ -3338,6 +3800,24 @@ class LidBolusDelivery(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            bolusid=self.bolusid,
+            bolusDeliveryStatusRaw=self.bolusDeliveryStatusRaw,
+            bolusTypeRaw=self.bolusTypeRaw,
+            bolusSourceRaw=self.bolusSourceRaw,
+            remoteId=self.remoteId,
+            requestedNow=self.requestedNow,
+            requestedLater=self.requestedLater,
+            extendedDurationRequested=self.extendedDurationRequested,
+            deliveredTotal=self.deliveredTotal,
+            correction=self.correction,
+        )
+
 
 @dataclass
 class LidVersionsA(BaseEvent):
@@ -3378,6 +3858,18 @@ class LidVersionsA(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            armpartnumber=self.armpartnumber,
+            armswversion=self.armswversion,
+            blepartnumber=self.blepartnumber,
+            bleswversion=self.bleswversion,
+        )
 
 
 @dataclass
@@ -3480,6 +3972,17 @@ class LidAaDailyStatus(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            pumpcontrolstateRaw=self.pumpcontrolstateRaw,
+            usermodeRaw=self.usermodeRaw,
+            sensortypeRaw=self.sensortypeRaw,
+        )
+
 
 @dataclass
 class LidCgmAlertActivatedDex(BaseEvent):
@@ -3573,6 +4076,19 @@ class LidCgmAlertActivatedDex(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dalertidRaw=self.dalertidRaw,
+            sensortypeRaw=self.sensortypeRaw,
+            faultlocatordata=self.faultlocatordata,
+            param1=self.param1,
+            param2=self.param2,
+        )
+
 
 @dataclass
 class LidCgmAlertClearedDex(BaseEvent):
@@ -3656,6 +4172,16 @@ class LidCgmAlertClearedDex(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dalertidRaw=self.dalertidRaw,
+            sensortypeRaw=self.sensortypeRaw,
+        )
 
 
 @dataclass
@@ -3761,6 +4287,17 @@ class LidCgmAlertAckDex(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dalertidRaw=self.dalertidRaw,
+            sensortypeRaw=self.sensortypeRaw,
+            acksourceRaw=self.acksourceRaw,
+        )
 
 
 @dataclass
@@ -3931,6 +4468,23 @@ class LidCgmDataFsl2(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            glucosevaluestatusRaw=self.glucosevaluestatusRaw,
+            cgmDataTypeRaw=self.cgmDataTypeRaw,
+            rateRaw=self.rateRaw,
+            algorithmstateRaw=self.algorithmstateRaw,
+            RSSI=self.RSSI,
+            currentglucosedisplayvalue=self.currentglucosedisplayvalue,
+            egvTimestamp=self.egvTimestamp,
+            egvInfoBitmaskRaw=self.egvInfoBitmaskRaw,
+            interval=self.interval,
+        )
+
 
 @dataclass
 class LidCgmJoinSessionG7(BaseEvent):
@@ -3965,6 +4519,16 @@ class LidCgmJoinSessionG7(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            cgmtimestamp=self.cgmtimestamp,
+            sessionsignature=self.sessionsignature,
+        )
 
 
 @dataclass
@@ -4141,6 +4705,23 @@ class LidCgmDataG7(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            glucosevaluestatusRaw=self.glucosevaluestatusRaw,
+            cgmDataTypeRaw=self.cgmDataTypeRaw,
+            rateRaw=self.rateRaw,
+            algorithmstateRaw=self.algorithmstateRaw,
+            RSSI=self.RSSI,
+            currentglucosedisplayvalue=self.currentglucosedisplayvalue,
+            egvTimestamp=self.egvTimestamp,
+            egvInfoBitmaskRaw=self.egvInfoBitmaskRaw,
+            interval=self.interval,
+        )
+
 
 @dataclass
 class LidCgmStartSessionFsl2(BaseEvent):
@@ -4175,6 +4756,16 @@ class LidCgmStartSessionFsl2(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            sessionstarttime=self.sessionstarttime,
+            sessionduration=self.sessionduration,
+        )
 
 
 @dataclass
@@ -4217,6 +4808,18 @@ class LidCgmStopSessionFsl2(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            sessionstarttime=self.sessionstarttime,
+            sessionstoptime=self.sessionstoptime,
+            sessionduration=self.sessionduration,
+            sessionstopreason=self.sessionstopreason,
+        )
+
 
 @dataclass
 class LidCgmJoinSessionFsl2(BaseEvent):
@@ -4257,6 +4860,18 @@ class LidCgmJoinSessionFsl2(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            sessionstarttime=self.sessionstarttime,
+            sessionjointime=self.sessionjointime,
+            sessionduration=self.sessionduration,
+            sessionjoinreason=self.sessionjoinreason,
+        )
 
 
 @dataclass
@@ -4304,6 +4919,20 @@ class LidCgmStopSessionG7(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            currenttransmittertime=self.currenttransmittertime,
+            sessionstarttime=self.sessionstarttime,
+            sessionstoptime=self.sessionstoptime,
+            sessionduration=self.sessionduration,
+            sessionstopreason=self.sessionstopreason,
+            stopsessioncode=self.stopsessioncode,
+        )
 
 
 @dataclass
@@ -4396,6 +5025,19 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dalertidRaw=self.dalertidRaw,
+            sensortypeRaw=self.sensortypeRaw,
+            faultlocatordata=self.faultlocatordata,
+            param1=self.param1,
+            param2=self.param2,
+        )
+
 
 @dataclass
 class LidCgmAlertClearedFsl2(BaseEvent):
@@ -4478,6 +5120,16 @@ class LidCgmAlertClearedFsl2(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dalertidRaw=self.dalertidRaw,
+            sensortypeRaw=self.sensortypeRaw,
+        )
+
 
 @dataclass
 class LidDailyBasal(BaseEvent):
@@ -4528,6 +5180,20 @@ class LidDailyBasal(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            dailytotalbasal=self.dailytotalbasal,
+            lastbasalrate=self.lastbasalrate,
+            iob=self.iob,
+            batterychargepercentmsbRaw=self.batterychargepercentmsbRaw,
+            batterychargepercentlsbRaw=self.batterychargepercentlsbRaw,
+            batterylipomillivolts=self.batterylipomillivolts,
+        )
+
 
 @dataclass
 class LidCarbsEntered(BaseEvent):
@@ -4559,6 +5225,15 @@ class LidCarbsEntered(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            carbs=self.carbs,
+        )
 
 
 @dataclass
@@ -4592,6 +5267,15 @@ class LidUsbConnected(BaseEvent):
     def eventId(self):
         return self.ID
 
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            negotiatedcurrent=self.negotiatedcurrent,
+        )
+
 
 @dataclass
 class LidUsbDisconnected(BaseEvent):
@@ -4623,6 +5307,15 @@ class LidUsbDisconnected(BaseEvent):
     @property
     def eventId(self):
         return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            negotiatedcurrent=self.negotiatedcurrent,
+        )
 
 EVENT_IDS = {
     3: LidBasalRateChange,
