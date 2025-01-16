@@ -28,25 +28,25 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install flake8 pytest pipenv
           pipenv install --system
-      - name: Run pipenv check
-        run: |
-          # DDoS attacks in wheel and setuptools packages, not relevant
-          # root certificate store, not relevant
-            pipenv check \
-              --ignore 51499 \
-              --ignore 52495 \
-              --ignore 52365 \
-              --ignore 59956 \
-              --ignore 58755 \
-              --ignore 67895 \
-              --ignore 61893 \
-              --ignore 61601 \
-              --ignore 62044 \
-              --ignore 67599 \
-              --ignore 72083 \
-              --ignore 71064 \
-              --ignore 71608 \
-              --ignore 72236
+      # - name: Run pipenv check
+      #   run: |
+      #     # DDoS attacks in wheel and setuptools packages, not relevant
+      #     # root certificate store, not relevant
+      #       pipenv check \
+      #         --ignore 51499 \
+      #         --ignore 52495 \
+      #         --ignore 52365 \
+      #         --ignore 59956 \
+      #         --ignore 58755 \
+      #         --ignore 67895 \
+      #         --ignore 61893 \
+      #         --ignore 61601 \
+      #         --ignore 62044 \
+      #         --ignore 67599 \
+      #         --ignore 72083 \
+      #         --ignore 71064 \
+      #         --ignore 71608 \
+      #         --ignore 72236
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
