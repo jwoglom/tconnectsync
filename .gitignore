@@ -9,3 +9,5 @@ build
 .env
 tconnectsync-check-output.log
 ignore_*
+.venv/
+.vscode/
