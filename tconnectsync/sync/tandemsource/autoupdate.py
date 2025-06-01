@@ -27,7 +27,7 @@ class TandemSourceAutoupdate:
     until stopped (ctrl+c), or a maximum of AUTOUPDATE_MAX_LOOP_INVOCATIONS times.
     Stops if AUTOUPDATE_RESTART_ON_FAILURE is set and an error occurs.
     """
-    def process(self, tconnect, nightscout, time_start, time_end, pretend, features=None):
+    def process(self, tconnect, nightscout, pretend, features=None):
         if features is None:
             features = DEFAULT_FEATURES
 
@@ -50,7 +50,7 @@ class TandemSourceAutoupdate:
                 if pretend:
                     logger.info('Would update now if not in pretend mode')
                 else:
-                    added, event_seqnum = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, self.secret, features=features).process(time_start, time_end)
+                    added, event_seqnum = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, self.secret, features=features).process(None, None)
                     logger.info('Added %d items from ProcessTimeRange' % added)
                     self.last_successful_process_time_range = now
 
