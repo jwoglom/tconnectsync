@@ -119,7 +119,7 @@ def main(*args, **kwargs):
 
     if args.auto_update:
         u = TandemSourceAutoupdate(secret)
-        sys.exit(u.process(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features))
+        sys.exit(u.process(tconnect, nightscout, args.pretend, features=args.features))
     else:
         tconnectDevice = TandemSourceChooseDevice(secret, tconnect).choose()
         added, last_event_id = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, secret=secret, features=args.features).process(time_start, time_end)
