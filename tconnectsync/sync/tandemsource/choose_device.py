@@ -24,6 +24,20 @@ class ChooseDevice:
 
             tconnectDevice = serialNumberToPump[str(self.secret.PUMP_SERIAL_NUMBER)]
 
+            # Warn if pump is stale (no events in >3 days)
+            try:
+                max_event_date = arrow.get(tconnectDevice["maxDateWithEvents"])
+                age_days = (arrow.utcnow() - max_event_date).days
+
+                if age_days > 3:
+                    logger.warning(
+                        f"The selected pump (serial {tconnectDevice['serialNumber']}) has no events in the last {age_days} days "
+                        f"(last seen: {tconnectDevice['maxDateWithEvents']}). "
+                        "You may have switched to a new pump. Consider removing or updating PUMP_SERIAL_NUMBER in your config."
+                    )
+            except Exception as e:
+                logger.debug(f"Could not parse maxDateWithEvents to check for staleness: {e}")
+
             logger.info(f'Using pump with serial: {tconnectDevice["serialNumber"]} (tconnectDeviceId: {tconnectDevice["tconnectDeviceId"]}, last seen: {tconnectDevice["maxDateWithEvents"]})')
         else:
             maxDateSeen = None
