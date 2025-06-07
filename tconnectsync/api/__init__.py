@@ -13,9 +13,10 @@ class TConnectApi:
     email = None
     password = None
 
-    def __init__(self, email, password):
+    def __init__(self, email, password, region='US'):
         self.email = email
         self.password = password
+        self.region = region
         self._ciq = None
         self._ws2 = None
         self._android = None
@@ -27,9 +28,9 @@ class TConnectApi:
         if self._tandemsource and not self._tandemsource.needs_relogin():
             return self._tandemsource
 
-        logger.debug("Instantiating new TandemSourceApi")
+        logger.debug(f"Instantiating new TandemSourceApi for region {self.region}")
 
-        self._tandemsource = TandemSourceApi(self.email, self.password)
+        self._tandemsource = TandemSourceApi(self.email, self.password, self.region)
         return self._tandemsource
 
 

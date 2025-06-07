@@ -16,5 +16,5 @@ Returns a TConnectApi object with default secret parameters.
 """
 def get_api():
     from ..api import TConnectApi
-    from ..secret import TCONNECT_EMAIL, TCONNECT_PASSWORD
-    return TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
+    from ..secret import TCONNECT_EMAIL, TCONNECT_PASSWORD, TCONNECT_REGION
+    return TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD, TCONNECT_REGION)

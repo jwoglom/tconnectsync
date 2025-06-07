@@ -24,23 +24,73 @@ from ..eventparser.generic import Events, decode_raw_events, EVENT_LEN
 logger = logging.getLogger(__name__)
 
 class TandemSourceApi:
+    # Common URLs that are shared between regions
     LOGIN_PAGE_URL = 'https://sso.tandemdiabetes.com/'
-    LOGIN_API_URL = 'https://tdcservices.tandemdiabetes.com/accounts/api/login'
     TDC_AUTH_CALLBACK_URL = 'https://sso.tandemdiabetes.com/auth/callback'
-    TDC_OAUTH_AUTHORIZE_URL = 'https://tdcservices.tandemdiabetes.com/accounts/api/oauth2/v1/authorize'
-    TDC_OIDC_JWKS_URL = 'https://tdcservices.tandemdiabetes.com/accounts/api/.well-known/openid-configuration/jwks'
-    TDC_OIDC_ISSUER = 'https://tdcservices.tandemdiabetes.com/accounts/api' # openid_config['issuer']
-    TDC_OIDC_CLIENT_ID = '0oa27ho9tpZE9Arjy4h7'
-    SOURCE_URL = 'https://source.tandemdiabetes.com/'
+    
+    # US Region URLs (default)
+    _US_URLS = {
+        'LOGIN_API_URL': 'https://tdcservices.tandemdiabetes.com/accounts/api/login',
+        'TDC_OAUTH_AUTHORIZE_URL': 'https://tdcservices.tandemdiabetes.com/accounts/api/oauth2/v1/authorize',
+        'TDC_OIDC_JWKS_URL': 'https://tdcservices.tandemdiabetes.com/accounts/api/.well-known/openid-configuration/jwks',
+        'TDC_OIDC_ISSUER': 'https://tdcservices.tandemdiabetes.com/accounts/api',
+        'TDC_OIDC_CLIENT_ID': '0oa27ho9tpZE9Arjy4h7',
+        'SOURCE_URL': 'https://source.tandemdiabetes.com/',
+        'REDIRECT_URI': 'https://sso.tandemdiabetes.com/auth/callback',
+        'TOKEN_ENDPOINT': 'https://tdcservices.tandemdiabetes.com/accounts/api/connect/token',
+        'AUTHORIZATION_ENDPOINT': 'https://tdcservices.tandemdiabetes.com/accounts/api/connect/authorize'
+    }
+    
+    # EU Region URLs
+    _EU_URLS = {
+        'LOGIN_API_URL': 'https://tdcservices.eu.tandemdiabetes.com/accounts/api/login',
+        'TDC_OAUTH_AUTHORIZE_URL': 'https://tdcservices.eu.tandemdiabetes.com/accounts/api/oauth2/v1/authorize',
+        'TDC_OIDC_JWKS_URL': 'https://tdcservices.eu.tandemdiabetes.com/accounts/api/.well-known/openid-configuration/jwks',
+        'TDC_OIDC_ISSUER': 'https://tdcservices.eu.tandemdiabetes.com/accounts/api',
+        'TDC_OIDC_CLIENT_ID': '1519e414-eeec-492e-8c5e-97bea4815a10',
+        'SOURCE_URL': 'https://source.eu.tandemdiabetes.com/',
+        'REDIRECT_URI': 'https://source.eu.tandemdiabetes.com/authorize/callback',
+        'TOKEN_ENDPOINT': 'https://tdcservices.eu.tandemdiabetes.com/accounts/api/connect/token',
+        'AUTHORIZATION_ENDPOINT': 'https://tdcservices.eu.tandemdiabetes.com/accounts/api/connect/authorize'
+    }
 
-
-    def __init__(self, email, password):
+    def __init__(self, email, password, region='US'):
+        self.region = region.upper()
+        if self.region not in ['US', 'EU']:
+            raise ValueError(f"Invalid region '{region}'. Must be 'US' or 'EU'.")
+        
+        self._region_urls = self._US_URLS if self.region == 'US' else self._EU_URLS
+        
         self.login(email, password)
         self._email = email
         self._password = password
 
+    @property
+    def LOGIN_API_URL(self):
+        return self._region_urls['LOGIN_API_URL']
+    
+    @property
+    def TDC_OAUTH_AUTHORIZE_URL(self):
+        return self._region_urls['TDC_OAUTH_AUTHORIZE_URL']
+    
+    @property
+    def TDC_OIDC_JWKS_URL(self):
+        return self._region_urls['TDC_OIDC_JWKS_URL']
+    
+    @property
+    def TDC_OIDC_ISSUER(self):
+        return self._region_urls['TDC_OIDC_ISSUER']
+    
+    @property
+    def TDC_OIDC_CLIENT_ID(self):
+        return self._region_urls['TDC_OIDC_CLIENT_ID']
+    
+    @property
+    def SOURCE_URL(self):
+        return self._region_urls['SOURCE_URL']
+
     def login(self, email, password):
-        logger.info("Logging in to TandemSourceApi...")
+        logger.info(f"Logging in to TandemSourceApi ({self.region} region)...")
         if self.try_load_cached_creds(email):
             logger.info("Successfully used cached credentials")
             return True
@@ -70,11 +120,10 @@ class TandemSourceApi:
 
             # oidc
             client_id = self.TDC_OIDC_CLIENT_ID
-            redirect_uri = 'https://sso.tandemdiabetes.com/auth/callback' # must be an allowlisted URI
+            redirect_uri = self._region_urls['REDIRECT_URI']
             scope = 'openid profile email'
 
-            token_endpoint = 'https://tdcservices.tandemdiabetes.com/accounts/api/connect/token' #openid_config['token_endpoint']
-
+            token_endpoint = self._region_urls['TOKEN_ENDPOINT']
 
             def generate_code_verifier():
                 """Generates a high-entropy code verifier."""
@@ -91,7 +140,7 @@ class TandemSourceApi:
             code_verifier = generate_code_verifier()
             code_challenge = generate_code_challenge(code_verifier)
 
-            authorization_endpoint = 'https://tdcservices.tandemdiabetes.com/accounts/api/connect/authorize' #openid_config['authorization_endpoint']
+            authorization_endpoint = self._region_urls['AUTHORIZATION_ENDPOINT']
 
             oidc_step1_params = {
                 'client_id': client_id,
@@ -224,6 +273,12 @@ class TandemSourceApi:
             logger.warning(f"Cached credentials are for a different email ({_saved_blob['cache_creds_email']} in cache, but using {email}), skipping")
             return False
 
+        # Check if cached region matches current region
+        cached_region = _saved_blob.get('cache_creds_region', 'US')  # Default to US for backward compatibility
+        if cached_region != self.region:
+            logger.warning(f"Cached credentials are for a different region ({cached_region} in cache, but using {self.region}), skipping")
+            return False
+
         at_expiry = _saved_blob['accessTokenExpiresAt']
         if arrow.get().int_timestamp >= arrow.get(at_expiry).int_timestamp:
             logger.info(f"Cached credentials have expired ({_saved_blob['accessTokenExpiresAt']}), skipping")
@@ -278,6 +333,7 @@ class TandemSourceApi:
             'cache_creds_version': 1.0,
             'cache_creds_saved_at': arrow.get(),
             'cache_creds_email': email,
+            'cache_creds_region': self.region,  # Store the region in cache
             'jwtData': self.jwtData,
             'pumperId': self.pumperId,
             'accountId': self.accountId,
