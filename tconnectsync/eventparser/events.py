@@ -2507,6 +2507,7 @@ class LidCgmAlertActivated(BaseEvent):
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        UnknownAlert2 = 2
 
     @property
     def dalertid(self):
@@ -2567,6 +2568,7 @@ class LidCgmAlertCleared(BaseEvent):
     dalertidRaw: int
 
     DalertidMap = {
+        "2": "Unknown Alert 2",
         "11": "CGM Sensor Fail",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
@@ -2586,6 +2588,7 @@ class LidCgmAlertCleared(BaseEvent):
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        UnknownAlert2 = 2
 
     @property
     def dalertid(self):
@@ -3998,6 +4001,7 @@ class LidCgmAlertActivatedDex(BaseEvent):
     param2: float
 
     DalertidMap = {
+        "2": "Unknown Alert 2",
         "11": "CGM Sensor Fail",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
@@ -4017,6 +4021,7 @@ class LidCgmAlertActivatedDex(BaseEvent):
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        UnknownAlert2 = 2
 
     @property
     def dalertid(self):
@@ -4101,6 +4106,7 @@ class LidCgmAlertClearedDex(BaseEvent):
     sensortypeRaw: int
 
     DalertidMap = {
+        "2": "Unknown Alert 2",
         "11": "CGM Sensor Fail",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
@@ -4120,6 +4126,7 @@ class LidCgmAlertClearedDex(BaseEvent):
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        UnknownAlert2 = 2
 
     @property
     def dalertid(self):
