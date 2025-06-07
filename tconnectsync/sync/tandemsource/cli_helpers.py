@@ -10,8 +10,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def fetch_oneshot(username, password, time_start=None, time_end=None):
-    tconnect = TConnectApi(username, password)
+def fetch_oneshot(username, password, time_start=None, time_end=None, region='US'):
+    tconnect = TConnectApi(username, password, region)
     if not time_start and not time_end:
         time_end = datetime.datetime.now()
         time_start = time_end - datetime.timedelta(days=1)
