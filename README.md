@@ -89,6 +89,9 @@ You should specify the following parameters:
 TCONNECT_EMAIL='email@email.com'
 TCONNECT_PASSWORD='password'
 
+# OPTIONAL: Your region (US or EU)
+TCONNECT_REGION=US
+
 # URL of your Nightscout site
 NS_URL='https://yournightscouturl/'
 # Your Nightscout API_SECRET value
@@ -99,6 +102,7 @@ TIMEZONE_NAME='America/New_York'
 
 # OPTIONAL: Your pump's serial number (numeric)
 PUMP_SERIAL_NUMBER=11111111
+
 ```
 
 This file contains your t:connect username and password, Tandem pump serial number (which is utilized in API calls to t:connect), your Nightscout URL and secret token (for uploading data to Nightscout), and local timezone (the timezone used in t:connect). When specifying the timezone, enter a [TZ database name value](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).

@@ -53,11 +53,13 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
 
     log("Loading secrets...")
     try:
-        from .secret import TCONNECT_EMAIL, TCONNECT_PASSWORD, PUMP_SERIAL_NUMBER, NS_URL, NS_SECRET, TIMEZONE_NAME
+        from .secret import TCONNECT_EMAIL, TCONNECT_PASSWORD, TCONNECT_REGION, PUMP_SERIAL_NUMBER, NS_URL, NS_SECRET, TIMEZONE_NAME
         from . import secret
     except ImportError as e:
         log("Error: Unable to load config file. Please check your .env file or environment variables")
         log_err(e)
+
+    log(f"Using {TCONNECT_REGION=}")
 
     if not TCONNECT_EMAIL or TCONNECT_EMAIL == 'email@email.com':
         log("Error: You have not specified a TCONNECT_EMAIL")
