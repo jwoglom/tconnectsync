@@ -46,7 +46,7 @@ class WebUIScraper(tconnectsync.api.webui.WebUIScraper):
 
     def my_devices(self):
         raise NotImplementedError
-    
+
     def device_settings(self, pump_guid):
         raise NotImplementedError
 
