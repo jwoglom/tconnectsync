@@ -31,7 +31,7 @@ class TandemSourceAutoupdate:
         if features is None:
             features = DEFAULT_FEATURES
 
-        # Read from android api, find exact interval to cut down on API calls
+        # Query for data, find exact interval to cut down on API calls
         # Refresh API token. If failure, die, have wrapper script re-run.
 
         self.autoupdate_start = time.time()
