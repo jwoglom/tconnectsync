@@ -4,13 +4,15 @@ import arrow
 import logging
 import traceback
 import pkg_resources
+import collections
 from datetime import datetime
 from pprint import pformat as pformat_base
 
 from .nightscout import NightscoutApi
 from .parser.nightscout import BASAL_EVENTTYPE, BOLUS_EVENTTYPE
 from .parser.tconnect import TConnectEntry
-from .sync.basal import process_ciq_basal_events
+from .domain.tandemsource.event_class import EventClass
+from .sync.tandemsource.choose_device import ChooseDevice
 
 try:
     __version__ = pkg_resources.require("tconnectsync")[0].version
@@ -52,26 +54,26 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
     log("Loading secrets...")
     try:
         from .secret import TCONNECT_EMAIL, TCONNECT_PASSWORD, PUMP_SERIAL_NUMBER, NS_URL, NS_SECRET, TIMEZONE_NAME
+        from . import secret
     except ImportError as e:
         log("Error: Unable to load config file. Please check your .env file or environment variables")
         log_err(e)
-    
+
     if not TCONNECT_EMAIL or TCONNECT_EMAIL == 'email@email.com':
         log("Error: You have not specified a TCONNECT_EMAIL")
         errors += 1
-    
+
     if not TCONNECT_PASSWORD or TCONNECT_PASSWORD == 'password':
         log("Error: You have not specified a TCONNECT_PASSWORD")
         errors += 1
-    
+
     if not PUMP_SERIAL_NUMBER or PUMP_SERIAL_NUMBER == '11111111':
-        log("Error: You have not specified a PUMP_SERIAL_NUMBER")
-        errors += 1
-    
+        log("Warning: You have not specified a PUMP_SERIAL_NUMBER, so the pump with most recent activity will be automatically used.")
+
     if not NS_URL or NS_URL == 'https://yournightscouturl/':
         log("Error: You have not specified a NS_URL")
         errors += 1
-    
+
     if not NS_SECRET or NS_SECRET == 'apisecret':
         log("Error: You have not specified a NS_SECRET")
         errors += 1
@@ -80,89 +82,62 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
 
     log("-----")
 
-    log("Logging in to t:connect ControlIQ API...")
+    serialNumberToPump = None
     try:
-        summary = tconnect.controliq.dashboard_summary(time_start, time_end)
-        debug("ControlIQ dashboard summary: \n%s" % pformat(summary))
-        log("tconnect_software_ver: %s" % tconnect.controliq.tconnect_software_ver)
-    except Exception as e:
-        log("Error occurred querying ControlIQ API for dashboard_summary:")
-        log_err(e)
-        if e and "HTTP 404" in str(e):
-            log("<!> The API returns a 404 error if there is no data for the provided dates (currently %s - %s). Try re-running with an earlier start date using --start-date and --end-date arguments." % (time_start, time_end))
-        errors += 1
-    
-    log("Querying ControlIQ therapy_timeline...")
-    lastBasalTime = None
-    lastBasalDuration = None
-    try:
-        tt = tconnect.controliq.therapy_timeline(time_start, time_end)
-        debug("ControlIQ therapy_timeline: \n%s" % pformat(tt))
-        if tt:
-            processed_tt = process_ciq_basal_events(tt)
-            debug("ControlIQ processed therapy_timeline: \n%s" % pformat(processed_tt))
-            if processed_tt:
-                log("Last ControlIQ processed therapy_timeline event: \n%s" % pformat(processed_tt[-1]))
-                lastBasalTime = processed_tt[-1]['time']
-                lastBasalDuration = processed_tt[-1]['duration_mins']
-    except Exception as e:
-        log("Error occurred querying ControlIQ therapy_timeline:")
-        log_err(e)
-        errors += 1
-    
-    log("Querying ControlIQ therapy_events...")
-    try:
-        androidevents = tconnect.controliq.therapy_events(time_start, time_end)
-        debug("controliq therapy_events: \n%s" % pformat(androidevents))
-    except Exception as e:
-        log("Error occurred querying ControlIQ therapy_events:")
-        log_err(e)
-        errors += 1
-    
-    log("-----")
+        log("Fetching pump metadata...")
+        pumpEventMetadata = tconnect.tandemsource.pump_event_metadata()
 
-    log("Initializing t:connect WS2 API...")
-    ws2_loggedin = False
-    try:
-        summary = tconnect.ws2.basaliqtech(time_start, time_end)
-        debug("WS2 basaliq status: \n%s" % pformat(summary))
-        ws2_loggedin = True
+        serialNumberToPump = {p['serialNumber']: p for p in pumpEventMetadata}
+        log(f'Found {len(serialNumberToPump)} pumps: {serialNumberToPump.keys()}')
+        for pumpSerial, pumpDetails in serialNumberToPump.items():
+            log(f'Pump {pumpSerial=}: {pumpDetails=}')
+
+        log("Running ChooseDevice...")
+        tconnectDevice = ChooseDevice(secret, tconnect).choose()
+
+        log(f'ChooseDevice selected: {tconnectDevice}')
+
+        tconnectDeviceId = tconnectDevice['tconnectDeviceId']
+
+        log(f'Fetching pump events for {tconnectDeviceId=} {time_start=} {time_end=} fetch_all_event_types=False')
+
+        events = tconnect.tandemsource.pump_events(tconnectDeviceId, time_start, time_end, fetch_all_event_types=False)
+        events = list(events)
+
+        log(f"Found raw events count: {len(events)}")
+
+
+        events_first_time = None
+        events_last_time = None
+        last_event_seqnum = None
+        for_eventclass = collections.defaultdict(list)
+        for event in events:
+            if not events_first_time:
+                events_first_time = event.eventTimestamp
+            if not events_last_time:
+                events_last_time = event.eventTimestamp
+            if not last_event_seqnum:
+                last_event_seqnum = event.seqNum
+            events_first_time = min(events_first_time, event.eventTimestamp)
+            events_last_time = max(events_last_time, event.eventTimestamp)
+            last_event_seqnum = max(event.seqNum, last_event_seqnum)
+
+            clazz = EventClass.for_event(event)
+            if clazz:
+                for_eventclass[clazz.name].append(event)
+
+        count_by_eventclass = {k: len(v) for k,v in for_eventclass.items()}
+        log(f"Found events count: {count_by_eventclass}")
+
+        log(f"Found first event time: {events_first_time}")
+        log(f"Found last event time: {events_last_time}")
+        log(f"Found last event sequence number: {last_event_seqnum}")
     except Exception as e:
-        log("Error occurred querying WS2 API. This is okay so long as you are not using the PUMP_EVENTS or IOB sync features.")
+        log("Error occurred querying Tandem Source:")
         log_err(e)
         errors += 1
-    
-    lastReadingTime = None
-    if ws2_loggedin:
-        log("Querying WS2 therapy_timeline_csv...")
-        try:
-            ttcsv = tconnect.ws2.therapy_timeline_csv(time_start, time_end)
-            debug("therapy_timeline_csv: \n%s" % pformat(ttcsv))
-            if ttcsv and "readingData" in ttcsv and len(ttcsv["readingData"]) > 0:
-                log("Last therapy_timeline_csv reading: \n%s" % pformat(ttcsv["readingData"][-1]))
-                lastReadingTime = TConnectEntry._datetime_parse(ttcsv["readingData"][-1]['EventDateTime'])
-        except Exception as e:
-            log("Error occurred querying WS2 therapy_timeline_csv. This is okay so long as you are not using the PUMP_EVENTS or IOB sync features.")
-            log_err(e)
-            errors += 1
-    else:
-        log("Not able to log in to WS2 API, so skipping therapy_timeline_csv")
-    
-    log("-----")
 
-    log("Logging in to t:connect Android API...")
-    summary = None
-    try:
-        summary = tconnect.android.user_profile()
-        debug("Android user profile: \n%s" % pformat(summary))
 
-        event = tconnect.android.last_event_uploaded(PUMP_SERIAL_NUMBER)
-        debug("Android last uploaded event: \n%s" % pformat(event))
-    except Exception as e:
-        log("Error occurred querying Android API:")
-        log_err(e)
-        errors += 1
-    
     log("-----")
 
     log("Logging in to Nightscout...")
@@ -186,17 +161,13 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
     def time_ago(t):
         return '%s ago' % (arrow.now() - arrow.get(t)) if t else 'n/a'
 
-    log("Last basal start time: %s (%s)" % (lastBasalTime, time_ago(lastBasalTime)))
-    log("Last basal duration: %s" % lastBasalDuration)
-    log("Last reading time: %s (%s)" % (lastReadingTime, time_ago(lastReadingTime)))
 
-    log("-----")
 
     if errors == 0:
         log("No API errors returned!")
     else:
         log("API errors occurred. Please check the errors above.")
-    
+
 
     with open('tconnectsync-check-output.log', 'w') as f:
 
@@ -208,14 +179,10 @@ def check_login(tconnect, time_start, time_end, verbose=False, sanitize=True):
                 'NS_URL': NS_URL,
                 'NS_SECRET': NS_SECRET
             }
-
-            if summary:
-                sanitizedData.update({
-                    'ANDROID_PROFILE_USERID': summary.get('userID'),
-                    'ANDROID_PROFILE_PATIENT_FULLNAME': summary.get('patientFullName'),
-                    'ANDROID_PROFILE_CAREGIVER_FULLNAME': summary.get('caregiverFullName')
-                })
-
+            if serialNumberToPump:
+                for i, (pumpSerial, pumpDetails) in enumerate(serialNumberToPump.items()):
+                    sanitizedData[f'PUMP_SERIAL_{i}'] = pumpSerial
+                    sanitizedData[f'TCONNECT_DEVICE_ID_{i}'] = pumpDetails['tconnectDeviceId']
             loglines = [run_sanitize(i, sanitizedData) for i in loglines]
 
         f.writelines(loglines)
