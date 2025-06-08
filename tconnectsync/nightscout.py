@@ -4,6 +4,7 @@ import hashlib
 import time
 import urllib.parse
 import arrow
+import arrow.parser
 import logging
 
 from urllib.parse import urljoin
@@ -12,7 +13,20 @@ from .api.common import ApiException
 from .parser.nightscout import ENTERED_BY
 
 def format_datetime(date):
-	return arrow.get(date).isoformat()
+    try:
+        # Try parsing with 'T' separator and timezone
+        return arrow.get(date).isoformat()
+    except arrow.parser.ParserError:
+        try:
+            # Try parsing with space separator and timezone
+            return arrow.get(date.replace('T', ' '), 'YYYY-MM-DD HH:mm:ssZZ').isoformat()
+        except arrow.parser.ParserError:
+            try:
+                # Try parsing with 'T' separator without timezone
+                return arrow.get(date, 'YYYY-MM-DDTHH:mm:ss').isoformat()
+            except arrow.parser.ParserError:
+                # Try parsing with space separator without timezone
+                return arrow.get(date.replace('T', ' '), 'YYYY-MM-DD HH:mm:ss').isoformat()
 
 def time_range(field_name, start_time, end_time, t_to_space=False):
 	def fmt(date):
