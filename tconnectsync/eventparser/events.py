@@ -4001,7 +4001,13 @@ class LidCgmAlertActivatedDex(BaseEvent):
     param2: float
 
     DalertidMap = {
-        "2": "Unknown Alert 2",
+        "0": "Low BG",
+        "1": "Sensor disconnected",
+        "2": "Sensor fault",
+        "3": "Low signal",
+        "4": "High BG",
+        "5": "Expired sensor",
+        "6": "Calibration needed",
         "11": "CGM Sensor Fail",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
@@ -4013,6 +4019,13 @@ class LidCgmAlertActivatedDex(BaseEvent):
     }
 
     class DalertidEnum(Enum):
+        LOW_BG          = 0
+        SENSOR_DISCONNECTED = 1
+        SENSOR_FAULT    = 2
+        LOW_SIGNAL      = 3
+        HIGH_BG         = 4
+        EXPIRED_SENSOR  = 5
+        CALIBRATION_NEEDED = 6
         CgmSensorFail = 11
         CgmSensorExpired = 13
         CgmOutOfRange = 14
@@ -4021,7 +4034,6 @@ class LidCgmAlertActivatedDex(BaseEvent):
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
-        UnknownAlert2 = 2
 
     @property
     def dalertid(self):
