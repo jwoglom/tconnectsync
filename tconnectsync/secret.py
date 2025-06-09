@@ -41,6 +41,7 @@ def get_bool(name, default):
 
 TCONNECT_EMAIL = get('TCONNECT_EMAIL', 'email@email.com')
 TCONNECT_PASSWORD = get('TCONNECT_PASSWORD', 'password')
+TCONNECT_REGION = get_one_of('TCONNECT_REGION', 'US', ['US', 'EU'])
 
 PUMP_SERIAL_NUMBER = int(get_number('PUMP_SERIAL_NUMBER', '11111111'))
 

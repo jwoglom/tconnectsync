@@ -3,8 +3,8 @@
 import unittest
 from tconnectsync.parser.nightscout import NightscoutEntry, InvalidBolusTypeException, tandem_to_ns_time, tandem_to_ns_time_seconds
 from tconnectsync.domain.device_settings import Profile, ProfileSegment, DeviceSettings
+from .test_profile_data import DEVICE_PROFILE_A, DEVICE_SETTINGS, NS_PROFILE_A
 
-from ..sync.test_profile import DEVICE_PROFILE_A, DEVICE_SETTINGS, NS_PROFILE_A
 class TestNightscoutEntry(unittest.TestCase):
     maxDiff = None
     def test_basal(self):

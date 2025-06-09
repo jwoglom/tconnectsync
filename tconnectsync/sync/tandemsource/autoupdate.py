@@ -27,11 +27,11 @@ class TandemSourceAutoupdate:
     until stopped (ctrl+c), or a maximum of AUTOUPDATE_MAX_LOOP_INVOCATIONS times.
     Stops if AUTOUPDATE_RESTART_ON_FAILURE is set and an error occurs.
     """
-    def process(self, tconnect, nightscout, time_start, time_end, pretend, features=None):
+    def process(self, tconnect, nightscout, pretend, features=None):
         if features is None:
             features = DEFAULT_FEATURES
 
-        # Read from android api, find exact interval to cut down on API calls
+        # Query for data, find exact interval to cut down on API calls
         # Refresh API token. If failure, die, have wrapper script re-run.
 
         self.autoupdate_start = time.time()
@@ -39,6 +39,9 @@ class TandemSourceAutoupdate:
         while True:
             logger.debug("autoupdate loop")
             now = time.time()
+
+            time_end = datetime.datetime.now()
+            time_start = time_end - datetime.timedelta(days=1)
 
             tconnectDevice = ChooseDevice(self.secret, tconnect).choose()
 

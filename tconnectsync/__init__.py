@@ -12,8 +12,6 @@ if sys.version_info < (3, 8):
     typing.Protocol = typing_extensions.Protocol
 
 from .api import TConnectApi
-from .process import process_time_range
-from .autoupdate import Autoupdate
 from .sync.tandemsource.autoupdate import TandemSourceAutoupdate
 from .sync.tandemsource.choose_device import ChooseDevice as TandemSourceChooseDevice
 from .sync.tandemsource.process import ProcessTimeRange as TandemSourceProcessTimeRange
@@ -25,6 +23,7 @@ try:
     from .secret import (
         TCONNECT_EMAIL,
         TCONNECT_PASSWORD,
+        TCONNECT_REGION,
         NS_URL,
         NS_SECRET,
         NS_SKIP_TLS_VERIFY,
@@ -53,7 +52,8 @@ def parse_args(*args, **kwargs):
     parser.add_argument('--auto-update', dest='auto_update', action='store_const', const=True, default=False, help='If set, continuously checks for updates from t:connect and syncs with Nightscout.')
     parser.add_argument('--check-login', dest='check_login', action='store_const', const=True, default=False, help='If set, checks that the provided t:connect credentials can be used to log in.')
     parser.add_argument('--features', dest='features', nargs='+', default=DEFAULT_FEATURES, choices=ALL_FEATURES, help='Specifies what data should be synchronized between tconnect and Nightscout.')
-    parser.add_argument('--tandem-source', dest='tandem_source', action='store_const', const=True, default=False, help='FOR TESTING: Use Tandem Source')
+    parser.add_argument('--tandem-source', dest='tandem_source', action='store_const', const=True, default=True, help=argparse.SUPPRESS) # no longer used
+    parser.add_argument('--region', dest='region', type=str, choices=['US', 'EU'], default=None, help='Tandem t:connect server region (US or EU). If not specified, uses TCONNECT_REGION from configuration or defaults to US.')
 
     return parser.parse_args(*args, **kwargs)
 
@@ -85,6 +85,8 @@ def main(*args, **kwargs):
     if time_end < time_start:
         raise Exception('time_start must be before time_end')
 
+    # Determine region: command line arg takes precedence, then config, then default to US
+    region = args.region if args.region else TCONNECT_REGION
 
     if TCONNECT_EMAIL == 'email@email.com':
         logging.warn('NO USERNAME WAS PROVIDED. Ensure you have set TCONNECT_EMAIL appropriately.')
@@ -98,18 +100,18 @@ def main(*args, **kwargs):
         else:
             logging.warn('NO PUMP SERIAL NUMBER WAS PROVIDED. Ensure you have set PUMP_SERIAL_NUMBER appropriately.')
 
-    tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD)
+    tconnect = TConnectApi(TCONNECT_EMAIL, TCONNECT_PASSWORD, region)
 
     nightscout = NightscoutApi(NS_URL, NS_SECRET, skip_verify=NS_SKIP_TLS_VERIFY, ignore_conn_errors=NS_IGNORE_CONN_ERRORS)
 
-    # NOT YET MIGRATED
-    # if args.check_login:
-    #     return check_login(tconnect, time_start, time_end)
+    if args.check_login:
+        return check_login(tconnect, time_start, time_end)
 
     logging.warning("THIS VERSION OF TCONNECTSYNC READS DATA FROM TANDEM SOURCE, AND MAY CONTAIN BUGS!")
     logging.info("You may notice different behavior compared to older versions which utilized t:connect data sources.")
     logging.info("To report a bug or to get help, see https://github.com/jwoglom/tconnectsync/issues")
 
+    logging.info(f"Using Tandem t:connect region: {region}")
     logging.info("Enabled features: " + ", ".join(args.features))
 
     if args.check_login:
@@ -117,7 +119,7 @@ def main(*args, **kwargs):
 
     if args.auto_update:
         u = TandemSourceAutoupdate(secret)
-        sys.exit(u.process(tconnect, nightscout, time_start, time_end, args.pretend, features=args.features))
+        sys.exit(u.process(tconnect, nightscout, args.pretend, features=args.features))
     else:
         tconnectDevice = TandemSourceChooseDevice(secret, tconnect).choose()
         added, last_event_id = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, secret=secret, features=args.features).process(time_start, time_end)
