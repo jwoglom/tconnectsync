@@ -28,12 +28,9 @@ def format_datetime(date):
                 # Try parsing with space separator without timezone
                 return arrow.get(date.replace('T', ' '), 'YYYY-MM-DD HH:mm:ss').isoformat()
 
-def time_range(field_name, start_time, end_time, t_to_space=False):
+def time_range(field_name, start_time, end_time):
 	def fmt(date):
-		ret = format_datetime(date)
-		if t_to_space:
-			return ret.replace('T', ' ')
-		return ret
+		return format_datetime(date)
 	arg = ''
 	if start_time:
 		arg += '&find[%s][$gte]=%s' % (field_name, fmt(start_time))
@@ -79,8 +76,8 @@ class NightscoutApi:
 			raise ApiException(r.status_code, "Nightscout put %s response: %s" % (r.status_code, r.text))
 
 	def last_uploaded_entry(self, eventType, time_start=None, time_end=None):
-		def internal(t_to_space):
-			dateFilter = time_range('created_at', time_start, time_end, t_to_space=t_to_space)
+		try:
+			dateFilter = time_range('created_at', time_start, time_end)
 			latest = requests.get(urljoin(self.url, 'api/v1/treatments?count=1&find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[eventType]=' + urllib.parse.quote(eventType) + dateFilter + '&ts=' + str(time.time())), headers={
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
@@ -94,31 +91,23 @@ class NightscoutApi:
 			if j and len(j) > 0:
 				return j[0]
 			return None
-		try:
-			ret = None
-			try:
-				ret = internal(False)
-			except ApiException as e:
-				#logger.warning("last_uploaded_entry with no t_to_space: %s", e)
-				ret = None
-			if ret is None and (time_start or time_end):
-				try:
-					ret = internal(True)
-				except ApiException as e:
-					#logger.warning("last_uploaded_entry with t_to_space: %s", e)
-					ret = None
-				if ret is not None:
-					logger.warning("last_uploaded_entry with eventType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (eventType, time_start, time_end))
-			return ret
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
+		except ApiException as e:
+			# Log and re-raise or ignore based on configuration
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ApiException because ignore_conn_errors=true: %s', e)
+			else:
+				raise e
+		return None
+
 
 	def last_uploaded_bg_entry(self, time_start=None, time_end=None):
-		def internal(t_to_space):
-			dateFilter = time_range('dateString', time_start, time_end, t_to_space=t_to_space)
+		try:
+			dateFilter = time_range('dateString', time_start, time_end)
 			latest = requests.get(urljoin(self.url, 'api/v1/entries.json?count=1&find[device]=' + urllib.parse.quote(ENTERED_BY) + dateFilter + '&ts=' + str(time.time())), headers={
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
@@ -132,24 +121,22 @@ class NightscoutApi:
 			if j and len(j) > 0:
 				return j[0]
 			return None
-
-		try:
-			ret = internal(False)
-			if ret is None and (time_start or time_end):
-				ret = internal(True)
-				if ret is not None:
-					logger.warning("last_uploaded_bg_entry with time_start=%s time_end=%s only returned data when timestamps contained a space" % (time_start, time_end))
-
-			return ret
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
+		except ApiException as e:
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ApiException because ignore_conn_errors=true: %s', e)
+			else:
+				raise e
+		return None
+
 
 	def last_uploaded_activity(self, activityType, time_start=None, time_end=None):
-		def internal(t_to_space):
-			dateFilter = time_range('created_at', time_start, time_end, t_to_space=t_to_space)
+		try:
+			dateFilter = time_range('created_at', time_start, time_end)
 			latest = requests.get(urljoin(self.url, 'api/v1/activity?find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[activityType]=' + urllib.parse.quote(activityType) + dateFilter + '&ts=' + str(time.time())), headers={
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
@@ -163,23 +150,22 @@ class NightscoutApi:
 			if j and len(j) > 0:
 				return j[0]
 			return None
-
-		try:
-			ret = internal(False)
-			if ret is None and (time_start or time_end):
-				ret = internal(True)
-				if ret is not None:
-					logger.warning("last_uploaded_activity with activityType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (activityType, time_start, time_end))
-			return ret
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
+		except ApiException as e:
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ApiException because ignore_conn_errors=true: %s', e)
+			else:
+				raise e
+		return None
+
 
 	def last_uploaded_devicestatus(self, time_start=None, time_end=None):
-		def internal(t_to_space):
-			dateFilter = time_range('created_at', time_start, time_end, t_to_space=t_to_space)
+		try:
+			dateFilter = time_range('created_at', time_start, time_end)
 			latest = requests.get(urljoin(self.url, 'api/v1/devicestatus?find[device]=' + urllib.parse.quote(ENTERED_BY) + dateFilter + '&ts=' + str(time.time())), headers={
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
@@ -193,19 +179,18 @@ class NightscoutApi:
 			if j and len(j) > 0:
 				return j[0]
 			return None
-
-		try:
-			ret = internal(False)
-			if ret is None and (time_start or time_end):
-				ret = internal(True)
-				if ret is not None:
-					logger.warning("devicestatus time_start=%s time_end=%s only returned data when timestamps contained a space" % (time_start, time_end))
-			return ret
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
+		except ApiException as e:
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ApiException because ignore_conn_errors=true: %s', e)
+			else:
+				raise e
+		return None
+
 
 	"""
 	Returns general status information about the Nightscout server.
