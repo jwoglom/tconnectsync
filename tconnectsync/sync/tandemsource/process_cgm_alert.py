@@ -79,6 +79,13 @@ class ProcessCGMAlert:
             if alert.dalertid == eventtypes.LidCgmAlertActivatedDex.DalertidEnum.CgmOutOfRange:
                 logger.info("ProcessCGMAlert: Skipping alert with CgmOutOfRange dalertid %d: %s" % (alert.dalertidRaw, alert))
                 return None
+            elif alert.dalertid == eventtypes.LidCgmAlertActivatedDex.DalertidEnum.SENSOR_FAULT:
+                logger.info("ProcessCGMAlert: Processing alert with SENSOR_FAULT dalertid %d: %s" % (alert.dalertidRaw, alert))
+                return NightscoutEntry.cgm_alert(
+                    created_at = alert.eventTimestamp.format(),
+                    reason = "Dexcom CGM Alert (Sensor fault)",
+                    pump_event_id = "%s" % alert.seqNum
+                )
             return NightscoutEntry.cgm_alert(
                 created_at = alert.eventTimestamp.format(),
                 reason = ("Dexcom CGM Alert (%s)" % alert.dalertid.name) if alert.dalertid else "Dexcom CGM Alert (Unknown)",
