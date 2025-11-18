@@ -81,7 +81,9 @@ class ProcessTimeRange:
                 c = self.event_classes[clazz](self.tconnect, self.nightscout, self.tconnect_device_id, self.pretend, self.features)
                 if c.enabled():
                     logger.info("%s is enabled from features %s" % (clazz, self.features))
-                    ns_entries = c.process(events, events_first_time, events_last_time)
+                    # Cap events_last_time at time_end to handle pump clock drift
+                    capped_time_end = min(events_last_time, time_end) if events_last_time else time_end
+                    ns_entries = c.process(events, events_first_time, capped_time_end)
                     w = c.write(ns_entries)
                     if w:
                         processed_count += w
