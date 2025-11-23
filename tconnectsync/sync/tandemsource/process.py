@@ -1,5 +1,6 @@
 import logging
 import collections
+import arrow
 
 from ...features import DEVICE_STATUS, DEFAULT_FEATURES
 from ...eventparser import events as eventtypes
@@ -82,7 +83,9 @@ class ProcessTimeRange:
                 if c.enabled():
                     logger.info("%s is enabled from features %s" % (clazz, self.features))
                     # Cap events_last_time at time_end to handle pump clock drift
-                    capped_time_end = min(events_last_time, time_end) if events_last_time else time_end
+                    # Ensure time_end is timezone-aware for comparison
+                    time_end_aware = arrow.get(time_end)
+                    capped_time_end = min(events_last_time, time_end_aware) if events_last_time else time_end_aware
                     ns_entries = c.process(events, events_first_time, capped_time_end)
                     w = c.write(ns_entries)
                     if w:
