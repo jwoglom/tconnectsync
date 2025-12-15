@@ -6,6 +6,7 @@ from ..secret import TIMEZONE_NAME
 from dataclasses import dataclass
 
 EVENT_LEN = 26
+# Big endian
 UINT16 = '>H'
 UINT32 = '>I'
 TANDEM_EPOCH = 1199145600

@@ -3,7 +3,7 @@ import arrow
 
 from ...features import DEFAULT_FEATURES
 from ... import features
-from ...secret import TIMEZONE_NAME
+from ... import secret
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
 from ...eventparser.utils import bitmask_to_list
 from ...eventparser.raw_event import TANDEM_EPOCH
@@ -17,12 +17,13 @@ from ...parser.nightscout import (
 logger = logging.getLogger(__name__)
 
 class ProcessCGMReading:
-    def __init__(self, tconnect, nightscout, tconnect_device_id, pretend, features=DEFAULT_FEATURES):
+    def __init__(self, tconnect, nightscout, tconnect_device_id, pretend, features=DEFAULT_FEATURES, timezone=None):
         self.tconnect = tconnect
         self.nightscout = nightscout
         self.tconnect_device_id = tconnect_device_id
         self.pretend = pretend
         self.features = features
+        self.timezone = timezone or secret.TIMEZONE_NAME
 
     def enabled(self):
         return features.CGM in self.features
@@ -67,7 +68,7 @@ class ProcessCGMReading:
     def timestamp_for(self, event):
         # For backfills the time the event was added to the pump's event store
         # might not be the time it actually occurred, so we use the egvTimestamp
-        return arrow.get(TANDEM_EPOCH + event.egvTimestamp, tzinfo='UTC').replace(tzinfo=TIMEZONE_NAME)
+        return arrow.get(TANDEM_EPOCH + event.egvTimestamp, tzinfo='UTC').replace(tzinfo=self.timezone)
 
     def to_nsentry(self, event):
         return NightscoutEntry.entry(
