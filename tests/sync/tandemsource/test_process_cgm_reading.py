@@ -22,7 +22,7 @@ G7_EVENT_4 = b'\x01\x8f!\xc43C\x00\x07\xb8\xea\x13\x01\x00\x00\x00\x81\xbf !\xc4
 G7_EVENT_5 = b"\x01\x8f!\xc45\x9b\x00\x07\xb9\'\x11\x01\x00\x00\x00\x92\xbb !\xc45\x98\x00\x00\x19\xe1"
 
 
-class TestProcessCGMReadingG7_USEastern(unittest.TestCase):
+class TestProcessCGMReadingG7(unittest.TestCase):
     """Test with only G7 reading data"""
     maxDiff = None
 
@@ -313,6 +313,46 @@ class TestProcessCGMReadingWrite(unittest.TestCase):
         self.assertEqual(self.nightscout.uploaded_entries['entries'][3]['sgv'], 71)
         self.assertEqual(self.nightscout.uploaded_entries['entries'][3]['dateString'], '2025-12-13T18:21:44-0500')
 
+
+class TestProcessCGMReadingMultipleTimezones(unittest.TestCase):
+    """Test timezone processing across TIMEZONE_NAME values."""
+    maxDiff = None
+
+    def setUp(self):
+        self.tconnect = TConnectApi()
+        self.nightscout = NightscoutApi()
+        self.nightscout.last_uploaded_bg_entry = lambda *args, **kwargs: None
+        self.tconnect_device_id = 'abcdef'
+
+    def test_America_New_York(self):
+        timezone = 'America/New_York'
+
+        events = [Event(G7_EVENT_1)]
+        process = ProcessCGMReading(self.tconnect, self.nightscout, self.tconnect_device_id, pretend=False, timezone=timezone)
+        p = process.process(events, time_start=None, time_end=None)
+
+        self.assertEqual(len(p), 1)
+        self.assertEqual(p[0]['dateString'], '2025-12-13T18:16:44-0500')
+
+    def test_America_Chicago(self):
+        timezone = 'America/Chicago'
+
+        events = [Event(G7_EVENT_1)]
+        process = ProcessCGMReading(self.tconnect, self.nightscout, self.tconnect_device_id, pretend=False, timezone=timezone)
+        p = process.process(events, time_start=None, time_end=None)
+
+        self.assertEqual(len(p), 1)
+        self.assertEqual(p[0]['dateString'], '2025-12-13T18:16:44-0600')
+
+    def test_GMT(self):
+        timezone = 'Etc/GMT'
+
+        events = [Event(G7_EVENT_1)]
+        process = ProcessCGMReading(self.tconnect, self.nightscout, self.tconnect_device_id, pretend=False, timezone=timezone)
+        p = process.process(events, time_start=None, time_end=None)
+
+        self.assertEqual(len(p), 1)
+        self.assertEqual(p[0]['dateString'], '2025-12-13T18:16:44+0000')
 
 if __name__ == '__main__':
     unittest.main()
