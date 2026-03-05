@@ -18,7 +18,7 @@ urllib3 = "==1.26.6"
 requests = {extras = ["socks"], version = "==2.31.0"}
 requests-oidc = "*"
 PyJWT = "==2.8.0"
-cryptography = "*"
+cryptography = "<46"
 dataclasses-json = "*"
 cffi = ">=1.15.1"
 typing-extensions = "*"
