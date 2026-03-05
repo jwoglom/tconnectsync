@@ -3,13 +3,15 @@ import datetime
 import arrow
 import argparse
 import logging
-import pkg_resources
 import typing
 
 # Required for cryptography lib in python 3.7
 if sys.version_info < (3, 8):
     import typing_extensions
     typing.Protocol = typing_extensions.Protocol
+    from importlib_metadata import PackageNotFoundError, version
+else:
+    from importlib.metadata import PackageNotFoundError, version
 
 from .api import TConnectApi
 from .sync.tandemsource.autoupdate import TandemSourceAutoupdate
@@ -37,8 +39,8 @@ except Exception as e:
 
 
 try:
-    __version__ = pkg_resources.require("tconnectsync")[0].version
-except Exception:
+    __version__ = version("tconnectsync")
+except PackageNotFoundError:
     __version__ = "UNKNOWN"
 
 def parse_args(*args, **kwargs):
@@ -126,4 +128,3 @@ def main(*args, **kwargs):
 
         # return exit code 0 if processed events
         sys.exit(0 if added>0 else 1)
-

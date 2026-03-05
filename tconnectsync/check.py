@@ -3,10 +3,14 @@ import time
 import arrow
 import logging
 import traceback
-import pkg_resources
 import collections
 from datetime import datetime
 from pprint import pformat as pformat_base
+
+if sys.version_info < (3, 8):
+    from importlib_metadata import PackageNotFoundError, version
+else:
+    from importlib.metadata import PackageNotFoundError, version
 
 from .nightscout import NightscoutApi
 from .parser.nightscout import BASAL_EVENTTYPE, BOLUS_EVENTTYPE
@@ -15,8 +19,8 @@ from .domain.tandemsource.event_class import EventClass
 from .sync.tandemsource.choose_device import ChooseDevice
 
 try:
-    __version__ = pkg_resources.require("tconnectsync")[0].version
-except Exception:
+    __version__ = version("tconnectsync")
+except PackageNotFoundError:
     __version__ = "UNKNOWN"
 
 """

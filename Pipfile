@@ -22,6 +22,7 @@ cryptography = "*"
 dataclasses-json = "*"
 cffi = ">=1.15.1"
 typing-extensions = "*"
+importlib-metadata = {version = "*", markers = "python_version < '3.8'"}
 setuptools = "*"
 
 [scripts]
