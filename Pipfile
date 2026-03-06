@@ -5,23 +5,12 @@ verify_ssl = true
 
 [dev-packages]
 ptpython = "*"
+flake8 = "*"
+pytest = "*"
+coverage = "*"
 
 [packages]
 tconnectsync = {path = "."}
-bs4 = "*"
-arrow = "==1.2.3"
-lxml = "*"
-python-dotenv = "==0.21.1"
-requests-mock = "*"
-pysocks = "*"
-urllib3 = "==1.26.6"
-requests = {extras = ["socks"], version = "==2.31.0"}
-requests-oidc = "*"
-PyJWT = "==2.8.0"
-dataclasses-json = "*"
-cffi = ">=1.15.1"
-typing-extensions = "*"
-setuptools = "*"
 
 [scripts]
 tconnectsync = "python3 main.py"
