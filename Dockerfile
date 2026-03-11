@@ -1,4 +1,4 @@
-FROM python:3.9-slim as base
+FROM python:3.11-slim as base
 
 # The following is adapted from:
 # https://sourcery.ai/blog/python-docker/
