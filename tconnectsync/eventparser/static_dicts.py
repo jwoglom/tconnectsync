@@ -50,7 +50,7 @@ ALERTS_DICT = {
     "48": "CGM_UNAVAILABLE",
     "49": "DEFAULT_ALERT_49",
     "50": "DEFAULT_ALERT_50",
-    "51": "DEFAULT_ALERT_51",
+    "51": "CONTROL_IQ_LOW",
     "52": "DEFAULT_ALERT_52",
     "53": "DEFAULT_ALERT_53",
     "54": "DEVICE_PAIRED",
@@ -132,13 +132,24 @@ ALARMS_DICT = {
     "63": "DEFAULT_ALARM_63",
 }
 
+# CGM alert codes from pump history verification (verified from pump display)
 CGM_ALERTS_DICT = {
+    "1": "CGM Fixed Low",
+    "2": "CGM High",
+    "3": "CGM Low",
+    "8": "CGM Rapid Fall",
     "11": "CGM Sensor Fail",
+    "12": "CGM Sensor Expiring Soon",
     "13": "CGM Sensor Expired",
     "14": "CGM Out Of Range",
     "20": "CGM Transmitter Error",
+    "22": "CGM Sensor Expiring 2",
+    "25": "CGM Replace Sensor",
     "26": "CGM Temperature",
     "27": "CGM Failed Connection",
     "39": "CGM Transmitter Expired",
-    "40": "Pump Bluetooth Error"
+    "40": "Pump Bluetooth Error",
+    "45": "CGM Transmitter Expiring Soon",
+    "46": "CGM Transmitter Expiring 2",
+    "48": "CGM Unavailable"
 }

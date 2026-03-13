@@ -3,10 +3,8 @@ import arrow
 
 from ...features import DEFAULT_FEATURES
 from ... import features
-from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
-from ...eventparser.utils import bitmask_to_list
-from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
+from ...nightscout import format_datetime
 from ...parser.nightscout import (
     CGM_START_EVENTTYPE,
     CGM_JOIN_EVENTTYPE,
@@ -75,22 +73,23 @@ class ProcessCGMStartJoinStop:
 
         return count
 
+
     def to_nsentry(self, event):
         if type(event) in EventClass._CGM_START:
             return NightscoutEntry.cgm_start(
-                created_at = event.eventTimestamp.format(),
+                created_at = format_datetime(event.eventTimestamp),
                 reason = "CGM Session Started",
                 pump_event_id = "%s" % event.seqNum
             )
         elif type(event) in EventClass._CGM_JOIN:
             return NightscoutEntry.cgm_join(
-                created_at = event.eventTimestamp.format(),
+                created_at = format_datetime(event.eventTimestamp),
                 reason = "CGM Session Joined",
                 pump_event_id = "%s" % event.seqNum
             )
         elif type(event) in EventClass._CGM_STOP:
             return NightscoutEntry.cgm_stop(
-                created_at = event.eventTimestamp.format(),
+                created_at = format_datetime(event.eventTimestamp),
                 reason = "CGM Session Stopped",
                 pump_event_id = "%s" % event.seqNum
             )

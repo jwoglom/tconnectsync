@@ -165,7 +165,7 @@ class LidAlertActivated(BaseEvent):
         "48": "CGM_UNAVAILABLE",
         "49": "DEFAULT_ALERT_49",
         "50": "DEFAULT_ALERT_50",
-        "51": "DEFAULT_ALERT_51",
+        "51": "CONTROL_IQ_LOW",
         "52": "DEFAULT_ALERT_52",
         "53": "DEFAULT_ALERT_53",
         "54": "DEVICE_PAIRED",
@@ -231,7 +231,7 @@ class LidAlertActivated(BaseEvent):
         CgmUnavailable = 48
         DefaultAlert49 = 49
         DefaultAlert50 = 50
-        DefaultAlert51 = 51
+        ControlIqLow = 51
         DefaultAlert52 = 52
         DefaultAlert53 = 53
         DevicePaired = 54
@@ -1129,7 +1129,7 @@ class LidAlertCleared(BaseEvent):
         "48": "CGM_UNAVAILABLE",
         "49": "DEFAULT_ALERT_49",
         "50": "DEFAULT_ALERT_50",
-        "51": "DEFAULT_ALERT_51",
+        "51": "CONTROL_IQ_LOW",
         "52": "DEFAULT_ALERT_52",
         "53": "DEFAULT_ALERT_53",
         "54": "DEVICE_PAIRED",
@@ -1195,7 +1195,7 @@ class LidAlertCleared(BaseEvent):
         CgmUnavailable = 48
         DefaultAlert49 = 49
         DefaultAlert50 = 50
-        DefaultAlert51 = 51
+        ControlIqLow = 51
         DefaultAlert52 = 52
         DefaultAlert53 = 53
         DevicePaired = 54
@@ -2488,25 +2488,45 @@ class LidCgmAlertActivated(BaseEvent):
     param2: float
 
     DalertidMap = {
+        "1": "CGM Fixed Low",
+        "2": "CGM High",
+        "3": "CGM Low",
+        "8": "CGM Rapid Fall",
         "11": "CGM Sensor Fail",
+        "12": "CGM Sensor Expiring Soon",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
         "20": "CGM Transmitter Error",
+        "22": "CGM Sensor Expiring 2",
+        "25": "CGM Replace Sensor",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
         "39": "CGM Transmitter Expired",
-        "40": "Pump Bluetooth Error"
+        "40": "Pump Bluetooth Error",
+        "45": "CGM Transmitter Expiring Soon",
+        "46": "CGM Transmitter Expiring 2",
+        "48": "CGM Unavailable"
     }
 
     class DalertidEnum(Enum):
+        CgmFixedLow = 1
+        CgmHigh = 2
+        CgmLow = 3
+        CgmRapidFall = 8
         CgmSensorFail = 11
+        CgmSensorExpiringSoon = 12
         CgmSensorExpired = 13
         CgmOutOfRange = 14
         CgmTransmitterError = 20
+        CgmSensorExpiring2 = 22
+        CgmReplaceSensor = 25
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        CgmTransmitterExpiringSoon = 45
+        CgmTransmitterExpiring2 = 46
+        CgmUnavailable = 48
 
     @property
     def dalertid(self):
@@ -2567,25 +2587,45 @@ class LidCgmAlertCleared(BaseEvent):
     dalertidRaw: int
 
     DalertidMap = {
+        "1": "CGM Fixed Low",
+        "2": "CGM High",
+        "3": "CGM Low",
+        "8": "CGM Rapid Fall",
         "11": "CGM Sensor Fail",
+        "12": "CGM Sensor Expiring Soon",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
         "20": "CGM Transmitter Error",
+        "22": "CGM Sensor Expiring 2",
+        "25": "CGM Replace Sensor",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
         "39": "CGM Transmitter Expired",
-        "40": "Pump Bluetooth Error"
+        "40": "Pump Bluetooth Error",
+        "45": "CGM Transmitter Expiring Soon",
+        "46": "CGM Transmitter Expiring 2",
+        "48": "CGM Unavailable"
     }
 
     class DalertidEnum(Enum):
+        CgmFixedLow = 1
+        CgmHigh = 2
+        CgmLow = 3
+        CgmRapidFall = 8
         CgmSensorFail = 11
+        CgmSensorExpiringSoon = 12
         CgmSensorExpired = 13
         CgmOutOfRange = 14
         CgmTransmitterError = 20
+        CgmSensorExpiring2 = 22
+        CgmReplaceSensor = 25
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        CgmTransmitterExpiringSoon = 45
+        CgmTransmitterExpiring2 = 46
+        CgmUnavailable = 48
 
     @property
     def dalertid(self):
@@ -3998,25 +4038,45 @@ class LidCgmAlertActivatedDex(BaseEvent):
     param2: float
 
     DalertidMap = {
+        "1": "CGM Fixed Low",
+        "2": "CGM High",
+        "3": "CGM Low",
+        "8": "CGM Rapid Fall",
         "11": "CGM Sensor Fail",
+        "12": "CGM Sensor Expiring Soon",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
         "20": "CGM Transmitter Error",
+        "22": "CGM Sensor Expiring 2",
+        "25": "CGM Replace Sensor",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
         "39": "CGM Transmitter Expired",
-        "40": "Pump Bluetooth Error"
+        "40": "Pump Bluetooth Error",
+        "45": "CGM Transmitter Expiring Soon",
+        "46": "CGM Transmitter Expiring 2",
+        "48": "CGM Unavailable"
     }
 
     class DalertidEnum(Enum):
+        CgmFixedLow = 1
+        CgmHigh = 2
+        CgmLow = 3
+        CgmRapidFall = 8
         CgmSensorFail = 11
+        CgmSensorExpiringSoon = 12
         CgmSensorExpired = 13
         CgmOutOfRange = 14
         CgmTransmitterError = 20
+        CgmSensorExpiring2 = 22
+        CgmReplaceSensor = 25
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        CgmTransmitterExpiringSoon = 45
+        CgmTransmitterExpiring2 = 46
+        CgmUnavailable = 48
 
     @property
     def dalertid(self):
@@ -4101,25 +4161,45 @@ class LidCgmAlertClearedDex(BaseEvent):
     sensortypeRaw: int
 
     DalertidMap = {
+        "1": "CGM Fixed Low",
+        "2": "CGM High",
+        "3": "CGM Low",
+        "8": "CGM Rapid Fall",
         "11": "CGM Sensor Fail",
+        "12": "CGM Sensor Expiring Soon",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
         "20": "CGM Transmitter Error",
+        "22": "CGM Sensor Expiring 2",
+        "25": "CGM Replace Sensor",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
         "39": "CGM Transmitter Expired",
-        "40": "Pump Bluetooth Error"
+        "40": "Pump Bluetooth Error",
+        "45": "CGM Transmitter Expiring Soon",
+        "46": "CGM Transmitter Expiring 2",
+        "48": "CGM Unavailable"
     }
 
     class DalertidEnum(Enum):
+        CgmFixedLow = 1
+        CgmHigh = 2
+        CgmLow = 3
+        CgmRapidFall = 8
         CgmSensorFail = 11
+        CgmSensorExpiringSoon = 12
         CgmSensorExpired = 13
         CgmOutOfRange = 14
         CgmTransmitterError = 20
+        CgmSensorExpiring2 = 22
+        CgmReplaceSensor = 25
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        CgmTransmitterExpiringSoon = 45
+        CgmTransmitterExpiring2 = 46
+        CgmUnavailable = 48
 
     @property
     def dalertid(self):
@@ -4196,25 +4276,45 @@ class LidCgmAlertAckDex(BaseEvent):
     acksourceRaw: int
 
     DalertidMap = {
+        "1": "CGM Fixed Low",
+        "2": "CGM High",
+        "3": "CGM Low",
+        "8": "CGM Rapid Fall",
         "11": "CGM Sensor Fail",
+        "12": "CGM Sensor Expiring Soon",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
         "20": "CGM Transmitter Error",
+        "22": "CGM Sensor Expiring 2",
+        "25": "CGM Replace Sensor",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
         "39": "CGM Transmitter Expired",
-        "40": "Pump Bluetooth Error"
+        "40": "Pump Bluetooth Error",
+        "45": "CGM Transmitter Expiring Soon",
+        "46": "CGM Transmitter Expiring 2",
+        "48": "CGM Unavailable"
     }
 
     class DalertidEnum(Enum):
+        CgmFixedLow = 1
+        CgmHigh = 2
+        CgmLow = 3
+        CgmRapidFall = 8
         CgmSensorFail = 11
+        CgmSensorExpiringSoon = 12
         CgmSensorExpired = 13
         CgmOutOfRange = 14
         CgmTransmitterError = 20
+        CgmSensorExpiring2 = 22
+        CgmReplaceSensor = 25
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        CgmTransmitterExpiringSoon = 45
+        CgmTransmitterExpiring2 = 46
+        CgmUnavailable = 48
 
     @property
     def dalertid(self):
@@ -4949,25 +5049,45 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
     param2: float
 
     DalertidMap = {
+        "1": "CGM Fixed Low",
+        "2": "CGM High",
+        "3": "CGM Low",
+        "8": "CGM Rapid Fall",
         "11": "CGM Sensor Fail",
+        "12": "CGM Sensor Expiring Soon",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
         "20": "CGM Transmitter Error",
+        "22": "CGM Sensor Expiring 2",
+        "25": "CGM Replace Sensor",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
         "39": "CGM Transmitter Expired",
-        "40": "Pump Bluetooth Error"
+        "40": "Pump Bluetooth Error",
+        "45": "CGM Transmitter Expiring Soon",
+        "46": "CGM Transmitter Expiring 2",
+        "48": "CGM Unavailable"
     }
 
     class DalertidEnum(Enum):
+        CgmFixedLow = 1
+        CgmHigh = 2
+        CgmLow = 3
+        CgmRapidFall = 8
         CgmSensorFail = 11
+        CgmSensorExpiringSoon = 12
         CgmSensorExpired = 13
         CgmOutOfRange = 14
         CgmTransmitterError = 20
+        CgmSensorExpiring2 = 22
+        CgmReplaceSensor = 25
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        CgmTransmitterExpiringSoon = 45
+        CgmTransmitterExpiring2 = 46
+        CgmUnavailable = 48
 
     @property
     def dalertid(self):
@@ -5050,25 +5170,45 @@ class LidCgmAlertClearedFsl2(BaseEvent):
     sensortypeRaw: int
 
     DalertidMap = {
+        "1": "CGM Fixed Low",
+        "2": "CGM High",
+        "3": "CGM Low",
+        "8": "CGM Rapid Fall",
         "11": "CGM Sensor Fail",
+        "12": "CGM Sensor Expiring Soon",
         "13": "CGM Sensor Expired",
         "14": "CGM Out Of Range",
         "20": "CGM Transmitter Error",
+        "22": "CGM Sensor Expiring 2",
+        "25": "CGM Replace Sensor",
         "26": "CGM Temperature",
         "27": "CGM Failed Connection",
         "39": "CGM Transmitter Expired",
-        "40": "Pump Bluetooth Error"
+        "40": "Pump Bluetooth Error",
+        "45": "CGM Transmitter Expiring Soon",
+        "46": "CGM Transmitter Expiring 2",
+        "48": "CGM Unavailable"
     }
 
     class DalertidEnum(Enum):
+        CgmFixedLow = 1
+        CgmHigh = 2
+        CgmLow = 3
+        CgmRapidFall = 8
         CgmSensorFail = 11
+        CgmSensorExpiringSoon = 12
         CgmSensorExpired = 13
         CgmOutOfRange = 14
         CgmTransmitterError = 20
+        CgmSensorExpiring2 = 22
+        CgmReplaceSensor = 25
         CgmTemperature = 26
         CgmFailedConnection = 27
         CgmTransmitterExpired = 39
         PumpBluetoothError = 40
+        CgmTransmitterExpiringSoon = 45
+        CgmTransmitterExpiring2 = 46
+        CgmUnavailable = 48
 
     @property
     def dalertid(self):
@@ -5273,8 +5413,8 @@ class LidCgmDataFsl3(BaseEvent):
         "8": "EGV was successfully added to CGM subsystem array (e.g., not a duplicate)",
         "9": "OMR reading type",
         "11": "Sensor Type (see CGMTxType enum)",
-        "12": "Sensor Type (see CGMTxType enum)",
-        "13": "Sensor Type (see CGMTxType enum)"
+        "12": "Sensor Type (see CGMTxType enum) 2",
+        "13": "Sensor Type (see CGMTxType enum) 3"
     }
 
     class EgvinfobitmaskBitmask(IntFlag):
@@ -5286,9 +5426,9 @@ class LidCgmDataFsl3(BaseEvent):
         ValidAlgstateAlgstateIs100 = 2**7
         EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
         OmrReadingType = 2**9
-        SensorTypeSeeCgmtxtypeEnum_11 = 2**11
-        SensorTypeSeeCgmtxtypeEnum_12 = 2**12
-        SensorTypeSeeCgmtxtypeEnum_13 = 2**13
+        SensorTypeSeeCgmtxtypeEnum = 2**11
+        SensorTypeSeeCgmtxtypeEnum2 = 2**12
+        SensorTypeSeeCgmtxtypeEnum3 = 2**13
 
     @property
     def egvInfoBitmask(self):

@@ -354,5 +354,68 @@ class TestProcessCGMReadingMultipleTimezones(unittest.TestCase):
         self.assertEqual(len(p), 1)
         self.assertEqual(p[0]['dateString'], '2025-12-13T18:16:44+0000')
 
+
+# FSL3 events (real data from pump sync)
+# timestamp 2026-03-15T13:12:57-05:00, seqNum=785470, sgv=149
+FSL3_DATA_EVENT_1 = b'\x01\xe0"=-\xd9\x00\x0b\xfc>\x00\x00 \x00\x00\x95\xb5d"=-\xd9\x00\x00#\xe0'
+# timestamp 2026-03-15T13:13:56-05:00, seqNum=785472, sgv=161
+FSL3_DATA_EVENT_2 = b'\x01\xe0"=.\x14\x00\x0b\xfc@\x00\x00 \x00\x00\x95\xb5d"=.\x14\x00\x00#\xe0'
+# timestamp 2026-03-09T17:39:22-05:00, seqNum=749962 (JOIN event)
+FSL3_JOIN_EVENT_1 = b'\x01\xdd"5\x83J\x00\x0bq\x8ai\xaf\x05\xc1i\xaf\x05\xc8\x00\x00\t\x0f\x00\x13\xc6\x80'
+
+
+class TestProcessCGMReadingFSL3(unittest.TestCase):
+    """Test with FSL3 reading data"""
+    maxDiff = None
+
+    def setUp(self):
+        self.tconnect = TConnectApi()
+        self.nightscout = NightscoutApi()
+        self.nightscout.last_uploaded_bg_entry = lambda *args, **kwargs: None
+        self.tconnect_device_id = 'abcdef'
+        self.process = ProcessCGMReading(self.tconnect, self.nightscout, self.tconnect_device_id, pretend=False, timezone='America/New_York')
+
+    def test_single_fsl3_reading_no_last_uploaded(self):
+        """Test processing a single FSL3 CGM reading with no prior uploads"""
+        events = [Event(FSL3_DATA_EVENT_1)]
+
+        self.assertEqual(type(events[0]), eventtypes.LidCgmDataFsl3)
+        self.assertEqual(events[0].seqNum, 785470)
+        self.assertEqual(events[0].currentglucosedisplayvalue, 149)
+
+        p = self.process.process(events, time_start=None, time_end=None)
+
+        self.assertEqual(len(p), 1)
+        self.assertIn('sgv', p[0])
+        self.assertEqual(p[0]['sgv'], 149)
+
+    def test_multiple_fsl3_readings(self):
+        """Test processing multiple FSL3 CGM readings"""
+        events = [
+            Event(FSL3_DATA_EVENT_1),
+            Event(FSL3_DATA_EVENT_2)
+        ]
+
+        # Verify all events are LidCgmDataFsl3
+        for event in events:
+            self.assertEqual(type(event), eventtypes.LidCgmDataFsl3)
+
+        self.assertEqual(events[0].currentglucosedisplayvalue, 149)
+        self.assertEqual(events[1].currentglucosedisplayvalue, 149)
+
+        p = self.process.process(events, time_start=None, time_end=None)
+
+        self.assertEqual(len(p), 2)
+
+        # Check glucose values
+        self.assertEqual(p[0]['sgv'], 149)
+        self.assertEqual(p[1]['sgv'], 149)
+
+    def test_fsl3_join_event_parses(self):
+        """Test that FSL3 JOIN event parses correctly"""
+        events = [Event(FSL3_JOIN_EVENT_1)]
+
+        self.assertEqual(type(events[0]), eventtypes.LidCgmJoinSessionFsl3)
+        self.assertEqual(events[0].seqNum, 749962)
 if __name__ == '__main__':
     unittest.main()
