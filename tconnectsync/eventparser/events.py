@@ -5286,9 +5286,9 @@ class LidCgmDataFsl3(BaseEvent):
         ValidAlgstateAlgstateIs100 = 2**7
         EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
         OmrReadingType = 2**9
-        SensorTypeSeeCgmtxtypeEnum = 2**11
-        SensorTypeSeeCgmtxtypeEnum = 2**12
-        SensorTypeSeeCgmtxtypeEnum = 2**13
+        SensorTypeSeeCgmtxtypeEnum_11 = 2**11
+        SensorTypeSeeCgmtxtypeEnum_12 = 2**12
+        SensorTypeSeeCgmtxtypeEnum_13 = 2**13
 
     @property
     def egvInfoBitmask(self):
