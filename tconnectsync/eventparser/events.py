@@ -5413,8 +5413,8 @@ class LidCgmDataFsl3(BaseEvent):
         "8": "EGV was successfully added to CGM subsystem array (e.g., not a duplicate)",
         "9": "OMR reading type",
         "11": "Sensor Type (see CGMTxType enum)",
-        "12": "Sensor Type (see CGMTxType enum) 2",
-        "13": "Sensor Type (see CGMTxType enum) 3"
+        "12": "Sensor Type (see CGMTxType enum)",
+        "13": "Sensor Type (see CGMTxType enum)"
     }
 
     class EgvinfobitmaskBitmask(IntFlag):
@@ -5426,9 +5426,9 @@ class LidCgmDataFsl3(BaseEvent):
         ValidAlgstateAlgstateIs100 = 2**7
         EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
         OmrReadingType = 2**9
-        SensorTypeSeeCgmtxtypeEnum = 2**11
-        SensorTypeSeeCgmtxtypeEnum2 = 2**12
-        SensorTypeSeeCgmtxtypeEnum3 = 2**13
+        SensorTypeSeeCgmtxtypeEnum_11 = 2**11
+        SensorTypeSeeCgmtxtypeEnum_12 = 2**12
+        SensorTypeSeeCgmtxtypeEnum_13 = 2**13
 
     @property
     def egvInfoBitmask(self):

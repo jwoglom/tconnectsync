@@ -2263,8 +2263,8 @@
                 "8": "EGV was successfully added to CGM subsystem array (e.g., not a duplicate)",
                 "9": "OMR reading type",
                 "11": "Sensor Type (see CGMTxType enum)",
-                "12": "Sensor Type (see CGMTxType enum) 2",
-                "13": "Sensor Type (see CGMTxType enum) 3"
+                "12": "Sensor Type (see CGMTxType enum)",
+                "13": "Sensor Type (see CGMTxType enum)"
               }
             ]
           ]
