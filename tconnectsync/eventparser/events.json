@@ -13,8 +13,15 @@
           "offset": 4,
           "uom": "units/hour"
         },
-        "maxBasalRate": { "type": "float32", "offset": 8, "uom": "units/hour" },
-        "IDP": { "type": "uint16", "offset": 14 },
+        "maxBasalRate": {
+          "type": "float32",
+          "offset": 8,
+          "uom": "units/hour"
+        },
+        "IDP": {
+          "type": "uint16",
+          "offset": 14
+        },
         "ChangeType": {
           "type": "uint8",
           "offset": 13,
@@ -28,8 +35,8 @@
                 "3": "\"temp rate end\"",
                 "4": "\"pump suspended\"",
                 "5": "\"pump resumed\"",
-                "6": "“pump shut down”",
-                "7": "“basal limit”"
+                "6": "\u201cpump shut down\u201d",
+                "7": "\u201cbasal limit\u201d"
               }
             ]
           ]
@@ -42,11 +49,25 @@
         "AlertID": {
           "type": "uint32",
           "offset": 0,
-          "transform": [["dictionary", "alerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "alerts"
+            ]
+          ]
         },
-        "faultLocatorData": { "type": "uint32", "offset": 4 },
-        "param1": { "type": "uint32", "offset": 8 },
-        "param2": { "type": "float32", "offset": 12 }
+        "faultLocatorData": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "param1": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "param2": {
+          "type": "float32",
+          "offset": 12
+        }
       }
     },
     "5": {
@@ -55,11 +76,25 @@
         "AlarmID": {
           "type": "uint32",
           "offset": 0,
-          "transform": [["dictionary", "alarms"]]
+          "transform": [
+            [
+              "dictionary",
+              "alarms"
+            ]
+          ]
         },
-        "faultLocatorData": { "type": "uint32", "offset": 4 },
-        "param1": { "type": "uint32", "offset": 8 },
-        "param2": { "type": "float32", "offset": 12 }
+        "faultLocatorData": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "param1": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "param2": {
+          "type": "float32",
+          "offset": 12
+        }
       }
     },
     "6": {
@@ -68,18 +103,39 @@
         "MalfID": {
           "type": "uint32",
           "offset": 0,
-          "transform": [["dictionary", "malfs"]]
+          "transform": [
+            [
+              "dictionary",
+              "malfs"
+            ]
+          ]
         },
-        "faultLocatorData": { "type": "uint32", "offset": 4 },
-        "param1": { "type": "uint32", "offset": 8 },
-        "param2": { "type": "float32", "offset": 12 }
+        "faultLocatorData": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "param1": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "param2": {
+          "type": "float32",
+          "offset": 12
+        }
       }
     },
     "11": {
       "name": "LID_PUMPING_SUSPENDED",
       "data": {
-        "PreSuspendState": { "type": "uint32", "offset": 0 },
-        "InsulinAmount": { "type": "uint16", "offset": 6, "uom": "units" },
+        "PreSuspendState": {
+          "type": "uint32",
+          "offset": 0
+        },
+        "InsulinAmount": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "units"
+        },
         "SuspendReason": {
           "type": "uint8",
           "offset": 5,
@@ -95,30 +151,65 @@
             ]
           ]
         },
-        "RPATimeout": { "type": "uint8", "offset": 4, "uom": "minutes" }
+        "RPATimeout": {
+          "type": "uint8",
+          "offset": 4,
+          "uom": "minutes"
+        }
       }
     },
     "12": {
       "name": "LID_PUMPING_RESUMED",
       "data": {
-        "PreResumeState": { "type": "uint32", "offset": 0 },
-        "InsulinAmount": { "type": "uint16", "offset": 6, "uom": "units" }
+        "PreResumeState": {
+          "type": "uint32",
+          "offset": 0
+        },
+        "InsulinAmount": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "units"
+        }
       }
     },
     "13": {
       "name": "LID_TIME_CHANGED",
       "data": {
-        "TimePrior": { "type": "uint32", "offset": 0, "uom": "ms" },
-        "TimeAfter": { "type": "uint32", "offset": 4, "uom": "ms" },
-        "RawRTCTime": { "type": "uint32", "offset": 8, "uom": "ms" }
+        "TimePrior": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "ms"
+        },
+        "TimeAfter": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "ms"
+        },
+        "RawRTCTime": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "ms"
+        }
       }
     },
     "14": {
       "name": "LID_DATE_CHANGED",
       "data": {
-        "DatePrior": { "type": "uint32", "offset": 0, "uom": "day" },
-        "DateAfter": { "type": "uint32", "offset": 4, "uom": "day" },
-        "RawRTCTime": { "type": "uint32", "offset": 8, "uom": "ms" }
+        "DatePrior": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "day"
+        },
+        "DateAfter": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "day"
+        },
+        "RawRTCTime": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "ms"
+        }
       }
     },
     "16": {
@@ -127,9 +218,21 @@
         "SelectedIOB": {
           "type": "uint8",
           "offset": 15,
-          "transform": [["enum", { "0": "Mudaliar IOB", "1": "Swan IOB Meal" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Mudaliar IOB",
+                "1": "Swan IOB Meal"
+              }
+            ]
+          ]
         },
-        "BG": { "type": "uint16", "offset": 2, "uom": "mg/dL" },
+        "BG": {
+          "type": "uint16",
+          "offset": 2,
+          "uom": "mg/dL"
+        },
         "BgEntryType": {
           "type": "uint8",
           "offset": 0,
@@ -143,14 +246,32 @@
             ]
           ]
         },
-        "IOB": { "type": "float32", "offset": 4, "uom": "units" },
-        "TargetBG": { "type": "uint16", "offset": 10, "uom": "mg/dL" },
-        "ISF": { "type": "uint16", "offset": 8, "uom": "(mg/dL)/unit" },
+        "IOB": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        },
+        "TargetBG": {
+          "type": "uint16",
+          "offset": 10,
+          "uom": "mg/dL"
+        },
+        "ISF": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "(mg/dL)/unit"
+        },
         "BgSourceType": {
           "type": "uint8",
           "offset": 14,
           "transform": [
-            ["enum", { "0": "Local Pump entry", "1": "Remote entry" }]
+            [
+              "enum",
+              {
+                "0": "Local Pump entry",
+                "1": "Remote entry"
+              }
+            ]
           ]
         },
         "cgmCalibration": {
@@ -191,10 +312,25 @@
             ]
           ]
         },
-        "BolusID": { "type": "uint16", "offset": 0 },
-        "InsulinDelivered": { "type": "float32", "offset": 8, "uom": "units" },
-        "InsulinRequested": { "type": "float32", "offset": 12, "uom": "units" },
-        "IOB": { "type": "float32", "offset": 4, "uom": "units" }
+        "BolusID": {
+          "type": "uint16",
+          "offset": 0
+        },
+        "InsulinDelivered": {
+          "type": "float32",
+          "offset": 8,
+          "uom": "units"
+        },
+        "InsulinRequested": {
+          "type": "float32",
+          "offset": 12,
+          "uom": "units"
+        },
+        "IOB": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        }
       }
     },
     "21": {
@@ -220,10 +356,25 @@
             ]
           ]
         },
-        "BolusID": { "type": "uint16", "offset": 0 },
-        "InsulinDelivered": { "type": "float32", "offset": 8, "uom": "units" },
-        "InsulinRequested": { "type": "float32", "offset": 12, "uom": "units" },
-        "IOB": { "type": "float32", "offset": 4, "uom": "units" }
+        "BolusID": {
+          "type": "uint16",
+          "offset": 0
+        },
+        "InsulinDelivered": {
+          "type": "float32",
+          "offset": 8,
+          "uom": "units"
+        },
+        "InsulinRequested": {
+          "type": "float32",
+          "offset": 12,
+          "uom": "units"
+        },
+        "IOB": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        }
       }
     },
     "26": {
@@ -232,9 +383,17 @@
         "AlertID": {
           "type": "uint32",
           "offset": 0,
-          "transform": [["dictionary", "alerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "alerts"
+            ]
+          ]
         },
-        "faultLocatorData": { "type": "uint32", "offset": 4 }
+        "faultLocatorData": {
+          "type": "uint32",
+          "offset": 4
+        }
       }
     },
     "28": {
@@ -243,26 +402,63 @@
         "AlarmID": {
           "type": "uint32",
           "offset": 0,
-          "transform": [["dictionary", "alarms"]]
+          "transform": [
+            [
+              "dictionary",
+              "alarms"
+            ]
+          ]
         }
       }
     },
     "33": {
       "name": "LID_CARTRIDGE_FILLED",
       "data": {
-        "InsulinVolume": { "type": "uint32", "offset": 0, "uom": "units" },
-        "V2Volume": { "type": "float32", "offset": 4, "uom": "units" }
+        "InsulinVolume": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "units"
+        },
+        "V2Volume": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        }
       }
     },
     "53": {
       "name": "LID_SHELF_MODE",
       "data": {
-        "msecSinceReset": { "type": "uint32", "offset": 0, "uom": "ms" },
-        "LiPoCurrent": { "type": "int16", "offset": 6, "uom": "mA" },
-        "LiPo_ABC": { "type": "uint8", "offset": 5, "uom": "%" },
-        "LiPo_IBC": { "type": "uint8", "offset": 4, "uom": "%" },
-        "LiPo_RemCap": { "type": "uint32", "offset": 8, "uom": "mAh" },
-        "LiPo_mV": { "type": "uint32", "offset": 12, "uom": "mV" }
+        "msecSinceReset": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "ms"
+        },
+        "LiPoCurrent": {
+          "type": "int16",
+          "offset": 6,
+          "uom": "mA"
+        },
+        "LiPo_ABC": {
+          "type": "uint8",
+          "offset": 5,
+          "uom": "%"
+        },
+        "LiPo_IBC": {
+          "type": "uint8",
+          "offset": 4,
+          "uom": "%"
+        },
+        "LiPo_RemCap": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "mAh"
+        },
+        "LiPo_mV": {
+          "type": "uint32",
+          "offset": 12,
+          "uom": "mV"
+        }
       }
     },
     "55": {
@@ -271,11 +467,30 @@
         "SelectedIOB": {
           "type": "uint8",
           "offset": 1,
-          "transform": [["enum", { "0": "Mudaliar IOB", "1": "Swan IOB Meal" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Mudaliar IOB",
+                "1": "Swan IOB Meal"
+              }
+            ]
+          ]
         },
-        "BolusID": { "type": "uint16", "offset": 2 },
-        "IOB": { "type": "float32", "offset": 4, "uom": "units" },
-        "BolusSize": { "type": "float32", "offset": 8, "uom": "units" }
+        "BolusID": {
+          "type": "uint16",
+          "offset": 2
+        },
+        "IOB": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        },
+        "BolusSize": {
+          "type": "float32",
+          "offset": 8,
+          "uom": "units"
+        }
       }
     },
     "59": {
@@ -284,24 +499,53 @@
         "SelectedIOB": {
           "type": "uint8",
           "offset": 1,
-          "transform": [["enum", { "0": "Mudaliar IOB", "1": "Swan IOB Meal" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Mudaliar IOB",
+                "1": "Swan IOB Meal"
+              }
+            ]
+          ]
         },
-        "BolusID": { "type": "uint16", "offset": 2 },
-        "IOB": { "type": "float32", "offset": 4, "uom": "units" },
-        "BolexSize": { "type": "float32", "offset": 8, "uom": "units" }
+        "BolusID": {
+          "type": "uint16",
+          "offset": 2
+        },
+        "IOB": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        },
+        "BolexSize": {
+          "type": "float32",
+          "offset": 8,
+          "uom": "units"
+        }
       }
     },
     "60": {
       "name": "LID_DATA_LOG_CORRUPTION",
       "data": {
-        "Block": { "type": "uint32", "offset": 0 },
-        "Reason": { "type": "uint8", "offset": 7 }
+        "Block": {
+          "type": "uint32",
+          "offset": 0
+        },
+        "Reason": {
+          "type": "uint8",
+          "offset": 7
+        }
       }
     },
     "61": {
       "name": "LID_CANNULA_FILLED",
       "data": {
-        "PrimeSize": { "type": "float32", "offset": 0, "uom": "units" },
+        "PrimeSize": {
+          "type": "float32",
+          "offset": 0,
+          "uom": "units"
+        },
         "CompletionStatus": {
           "type": "uint32",
           "offset": 4,
@@ -322,7 +566,11 @@
     "63": {
       "name": "LID_TUBING_FILLED",
       "data": {
-        "PrimeSize": { "type": "float32", "offset": 0, "uom": "units" },
+        "PrimeSize": {
+          "type": "float32",
+          "offset": 0,
+          "uom": "units"
+        },
         "CompletionStatus": {
           "type": "uint32",
           "offset": 4,
@@ -338,13 +586,20 @@
             ]
           ]
         },
-        "Position": { "type": "uint32", "offset": 8, "uom": "counts" }
+        "Position": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "counts"
+        }
       }
     },
     "64": {
       "name": "LID_BOLUS_REQUESTED_MSG1",
       "data": {
-        "BolusID": { "type": "uint16", "offset": 2 },
+        "BolusID": {
+          "type": "uint16",
+          "offset": 2
+        },
         "BolusType": {
           "type": "uint8",
           "offset": 1,
@@ -363,17 +618,42 @@
         "CorrectionBolusIncluded": {
           "type": "uint8",
           "offset": 0,
-          "transform": [["enum", { "0": "No", "1": "Yes" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "No",
+                "1": "Yes"
+              }
+            ]
+          ]
         },
-        "CarbAmount": { "type": "uint16", "offset": 6, "uom": "grams" },
-        "BG": { "type": "uint16", "offset": 4, "uom": "mg/dL" },
+        "CarbAmount": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "grams"
+        },
+        "BG": {
+          "type": "uint16",
+          "offset": 4,
+          "uom": "mg/dL"
+        },
         "CarbRatio": {
           "type": "uint32",
           "offset": 12,
-          "transform": [["ratio", 0.001]],
+          "transform": [
+            [
+              "ratio",
+              0.001
+            ]
+          ],
           "uom": "g/u"
         },
-        "IOB": { "type": "float32", "offset": 8, "uom": "units" }
+        "IOB": {
+          "type": "float32",
+          "offset": 8,
+          "uom": "units"
+        }
       }
     },
     "65": {
@@ -382,9 +662,20 @@
         "SelectedIOB": {
           "type": "uint8",
           "offset": 13,
-          "transform": [["enum", { "0": "Mudaliar IOB", "1": "Swan IOB Meal" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Mudaliar IOB",
+                "1": "Swan IOB Meal"
+              }
+            ]
+          ]
         },
-        "BolusID": { "type": "uint16", "offset": 2 },
+        "BolusID": {
+          "type": "uint16",
+          "offset": 2
+        },
         "Options": {
           "type": "uint8",
           "offset": 1,
@@ -404,10 +695,26 @@
             ]
           ]
         },
-        "StandardPercent": { "type": "uint8", "offset": 0, "uom": "%" },
-        "Duration": { "type": "uint16", "offset": 6, "uom": "minutes" },
-        "ISF": { "type": "uint16", "offset": 10, "uom": "(mg/dL)/unit" },
-        "TargetBG": { "type": "uint16", "offset": 8, "uom": "mg/dL" },
+        "StandardPercent": {
+          "type": "uint8",
+          "offset": 0,
+          "uom": "%"
+        },
+        "Duration": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "minutes"
+        },
+        "ISF": {
+          "type": "uint16",
+          "offset": 10,
+          "uom": "(mg/dL)/unit"
+        },
+        "TargetBG": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "mg/dL"
+        },
         "UserOverride": {
           "type": "uint8",
           "offset": 15,
@@ -439,14 +746,25 @@
     "66": {
       "name": "LID_BOLUS_REQUESTED_MSG3",
       "data": {
-        "BolusID": { "type": "uint16", "offset": 2 },
-        "FoodBolusSize": { "type": "float32", "offset": 4, "uom": "units" },
+        "BolusID": {
+          "type": "uint16",
+          "offset": 2
+        },
+        "FoodBolusSize": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        },
         "CorrectionBolusSize": {
           "type": "float32",
           "offset": 8,
           "uom": "units"
         },
-        "TotalBolusSize": { "type": "float32", "offset": 12, "uom": "units" }
+        "TotalBolusSize": {
+          "type": "float32",
+          "offset": 12,
+          "uom": "units"
+        }
       }
     },
     "90": {
@@ -457,25 +775,55 @@
           "offset": 0,
           "uom": "units/hour"
         },
-        "FeaturesBitmask": { "type": "uint32", "offset": 4 },
-        "FeatureBitmaskIndex": { "type": "uint32", "offset": 8 }
+        "FeaturesBitmask": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "FeatureBitmaskIndex": {
+          "type": "uint32",
+          "offset": 8
+        }
       }
     },
     "99": {
       "name": "LID_ARM_INIT",
       "data": {
-        "Version": { "type": "uint32", "offset": 0 },
-        "ConfigABits": { "type": "uint32", "offset": 4 },
-        "ConfigBBits": { "type": "uint32", "offset": 8 },
-        "NumLogEntries": { "type": "uint32", "offset": 12 }
+        "Version": {
+          "type": "uint32",
+          "offset": 0
+        },
+        "ConfigABits": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "ConfigBBits": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "NumLogEntries": {
+          "type": "uint32",
+          "offset": 12
+        }
       }
     },
     "140": {
       "name": "LID_PLGS_PERIODIC",
       "data": {
-        "Timestamp": { "type": "uint32", "offset": 0, "uom": "sec" },
-        "FMR": { "type": "uint16", "offset": 6, "uom": "mg/dL" },
-        "PGV": { "type": "uint16", "offset": 4, "uom": "mg/dL" },
+        "Timestamp": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "sec"
+        },
+        "FMR": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "mg/dL"
+        },
+        "PGV": {
+          "type": "uint16",
+          "offset": 4,
+          "uom": "mg/dL"
+        },
         "FMRStatus": {
           "type": "uint8",
           "offset": 11,
@@ -497,7 +845,15 @@
         "PGVValid": {
           "type": "uint8",
           "offset": 10,
-          "transform": [["enum", { "0": "FALSE", "1": "TRUE" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "FALSE",
+                "1": "TRUE"
+              }
+            ]
+          ]
         },
         "RuleState": {
           "type": "uint8",
@@ -561,11 +917,25 @@
         "DalertID": {
           "type": "uint32",
           "offset": 0,
-          "transform": [["dictionary", "dalerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "dalerts"
+            ]
+          ]
         },
-        "faultLocatorData": { "type": "uint32", "offset": 4 },
-        "param1": { "type": "uint32", "offset": 8 },
-        "param2": { "type": "float32", "offset": 12 }
+        "faultLocatorData": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "param1": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "param2": {
+          "type": "float32",
+          "offset": 12
+        }
       }
     },
     "172": {
@@ -574,35 +944,76 @@
         "DalertID": {
           "type": "uint32",
           "offset": 0,
-          "transform": [["dictionary", "dalerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "dalerts"
+            ]
+          ]
         }
       }
     },
     "191": {
       "name": "LID_VERSION_INFO",
       "data": {
-        "Version": { "type": "uint32", "offset": 0 },
-        "ConfigABits": { "type": "uint32", "offset": 4 },
-        "ConfigBBits": { "type": "uint32", "offset": 8 },
-        "ArmCRC": { "type": "uint16", "offset": 14 }
+        "Version": {
+          "type": "uint32",
+          "offset": 0
+        },
+        "ConfigABits": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "ConfigBBits": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "ArmCRC": {
+          "type": "uint16",
+          "offset": 14
+        }
       }
     },
     "203": {
       "name": "LID_UPDATE_STATUS",
       "data": {
-        "SwUpdateStatus": { "type": "uint16", "offset": 2 },
-        "MetadataAndVersionStatus": { "type": "uint16", "offset": 0 },
-        "FullDlAndCrcStatus": { "type": "uint16", "offset": 6 },
-        "FileDlAndSideloadStatus": { "type": "uint16", "offset": 4 },
-        "ExternalFlashStatus": { "type": "uint16", "offset": 10 },
+        "SwUpdateStatus": {
+          "type": "uint16",
+          "offset": 2
+        },
+        "MetadataAndVersionStatus": {
+          "type": "uint16",
+          "offset": 0
+        },
+        "FullDlAndCrcStatus": {
+          "type": "uint16",
+          "offset": 6
+        },
+        "FileDlAndSideloadStatus": {
+          "type": "uint16",
+          "offset": 4
+        },
+        "ExternalFlashStatus": {
+          "type": "uint16",
+          "offset": 10
+        },
         "UpdateSuccessful": {
           "type": "uint8",
           "offset": 9,
           "transform": [
-            ["enum", { "0": "Update Not Successful", "1": "Update Successful" }]
+            [
+              "enum",
+              {
+                "0": "Update Not Successful",
+                "1": "Update Successful"
+              }
+            ]
           ]
         },
-        "SwPartNum": { "type": "uint32", "offset": 12 }
+        "SwPartNum": {
+          "type": "uint32",
+          "offset": 12
+        }
       }
     },
     "212": {
@@ -613,8 +1024,16 @@
           "offset": 0,
           "uom": "sec"
         },
-        "SessionStartTime": { "type": "uint32", "offset": 4, "uom": "sec" },
-        "SessionDuration": { "type": "uint8", "offset": 15, "uom": "days" }
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "sec"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 15,
+          "uom": "days"
+        }
       }
     },
     "213": {
@@ -625,8 +1044,16 @@
           "offset": 0,
           "uom": "sec"
         },
-        "SessionStartTime": { "type": "uint32", "offset": 4, "uom": "sec" },
-        "SessionDuration": { "type": "uint8", "offset": 15, "uom": "days" },
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "sec"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 15,
+          "uom": "days"
+        },
         "SessionJoinReason": {
           "type": "uint8",
           "offset": 14,
@@ -662,9 +1089,21 @@
           "offset": 0,
           "uom": "sec"
         },
-        "SessionStartTime": { "type": "uint32", "offset": 4, "uom": "sec" },
-        "SessionStopTime": { "type": "uint32", "offset": 8, "uom": "sec" },
-        "SessionDuration": { "type": "uint8", "offset": 15, "uom": "days" },
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "sec"
+        },
+        "SessionStopTime": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "sec"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 15,
+          "uom": "days"
+        },
         "SessionStopReason": {
           "type": "uint8",
           "offset": 14,
@@ -698,9 +1137,21 @@
         "ExerciseChoice": {
           "type": "uint8",
           "offset": 10,
-          "transform": [["enum", { "0": "Continuous", "1": "Timed" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Continuous",
+                "1": "Timed"
+              }
+            ]
+          ]
         },
-        "ExerciseTime": { "type": "uint16", "offset": 8, "uom": "minutes" },
+        "ExerciseTime": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "minutes"
+        },
         "CurrentUserMode": {
           "type": "uint8",
           "offset": 3,
@@ -753,12 +1204,28 @@
         "SleepStartedByGUI": {
           "type": "uint8",
           "offset": 7,
-          "transform": [["enum", { "0": "FALSE", "1": "TRUE" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "FALSE",
+                "1": "TRUE"
+              }
+            ]
+          ]
         },
         "ExerciseStoppedByTimer": {
           "type": "uint8",
           "offset": 11,
-          "transform": [["enum", { "0": "False", "1": "True" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "False",
+                "1": "True"
+              }
+            ]
+          ]
         },
         "ActiveSleepSchedule": {
           "type": "uint8",
@@ -778,7 +1245,15 @@
         "EatingSoonStoppedByTimer": {
           "type": "uint8",
           "offset": 15,
-          "transform": [["enum", { "0": "False", "1": "True" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "False",
+                "1": "True"
+              }
+            ]
+          ]
         }
       }
     },
@@ -818,27 +1293,67 @@
         "PumpSuspended": {
           "type": "uint8",
           "offset": 1,
-          "transform": [["enum", { "0": "FALSE", "1": "TRUE" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "FALSE",
+                "1": "TRUE"
+              }
+            ]
+          ]
         },
         "CalculationAvailable": {
           "type": "uint8",
           "offset": 0,
-          "transform": [["enum", { "0": "FALSE", "1": "TRUE" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "FALSE",
+                "1": "TRUE"
+              }
+            ]
+          ]
         },
         "CgmAvailable": {
           "type": "uint8",
           "offset": 7,
-          "transform": [["enum", { "0": "FALSE", "1": "TRUE" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "FALSE",
+                "1": "TRUE"
+              }
+            ]
+          ]
         },
         "ClosedLoopPreferred": {
           "type": "uint8",
           "offset": 6,
-          "transform": [["enum", { "0": "FALSE", "1": "TRUE" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "FALSE",
+                "1": "TRUE"
+              }
+            ]
+          ]
         },
         "SufficientClosedLoopParams": {
           "type": "uint8",
           "offset": 5,
-          "transform": [["enum", { "0": "FALSE", "1": "TRUE" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "FALSE",
+                "1": "TRUE"
+              }
+            ]
+          ]
         }
       }
     },
@@ -878,17 +1393,33 @@
         "Rate": {
           "type": "int8",
           "offset": 0,
-          "transform": [["ratio", 0.1]],
+          "transform": [
+            [
+              "ratio",
+              0.1
+            ]
+          ],
           "uom": "mg/dL/min"
         },
-        "AlgorithmState": { "type": "uint8", "offset": 7 },
-        "RSSI": { "type": "int8", "offset": 6, "uom": "dBm" },
+        "AlgorithmState": {
+          "type": "uint8",
+          "offset": 7
+        },
+        "RSSI": {
+          "type": "int8",
+          "offset": 6,
+          "uom": "dBm"
+        },
         "currentGlucoseDisplayValue": {
           "type": "uint16",
           "offset": 4,
           "uom": "mg/dL"
         },
-        "EGV TimeStamp": { "type": "uint32", "offset": 8, "uom": "sec" },
+        "EGV TimeStamp": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "sec"
+        },
         "EGV Info Bitmask": {
           "type": "uint16",
           "offset": 14,
@@ -909,7 +1440,10 @@
             ]
           ]
         },
-        "Interval": { "type": "uint8", "offset": 13 }
+        "Interval": {
+          "type": "uint8",
+          "offset": 13
+        }
       }
     },
     "279": {
@@ -946,18 +1480,31 @@
           "offset": 10,
           "uom": "milliunits/hr"
         },
-        "Temp Rate": { "type": "uint16", "offset": 8, "uom": "milliunits/hr" }
+        "Temp Rate": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "milliunits/hr"
+        }
       }
     },
     "280": {
       "name": "LID_BOLUS_DELIVERY",
       "data": {
-        "BolusID": { "type": "uint16", "offset": 2 },
+        "BolusID": {
+          "type": "uint16",
+          "offset": 2
+        },
         "Bolus Delivery Status": {
           "type": "uint8",
           "offset": 1,
           "transform": [
-            ["enum", { "0": "Bolus Completed", "1": "Bolus Started" }]
+            [
+              "enum",
+              {
+                "0": "Bolus Completed",
+                "1": "Bolus Started"
+              }
+            ]
           ]
         },
         "Bolus Type": {
@@ -998,8 +1545,15 @@
             ]
           ]
         },
-        "Remote ID": { "type": "uint8", "offset": 6 },
-        "Requested Now": { "type": "uint16", "offset": 4, "uom": "milliunits" },
+        "Remote ID": {
+          "type": "uint8",
+          "offset": 6
+        },
+        "Requested Now": {
+          "type": "uint16",
+          "offset": 4,
+          "uom": "milliunits"
+        },
         "Requested Later": {
           "type": "uint16",
           "offset": 10,
@@ -1015,16 +1569,32 @@
           "offset": 12,
           "uom": "milliunits"
         },
-        "Correction": { "type": "uint16", "offset": 8, "uom": "milliunits" }
+        "Correction": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "milliunits"
+        }
       }
     },
     "307": {
       "name": "LID_VERSIONS_A",
       "data": {
-        "ArmPartNumber": { "type": "uint32", "offset": 0 },
-        "ArmSwVersion": { "type": "uint32", "offset": 4 },
-        "BlePartNumber": { "type": "uint32", "offset": 8 },
-        "BleSwVersion": { "type": "uint32", "offset": 12 }
+        "ArmPartNumber": {
+          "type": "uint32",
+          "offset": 0
+        },
+        "ArmSwVersion": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "BlePartNumber": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "BleSwVersion": {
+          "type": "uint32",
+          "offset": 12
+        }
       }
     },
     "313": {
@@ -1049,7 +1619,14 @@
           "type": "uint8",
           "offset": 2,
           "transform": [
-            ["enum", { "0": "Normal", "1": "Sleeping", "2": "Exercising" }]
+            [
+              "enum",
+              {
+                "0": "Normal",
+                "1": "Sleeping",
+                "2": "Exercising"
+              }
+            ]
           ]
         },
         "SensorType": {
@@ -1075,7 +1652,12 @@
         "DalertID": {
           "type": "uint8",
           "offset": 3,
-          "transform": [["dictionary", "dalerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "dalerts"
+            ]
+          ]
         },
         "SensorType": {
           "type": "uint8",
@@ -1091,9 +1673,18 @@
             ]
           ]
         },
-        "faultLocatorData": { "type": "uint32", "offset": 4 },
-        "param1": { "type": "uint32", "offset": 8 },
-        "param2": { "type": "float32", "offset": 12 }
+        "faultLocatorData": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "param1": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "param2": {
+          "type": "float32",
+          "offset": 12
+        }
       }
     },
     "370": {
@@ -1102,7 +1693,12 @@
         "DalertID": {
           "type": "uint8",
           "offset": 3,
-          "transform": [["dictionary", "dalerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "dalerts"
+            ]
+          ]
         },
         "SensorType": {
           "type": "uint8",
@@ -1126,7 +1722,12 @@
         "DalertID": {
           "type": "uint8",
           "offset": 3,
-          "transform": [["dictionary", "dalerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "dalerts"
+            ]
+          ]
         },
         "SensorType": {
           "type": "uint8",
@@ -1166,7 +1767,11 @@
           "transform": [
             [
               "enum",
-              { "0": "Precise Value", "1": "Special High", "2": "Special Low" }
+              {
+                "0": "Precise Value",
+                "1": "Special High",
+                "2": "Special Low"
+              }
             ]
           ]
         },
@@ -1189,7 +1794,12 @@
         "Rate": {
           "type": "int16",
           "offset": 0,
-          "transform": [["ratio", 0.1]],
+          "transform": [
+            [
+              "ratio",
+              0.1
+            ]
+          ],
           "uom": "mg/dL/min"
         },
         "AlgorithmState": {
@@ -1211,13 +1821,21 @@
             ]
           ]
         },
-        "RSSI": { "type": "int8", "offset": 6, "uom": "dBm" },
+        "RSSI": {
+          "type": "int8",
+          "offset": 6,
+          "uom": "dBm"
+        },
         "currentGlucoseDisplayValue": {
           "type": "uint16",
           "offset": 4,
           "uom": "mg/dL"
         },
-        "EGV TimeStamp": { "type": "uint32", "offset": 8, "uom": "Seconds" },
+        "EGV TimeStamp": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "Seconds"
+        },
         "EGV Info Bitmask": {
           "type": "uint16",
           "offset": 14,
@@ -1240,14 +1858,25 @@
             ]
           ]
         },
-        "Interval": { "type": "uint8", "offset": 13 }
+        "Interval": {
+          "type": "uint8",
+          "offset": 13
+        }
       }
     },
     "394": {
       "name": "LID_CGM_JOIN_SESSION_G7",
       "data": {
-        "cgmTimestamp": { "type": "uint32", "offset": 0, "uom": "Seconds" },
-        "sessionSignature": { "type": "uint32", "offset": 4, "uom": "Seconds" }
+        "cgmTimestamp": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "Seconds"
+        },
+        "sessionSignature": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "Seconds"
+        }
       }
     },
     "399": {
@@ -1287,7 +1916,12 @@
         "Rate": {
           "type": "int8",
           "offset": 0,
-          "transform": [["ratio", 0.1]],
+          "transform": [
+            [
+              "ratio",
+              0.1
+            ]
+          ],
           "uom": "mg/dL/min/10"
         },
         "AlgorithmState": {
@@ -1312,13 +1946,21 @@
             ]
           ]
         },
-        "RSSI": { "type": "int8", "offset": 6, "uom": "dBm" },
+        "RSSI": {
+          "type": "int8",
+          "offset": 6,
+          "uom": "dBm"
+        },
         "currentGlucoseDisplayValue": {
           "type": "uint16",
           "offset": 4,
           "uom": "mg/dL"
         },
-        "EGV TimeStamp": { "type": "uint32", "offset": 8, "uom": "sec" },
+        "EGV TimeStamp": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "sec"
+        },
         "EGV Info Bitmask": {
           "type": "uint16",
           "offset": 14,
@@ -1341,32 +1983,73 @@
             ]
           ]
         },
-        "Interval": { "type": "uint8", "offset": 13 }
+        "Interval": {
+          "type": "uint8",
+          "offset": 13
+        }
       }
     },
     "404": {
       "name": "LID_CGM_START_SESSION_FSL2",
       "data": {
-        "SessionStartTime": { "type": "uint32", "offset": 0, "uom": "sec" },
-        "SessionDuration": { "type": "uint8", "offset": 7, "uom": "days" }
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "sec"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 7,
+          "uom": "days"
+        }
       }
     },
     "405": {
       "name": "LID_CGM_STOP_SESSION_FSL2",
       "data": {
-        "SessionStartTime": { "type": "uint32", "offset": 0, "uom": "sec" },
-        "SessionStopTime": { "type": "uint32", "offset": 4, "uom": "sec" },
-        "SessionDuration": { "type": "uint8", "offset": 11, "uom": "days" },
-        "SessionStopReason": { "type": "uint8", "offset": 10 }
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "sec"
+        },
+        "SessionStopTime": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "sec"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 11,
+          "uom": "days"
+        },
+        "SessionStopReason": {
+          "type": "uint8",
+          "offset": 10
+        }
       }
     },
     "406": {
       "name": "LID_CGM_JOIN_SESSION_FSL2",
       "data": {
-        "SessionStartTime": { "type": "uint32", "offset": 0, "uom": "sec" },
-        "SessionJoinTime": { "type": "uint32", "offset": 4, "uom": "sec" },
-        "SessionDuration": { "type": "uint8", "offset": 11, "uom": "days" },
-        "SessionJoinReason": { "type": "uint8", "offset": 10 }
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "sec"
+        },
+        "SessionJoinTime": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "sec"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 11,
+          "uom": "days"
+        },
+        "SessionJoinReason": {
+          "type": "uint8",
+          "offset": 10
+        }
       }
     },
     "447": {
@@ -1377,11 +2060,29 @@
           "offset": 0,
           "uom": "sec"
         },
-        "SessionStartTime": { "type": "uint32", "offset": 4, "uom": "sec" },
-        "SessionStopTime": { "type": "uint32", "offset": 8, "uom": "sec" },
-        "SessionDuration": { "type": "uint8", "offset": 15, "uom": "days" },
-        "SessionStopReason": { "type": "uint8", "offset": 14 },
-        "StopSessionCode": { "type": "uint8", "offset": 13 }
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "sec"
+        },
+        "SessionStopTime": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "sec"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 15,
+          "uom": "days"
+        },
+        "SessionStopReason": {
+          "type": "uint8",
+          "offset": 14
+        },
+        "StopSessionCode": {
+          "type": "uint8",
+          "offset": 13
+        }
       }
     },
     "460": {
@@ -1390,16 +2091,38 @@
         "DalertID": {
           "type": "uint8",
           "offset": 3,
-          "transform": [["dictionary", "dalerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "dalerts"
+            ]
+          ]
         },
         "SensorType": {
           "type": "uint8",
           "offset": 2,
-          "transform": [["enum", { "0": "Invalid", "2": "CGM_TYPE_LIBRE2" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Invalid",
+                "2": "CGM_TYPE_LIBRE2"
+              }
+            ]
+          ]
         },
-        "faultLocatorData": { "type": "uint32", "offset": 4 },
-        "param1": { "type": "uint32", "offset": 8 },
-        "param2": { "type": "float32", "offset": 12 }
+        "faultLocatorData": {
+          "type": "uint32",
+          "offset": 4
+        },
+        "param1": {
+          "type": "uint32",
+          "offset": 8
+        },
+        "param2": {
+          "type": "float32",
+          "offset": 12
+        }
       }
     },
     "461": {
@@ -1408,12 +2131,171 @@
         "DalertID": {
           "type": "uint8",
           "offset": 3,
-          "transform": [["dictionary", "dalerts"]]
+          "transform": [
+            [
+              "dictionary",
+              "dalerts"
+            ]
+          ]
         },
         "SensorType": {
           "type": "uint8",
           "offset": 2,
-          "transform": [["enum", { "0": "Invalid", "2": "CGM_TYPE_LIBRE2" }]]
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Invalid",
+                "2": "CGM_TYPE_LIBRE2"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "477": {
+      "name": "LID_CGM_JOIN_SESSION_FSL3",
+      "data": {
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "Seconds"
+        },
+        "SessionJoinTime": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "Seconds"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 8,
+          "uom": "Days"
+        },
+        "SessionJoinReason": {
+          "type": "uint8",
+          "offset": 9
+        }
+      }
+    },
+    "480": {
+      "name": "LID_CGM_DATA_FSL3",
+      "data": {
+        "glucoseValueStatus": {
+          "type": "uint8",
+          "offset": 3,
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Precise Value",
+                "1": "Special High",
+                "2": "Special Low"
+              }
+            ]
+          ]
+        },
+        "CGM Data Type": {
+          "type": "uint8",
+          "offset": 2,
+          "transform": [
+            [
+              "bitmask",
+              {
+                "0": "Five Minute Reading (FMR)",
+                "1": "Backfill",
+                "4": "None",
+                "5": "One Minute Reading (OMR)"
+              }
+            ]
+          ]
+        },
+        "Rate": {
+          "type": "int16",
+          "offset": 0,
+          "transform": [
+            [
+              "ratio",
+              0.1
+            ]
+          ],
+          "uom": "mg/dL/min"
+        },
+        "AlgorithmState": {
+          "type": "uint8",
+          "offset": 7,
+          "transform": [
+            [
+              "enum",
+              {
+                "100": "OK State"
+              }
+            ]
+          ]
+        },
+        "RSSI": {
+          "type": "int8",
+          "offset": 6,
+          "uom": "dBm"
+        },
+        "currentGlucoseDisplayValue": {
+          "type": "uint16",
+          "offset": 4,
+          "uom": "mg/dL"
+        },
+        "EGV TimeStamp": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "Seconds"
+        },
+        "EGV Info Bitmask": {
+          "type": "uint16",
+          "offset": 14,
+          "transform": [
+            [
+              "bitmask",
+              {
+                "0": "Five Minute Reading (FMR)",
+                "1": "Backfill",
+                "4": "NO_EGV message",
+                "5": "Valid timestamp",
+                "6": "Valid EGV (valid range)",
+                "7": "Valid algState (algState is 100)",
+                "8": "EGV was successfully added to CGM subsystem array (e.g., not a duplicate)",
+                "9": "OMR reading type",
+                "11": "Sensor Type (see CGMTxType enum)",
+                "12": "Sensor Type (see CGMTxType enum)",
+                "13": "Sensor Type (see CGMTxType enum)"
+              }
+            ]
+          ]
+        },
+        "Interval": {
+          "type": "uint8",
+          "offset": 13
+        }
+      }
+    },
+    "486": {
+      "name": "LID_CGM_STOP_SESSION_FSL3",
+      "data": {
+        "SessionStartTime": {
+          "type": "uint32",
+          "offset": 0,
+          "uom": "sec"
+        },
+        "SessionStopTime": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "sec"
+        },
+        "SessionDuration": {
+          "type": "uint8",
+          "offset": 8,
+          "uom": "days"
+        },
+        "SessionStopReason": {
+          "type": "uint8",
+          "offset": 9
         }
       }
     }
