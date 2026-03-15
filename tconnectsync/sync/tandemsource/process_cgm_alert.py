@@ -65,6 +65,8 @@ class ProcessCGMAlert:
         return count
 
     def alert_to_nsentry(self, alert):
+        # FSL3 alert codes are defined in eventparser/static_dicts.py:CGM_ALERTS_DICT
+        # Alert code meanings are documented in comments there.
         if not alert.dalertid:
             logger.info("ProcessCGMAlert: Skipping alert with unknown dalertid %d: %s" % (alert.dalertidRaw, alert))
             return None

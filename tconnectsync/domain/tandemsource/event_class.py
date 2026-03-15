@@ -19,10 +19,10 @@ class EventClass(set, Enum):
     CARTRIDGE = {events.LidCartridgeFilled, events.LidCannulaFilled, events.LidTubingFilled}
     CGM_ALERT = {events.LidCgmAlertActivated, events.LidCgmAlertActivatedDex, events.LidCgmAlertActivatedFsl2}
     _CGM_START = {events.LidCgmStartSessionGx, events.LidCgmStartSessionFsl2}
-    _CGM_JOIN = {events.LidCgmJoinSessionGx, events.LidCgmJoinSessionG7, events.LidCgmJoinSessionFsl2}
-    _CGM_STOP = {events.LidCgmStopSessionGx, events.LidCgmStopSessionG7, events.LidCgmStopSessionFsl2}
+    _CGM_JOIN = {events.LidCgmJoinSessionGx, events.LidCgmJoinSessionG7, events.LidCgmJoinSessionFsl2, events.LidCgmJoinSessionFsl3}
+    _CGM_STOP = {events.LidCgmStopSessionGx, events.LidCgmStopSessionG7, events.LidCgmStopSessionFsl2, events.LidCgmStopSessionFsl3}
     CGM_START_JOIN_STOP = {*_CGM_START, *_CGM_JOIN, *_CGM_STOP}
-    CGM_READING = {events.LidCgmDataGxb, events.LidCgmDataG7, events.LidCgmDataFsl2}
+    CGM_READING = {events.LidCgmDataGxb, events.LidCgmDataG7, events.LidCgmDataFsl2, events.LidCgmDataFsl3}
     USER_MODE = {events.LidAaUserModeChange}
     DEVICE_STATUS = {events.LidDailyBasal}
 

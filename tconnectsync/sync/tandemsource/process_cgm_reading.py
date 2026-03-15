@@ -4,15 +4,9 @@ import arrow
 from ...features import DEFAULT_FEATURES
 from ... import features
 from ... import secret
-from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
-from ...eventparser.utils import bitmask_to_list
 from ...eventparser.raw_event import TANDEM_EPOCH
-from ...eventparser import events as eventtypes
-from ...domain.tandemsource.event_class import EventClass
-from ...parser.nightscout import (
-    CGM_START_EVENTTYPE,
-    NightscoutEntry
-)
+from ...parser.nightscout import NightscoutEntry
+
 
 logger = logging.getLogger(__name__)
 
