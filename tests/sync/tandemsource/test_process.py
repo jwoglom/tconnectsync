@@ -100,15 +100,10 @@ class TestProcessTimeRangeBasalDuration(unittest.TestCase):
         self.assertEqual(basal_1['duration'], 5.0)
 
         # Second basal: from 13:17:40 to time_end (13:29:00) = 11.333... minutes
-        # NOT from 13:17:40 to future_cgm_event (03:00:00) which would be ~822 minutes
         basal_2 = self.nightscout.uploaded_entries['treatments'][1]
         self.assertEqual(basal_2['eventType'], 'Temp Basal')
         self.assertEqual(basal_2['created_at'], '2025-11-18 13:17:40-05:00')
-        # Duration should be capped at time_end, not extended to future CGM event
-        expected_duration = (time_end - arrow.get('2025-11-18T13:17:40-05:00')).seconds / 60
-        self.assertAlmostEqual(basal_2['duration'], expected_duration, places=2)
-        # Verify it's NOT the inflated duration to the future event
-        self.assertLess(basal_2['duration'], 100)  # Should be ~11 min, not ~822 min
+        self.assertAlmostEqual(basal_2['duration'], 11.33, places=2)
 
     def test_basal_duration_normal_when_all_events_in_past(self):
         """Test that basal duration uses events_last_time when it's <= time_end"""
@@ -141,9 +136,30 @@ class TestProcessTimeRangeBasalDuration(unittest.TestCase):
         # Second basal: should use events_last_time (13:22:40) not time_end (13:29:00)
         # Duration: 13:17:40 to 13:22:40 = 5 minutes
         basal_2 = self.nightscout.uploaded_entries['treatments'][1]
-        expected_duration = (arrow.get('2025-11-18T13:22:40-05:00') - arrow.get('2025-11-18T13:17:40-05:00')).seconds / 60
-        self.assertAlmostEqual(basal_2['duration'], expected_duration, places=2)
         self.assertEqual(basal_2['duration'], 5.0)
+
+    def test_single_basal_event_duration(self):
+        """Test that a single basal event gets a proper duration (min 5 min) even if it's the only event in the batch"""
+        # Create one basal event
+        basal_event = Event(BASAL_EVENT_1)  # 2025-11-18 13:12:40
+
+        # Set up the fake API
+        self.tconnect._tandemsource.events = [basal_event]
+
+        # time_end is 13:22:40 (10 minutes after event)
+        time_start = arrow.get('2025-11-18T13:00:00-05:00')
+        time_end = arrow.get('2025-11-18T13:22:40-05:00')
+
+        # Process the events
+        self.process.process(time_start, time_end)
+
+        # Verify that basal event was uploaded
+        self.assertEqual(len(self.nightscout.uploaded_entries['treatments']), 1)
+        basal = self.nightscout.uploaded_entries['treatments'][0]
+
+        # Duration is 10.0 because it's max(actual_end_time - start, 5 min)
+        # actual_end_time is time_end (13:22:40) because time_end > start
+        self.assertEqual(basal['duration'], 10.0)
 
 
 if __name__ == '__main__':

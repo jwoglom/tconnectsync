@@ -22,7 +22,7 @@ class ProcessCGMReading:
     def enabled(self):
         return features.CGM in self.features
 
-    def process(self, events, time_start, time_end):
+    def process(self, events, time_start, time_end, time_end_aware=None):
         logger.debug("ProcessCGMReading: querying for last uploaded entry")
         last_upload = self.nightscout.last_uploaded_bg_entry(time_start=time_start, time_end=time_end)
         last_upload_time = None

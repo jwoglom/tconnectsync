@@ -25,7 +25,7 @@ class ProcessCGMAlert:
     def enabled(self):
         return features.CGM_ALERTS in self.features
 
-    def process(self, events, time_start, time_end):
+    def process(self, events, time_start, time_end, time_end_aware=None):
         logger.debug("ProcessCGMAlert: querying for last uploaded entry")
         last_upload = self.nightscout.last_uploaded_entry(CGM_ALERT_EVENTTYPE, time_start=time_start, time_end=time_end)
         last_upload_time = None

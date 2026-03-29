@@ -86,7 +86,7 @@ class ProcessTimeRange:
                     # Ensure time_end is timezone-aware for comparison
                     time_end_aware = arrow.get(time_end)
                     capped_time_end = min(events_last_time, time_end_aware) if events_last_time else time_end_aware
-                    ns_entries = c.process(events, events_first_time, capped_time_end)
+                    ns_entries = c.process(events, events_first_time, capped_time_end, time_end_aware)
                     w = c.write(ns_entries)
                     if w:
                         processed_count += w

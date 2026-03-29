@@ -25,7 +25,7 @@ class ProcessCGMStartJoinStop:
     def enabled(self):
         return features.PUMP_EVENTS in self.features or features.CGM_ALERTS in self.features
 
-    def process(self, events, time_start, time_end):
+    def process(self, events, time_start, time_end, time_end_aware=None):
         last_upload = None
         last_upload_time = None
         for eventtype in [CGM_START_EVENTTYPE, CGM_JOIN_EVENTTYPE, CGM_STOP_EVENTTYPE]:
