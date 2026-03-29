@@ -25,7 +25,7 @@ class ProcessAlarm:
     def enabled(self):
         return features.PUMP_EVENTS in self.features
 
-    def process(self, events, time_start, time_end):
+    def process(self, events, time_start, time_end, time_end_aware=None):
         logger.debug("ProcessAlarm: querying for last uploaded alarm")
         last_upload = self.nightscout.last_uploaded_entry(ALARM_EVENTTYPE, time_start=time_start, time_end=time_end)
         last_upload_time = None

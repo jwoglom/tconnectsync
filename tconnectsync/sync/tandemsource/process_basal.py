@@ -1,5 +1,6 @@
 import logging
 import arrow
+import datetime
 
 from ...secret import IGNORE_ZERO_UNIT_BASAL
 from ...features import DEFAULT_FEATURES
@@ -27,7 +28,10 @@ class ProcessBasal:
     def enabled(self):
         return features.BASAL in self.features
 
-    def process(self, events, time_start, time_end):
+    def process(self, events, time_start, time_end, time_end_aware=None):
+        if time_end_aware is None:
+            time_end_aware = time_end
+
         logger.debug("ProcessBasal: querying for last uploaded entry")
         last_upload = self.nightscout.last_uploaded_entry(BASAL_EVENTTYPE, time_start=time_start, time_end=time_end)
         last_upload_time = None
@@ -51,7 +55,23 @@ class ProcessBasal:
         for i in range(len(with_duration)-1):
             with_duration[i][1] = with_duration[i+1][0] - with_duration[i][0]
 
-        with_duration[-1][1] = time_end - with_duration[-1][0]
+        # If the last event in the batch is the basal event itself, then time_end == event.eventTimestamp
+        # and duration is 0. In this case, we want to extend the duration to time_end_aware (now).
+        # If there were other events in the batch after this basal, time_end would be > event.eventTimestamp
+        # and we should respect that as the duration.
+        last_start_time = with_duration[-1][0]
+        actual_end_time = time_end
+        if actual_end_time <= last_start_time:
+            actual_end_time = time_end_aware
+
+        # Ensure the last basal event has a minimum duration (e.g., 5 minutes)
+        # to avoid "too short" durations when polling frequently.
+        # Nightscout will overlap this with the next basal event when it arrives.
+        min_duration = datetime.timedelta(minutes=5)
+        if actual_end_time - last_start_time < min_duration:
+            actual_end_time = last_start_time + min_duration
+            
+        with_duration[-1][1] = actual_end_time - last_start_time
 
         ns_entries = []
         for item in with_duration:
@@ -75,6 +95,7 @@ class ProcessBasal:
 
 
     def basal_to_nsentry(self, start, duration, event):
+        duration_mins = round(duration.total_seconds() / 60, 2)
         if type(event) == eventtypes.LidBasalRateChange:
             value = insulin_float_round(event.commandedbasalrate)
             if IGNORE_ZERO_UNIT_BASAL and value < 0.01:
@@ -82,7 +103,7 @@ class ProcessBasal:
                 return None
             return NightscoutEntry.basal(
                 value = value,
-                duration_mins = duration.seconds / 60,
+                duration_mins = duration_mins,
                 created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.changetype)),
                 pump_event_id = "%s" % event.seqNum
@@ -94,7 +115,7 @@ class ProcessBasal:
                 return None
             return NightscoutEntry.basal(
                 value = value,
-                duration_mins = duration.seconds / 60,
+                duration_mins = duration_mins,
                 created_at = start.format(),
                 reason = ', '.join(bitmask_to_list(event.commandedRateSource)),
                 pump_event_id = "%s" % event.seqNum

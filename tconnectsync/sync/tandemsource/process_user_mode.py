@@ -1,5 +1,6 @@
 import logging
 import arrow
+import datetime
 
 from ...features import DEFAULT_FEATURES
 from ... import features
@@ -28,7 +29,10 @@ class ProcessUserMode:
     def enabled(self):
         return features.PUMP_EVENTS in self.features
 
-    def process(self, events, time_start, time_end):
+    def process(self, events, time_start, time_end, time_end_aware=None):
+        if time_end_aware is None:
+            time_end_aware = time_end
+
         logger.debug("ProcessUserMode: querying for last uploaded exercise entry")
         exercise_last_upload = self.nightscout.last_uploaded_entry(EXERCISE_EVENTTYPE, time_start=time_start, time_end=time_end)
         exercise_last_upload_time = None
@@ -112,10 +116,10 @@ class ProcessUserMode:
             logger.info("ProcessUserMode: exercise is active")
 
         for items in processed_sleep:
-            ns_entries.append(self.sleep_to_nsentry(start=items[0], stop=items[1], time_end=time_end))
+            ns_entries.append(self.sleep_to_nsentry(start=items[0], stop=items[1], time_end=time_end, time_end_aware=time_end_aware))
 
         for items in processed_exercise:
-            ns_entries.append(self.exercise_to_nsentry(start=items[0], stop=items[1], time_end=time_end))
+            ns_entries.append(self.exercise_to_nsentry(start=items[0], stop=items[1], time_end=time_end, time_end_aware=time_end_aware))
 
         return ns_entries
 
@@ -143,7 +147,7 @@ class ProcessUserMode:
                event.requestedaction == eventtypes.LidAaUserModeChange.RequestedactionEnum.StopAll
 
 
-    def sleep_to_nsentry(self, start, stop=None, time_end=None):
+    def sleep_to_nsentry(self, start, stop=None, time_end=None, time_end_aware=None):
         if start and stop:
             reason = None
             if start.sleepstartedbygui == eventtypes.LidAaUserModeChange.SleepstartedbyguiEnum.TrueVal:
@@ -151,7 +155,7 @@ class ProcessUserMode:
             elif start.activesleepschedule:
                 reason = "Sleep (Scheduled)"
 
-            duration_mins = (stop.eventTimestamp - start.eventTimestamp).seconds / 60
+            duration_mins = round((stop.eventTimestamp - start.eventTimestamp).total_seconds() / 60, 2)
             return NightscoutEntry.activity(
                 created_at=start.eventTimestamp.format(),
                 reason=reason,
@@ -166,7 +170,15 @@ class ProcessUserMode:
             elif start.activesleepscheduleRaw:
                 reason = "Sleep (Scheduled)"
 
-            duration_mins = (time_end - start.eventTimestamp).seconds / 60
+            actual_end_time = time_end
+            if actual_end_time <= start.eventTimestamp:
+                actual_end_time = time_end_aware or time_end
+            
+            min_duration = datetime.timedelta(minutes=5)
+            if actual_end_time - start.eventTimestamp < min_duration:
+                actual_end_time = start.eventTimestamp + min_duration
+
+            duration_mins = round((actual_end_time - start.eventTimestamp).total_seconds() / 60, 2)
             return NightscoutEntry.activity(
                 created_at=start.eventTimestamp.format(),
                 reason=reason + " - " + NOT_ENDED if reason else NOT_ENDED,
@@ -176,7 +188,7 @@ class ProcessUserMode:
             )
 
 
-    def exercise_to_nsentry(self, start, stop=None, time_end=None):
+    def exercise_to_nsentry(self, start, stop=None, time_end=None, time_end_aware=None):
         if start and stop:
             reason = "Exercise"
             if start.exercisechoice == eventtypes.LidAaUserModeChange.ExercisechoiceEnum.Timed:
@@ -185,7 +197,7 @@ class ProcessUserMode:
             if stop.exercisestoppedbytimer == eventtypes.LidAaUserModeChange.ExercisestoppedbytimerEnum.TrueVal:
                 reason += " (Stopped by timer)"
 
-            duration_mins = (stop.eventTimestamp - start.eventTimestamp).seconds / 60
+            duration_mins = round((stop.eventTimestamp - start.eventTimestamp).total_seconds() / 60, 2)
             return NightscoutEntry.activity(
                 created_at=start.eventTimestamp.format(),
                 reason=reason,
@@ -198,7 +210,15 @@ class ProcessUserMode:
             if start.exercisechoice == eventtypes.LidAaUserModeChange.ExercisechoiceEnum.Timed:
                 reason = "Exercise (Timed)"
 
-            duration_mins = (time_end - start.eventTimestamp).seconds / 60
+            actual_end_time = time_end
+            if actual_end_time <= start.eventTimestamp:
+                actual_end_time = time_end_aware or time_end
+            
+            min_duration = datetime.timedelta(minutes=5)
+            if actual_end_time - start.eventTimestamp < min_duration:
+                actual_end_time = start.eventTimestamp + min_duration
+
+            duration_mins = round((actual_end_time - start.eventTimestamp).total_seconds() / 60, 2)
             return NightscoutEntry.activity(
                 created_at=start.eventTimestamp.format(),
                 reason=reason + " - " + NOT_ENDED,
@@ -214,7 +234,7 @@ class ProcessUserMode:
         else:
             self.nightscout.delete_entry('treatments/%s' % sleep_last_upload["_id"])
 
-        duration_mins = (event.eventTimestamp - arrow.get(sleep_last_upload["created_at"])).seconds / 60
+        duration_mins = round((event.eventTimestamp - arrow.get(sleep_last_upload["created_at"])).total_seconds() / 60, 2)
         return NightscoutEntry.activity(
             created_at=sleep_last_upload["created_at"],
             reason=sleep_last_upload["reason"].replace(" - %s" % NOT_ENDED, ""),
@@ -234,7 +254,7 @@ class ProcessUserMode:
         if event.exercisestoppedbytimer == eventtypes.LidAaUserModeChange.ExercisestoppedbytimerEnum.TrueVal:
             reason += " (Stopped by timer)"
 
-        duration_mins = (event.eventTimestamp - arrow.get(exercise_last_upload["created_at"])).seconds / 60
+        duration_mins = round((event.eventTimestamp - arrow.get(exercise_last_upload["created_at"])).total_seconds() / 60, 2)
         return NightscoutEntry.activity(
             created_at=exercise_last_upload["created_at"],
             reason=reason,

@@ -26,7 +26,7 @@ class ProcessDeviceStatus:
     def enabled(self):
         return features.DEVICE_STATUS in self.features
 
-    def process(self, events, time_start, time_end):
+    def process(self, events, time_start, time_end, time_end_aware=None):
         logger.debug("ProcessDeviceStatus: querying for last uploaded devicestatus")
         last_upload = self.nightscout.last_uploaded_devicestatus(time_start=time_start, time_end=time_end)
         last_upload_time = None
