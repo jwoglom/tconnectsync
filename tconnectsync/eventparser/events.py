@@ -5557,31 +5557,39 @@ class LidDailyBasal(BaseEvent):
     dailytotalbasal: float # units
     lastbasalrate: float # units/hour
     iob: float # units
-    batterychargepercentmsbRaw: int
-    batterychargepercentlsbRaw: int
     batterylipomillivolts: int
+    batterychargepercent: int
+    batterystatusRaw: int
 
     @property
     def batteryChargePercent(self):
-        return (256*(self.batterychargepercentmsbRaw-14)+self.batterychargepercentlsbRaw)/(3*256)
+        return self.batterychargepercent / 100
+
+    @property
+    def batterychargepercentmsbRaw(self):
+        return (self.batterylipomillivolts >> 8) & 0xff
+
+    @property
+    def batterychargepercentlsbRaw(self):
+        return self.batterylipomillivolts & 0xff
 
     @staticmethod
     def build(raw):
         dailytotalbasal, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
         lastbasalrate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
-        batterychargepercentmsbRaw, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
-        batterychargepercentlsbRaw, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
-        batterylipomillivolts, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+        batterylipomillivolts, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
+        batterychargepercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        batterystatusRaw, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
 
         return LidDailyBasal(
             raw = RawEvent.build(raw),
             dailytotalbasal = dailytotalbasal,
             lastbasalrate = lastbasalrate,
             iob = iob,
-            batterychargepercentmsbRaw = batterychargepercentmsbRaw,
-            batterychargepercentlsbRaw = batterychargepercentlsbRaw,
             batterylipomillivolts = batterylipomillivolts,
+            batterychargepercent = batterychargepercent,
+            batterystatusRaw = batterystatusRaw,
         )
 
     @property
@@ -5605,9 +5613,9 @@ class LidDailyBasal(BaseEvent):
             dailytotalbasal=self.dailytotalbasal,
             lastbasalrate=self.lastbasalrate,
             iob=self.iob,
-            batterychargepercentmsbRaw=self.batterychargepercentmsbRaw,
-            batterychargepercentlsbRaw=self.batterychargepercentlsbRaw,
             batterylipomillivolts=self.batterylipomillivolts,
+            batterychargepercent=self.batterychargepercent,
+            batterystatusRaw=self.batterystatusRaw,
         )
 
 
