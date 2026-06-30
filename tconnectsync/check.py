@@ -14,7 +14,6 @@ else:
 
 from .nightscout import NightscoutApi
 from .parser.nightscout import BASAL_EVENTTYPE, BOLUS_EVENTTYPE
-from .parser.tconnect import TConnectEntry
 from .domain.tandemsource.event_class import EventClass
 from .sync.tandemsource.choose_device import ChooseDevice
 

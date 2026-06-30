@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from tconnectsync.parser.nightscout import NightscoutEntry, InvalidBolusTypeException, tandem_to_ns_time, tandem_to_ns_time_seconds
-from tconnectsync.domain.device_settings import Profile, ProfileSegment, DeviceSettings
-from .test_profile_data import DEVICE_PROFILE_A, DEVICE_SETTINGS, NS_PROFILE_A
+from tconnectsync.parser.nightscout import NightscoutEntry, InvalidBolusTypeException
 
 class TestNightscoutEntry(unittest.TestCase):
     maxDiff = None
@@ -188,39 +186,6 @@ class TestNightscoutEntry(unittest.TestCase):
             }
         )
 
-
-    def test_profile_store(self):
-        self.assertEqual(
-            NightscoutEntry.profile_store(
-                profile=DEVICE_PROFILE_A,
-                device_settings=DEVICE_SETTINGS
-            ),
-            NS_PROFILE_A
-        )
-
-
-class TestTandemNightscoutTime(unittest.TestCase):
-    def test_tandem_to_ns_time(self):
-        self.assertEqual(tandem_to_ns_time('12:00 AM'), '00:00')
-        self.assertEqual(tandem_to_ns_time('12:30 AM'), '00:30')
-        self.assertEqual(tandem_to_ns_time('6:00 AM'), '06:00')
-        self.assertEqual(tandem_to_ns_time('6:30 AM'), '06:30')
-        self.assertEqual(tandem_to_ns_time('11:30 AM'), '11:30')
-        self.assertEqual(tandem_to_ns_time('12:00 PM'), '12:00')
-        self.assertEqual(tandem_to_ns_time('12:30 PM'), '12:30')
-        self.assertEqual(tandem_to_ns_time('06:30 PM'), '18:30')
-        self.assertEqual(tandem_to_ns_time('11:30 PM'), '23:30')
-
-    def test_tandem_to_ns_time_seconds(self):
-        self.assertEqual(tandem_to_ns_time_seconds('12:00 AM'), 0)
-        self.assertEqual(tandem_to_ns_time_seconds('12:30 AM'), 30*60)
-        self.assertEqual(tandem_to_ns_time_seconds('6:00 AM'), 6*60*60)
-        self.assertEqual(tandem_to_ns_time_seconds('6:30 AM'), 6*60*60 + 30*60)
-        self.assertEqual(tandem_to_ns_time_seconds('11:30 AM'), 11*60*60 + 30*60)
-        self.assertEqual(tandem_to_ns_time_seconds('12:00 PM'), 12*60*60)
-        self.assertEqual(tandem_to_ns_time_seconds('12:30 PM'), 12*60*60 + 30*60)
-        self.assertEqual(tandem_to_ns_time_seconds('06:30 PM'), 12*60*60 + 6*60*60 + 30*60)
-        self.assertEqual(tandem_to_ns_time_seconds('11:30 PM'), 12*60*60 + 11*60*60 + 30*60)
 
 if __name__ == '__main__':
     unittest.main()

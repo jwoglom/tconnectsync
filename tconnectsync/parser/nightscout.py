@@ -1,6 +1,5 @@
 import arrow
 
-from ..domain.device_settings import Profile, DeviceSettings
 from ..domain.tandemsource.pump_settings import PumpProfile, PumpSettings
 from ..secret import TIMEZONE_NAME, NIGHTSCOUT_PROFILE_CARBS_HR_VALUE, NIGHTSCOUT_PROFILE_DELAY_VALUE
 
@@ -210,57 +209,6 @@ class NightscoutEntry:
             "pump_event_id": pump_event_id
         }
 
-    # Tandem-scraped profile to Nightscout profile store entry
-    @staticmethod
-    def profile_store(profile: Profile, device_settings: DeviceSettings) -> dict:
-        return {
-            # insulin duration in hours; Nightscout JS bug requires all top-level fields to be strings
-            "dia": "%s" % (profile.insulin_duration_min / 60),
-            "carbratio": [
-                {
-                    "time": tandem_to_ns_time(segment.time),
-                    "timeAsSeconds": tandem_to_ns_time_seconds(segment.time),
-                    "value": segment.carb_ratio
-                } for segment in profile.segments
-            ],
-
-            "carbs_hr": NIGHTSCOUT_PROFILE_CARBS_HR_VALUE,
-            "delay": NIGHTSCOUT_PROFILE_DELAY_VALUE,
-            "sens": [ # Correction factor
-                {
-                    "time": tandem_to_ns_time(segment.time),
-                    "timeAsSeconds": tandem_to_ns_time_seconds(segment.time),
-                    "value": segment.correction_factor
-                } for segment in profile.segments
-            ],
-            "basal": [
-                {
-                    "time": tandem_to_ns_time(segment.time),
-                    "timeAsSeconds": tandem_to_ns_time_seconds(segment.time),
-                    "value": segment.basal_rate
-                } for segment in profile.segments
-            ],
-            "target_low": [
-                {
-                    "time": "00:00",
-                    "timeAsSeconds": 0,
-                    "value": device_settings.low_bg_threshold
-                }
-            ],
-            "target_high": [
-                {
-                    "time": "00:00",
-                    "timeAsSeconds": 0,
-                    "value": device_settings.high_bg_threshold
-                }
-            ],
-            "timezone": TIMEZONE_NAME, # tconnectsync settings timezone
-            "startDate": "1970-01-01T00:00:00.000Z",
-            "units": "mg/dl"
-        }
-
-
-
     # TandemSource profile to Nightscout profile store entry
     @staticmethod
     def tandemsource_profile_store(profile: PumpProfile, pump_settings: PumpSettings) -> dict:
@@ -313,24 +261,6 @@ class NightscoutEntry:
             "units": "mg/dl"
         }
 
-def tandem_to_ns_time(tandem_time: str) -> str:
-    numbers, ampm = tandem_time.split(' ')
-    hr, min = numbers.split(':')
-    if ampm.lower().strip() == 'am':
-        return "%02d:%02d" % (int(hr) % 12, int(min))
-    elif ampm.lower().strip() == 'pm':
-        return "%02d:%02d" % (12 + (int(hr) % 12), int(min))
-    raise InvalidTimeException(tandem_time)
-
-def tandem_to_ns_time_seconds(tandem_time: str) -> int:
-    numbers, ampm = tandem_time.split(' ')
-    hr, min = numbers.split(':')
-    if ampm.lower().strip() == 'am':
-        return 60 * (60 * (int(hr) % 12) + int(min))
-    elif ampm.lower().strip() == 'pm':
-        return 60 * (60 * (12 + (int(hr) % 12)) + int(min))
-    raise InvalidTimeException(tandem_time)
-
 def minutes_to_ns_time(minutes_time: int) -> str:
     hr = minutes_time // 60
     mn = minutes_time % 60
@@ -338,7 +268,4 @@ def minutes_to_ns_time(minutes_time: int) -> str:
     return "%02d:%02d" % (hr, mn)
 
 class InvalidBolusTypeException(RuntimeError):
-    pass
-
-class InvalidTimeException(RuntimeError):
     pass

@@ -419,13 +419,11 @@ If main.py doesn't exist in `C:\Users\<USERNAME>\AppData\Local\Programs\Python\<
 
 ## Tandem APIs
 
-This application utilizes three separate Tandem APIs for obtaining t:connect data, referenced here by the identifying part of their URLs:
+As of version 2.0, tconnectsync retrieves all of its data from a single Tandem API, [**tandemsource**](https://github.com/jwoglom/tconnectsync/blob/master/tconnectsync/api/tandemsource.py), which powers [Tandem Source](https://source.tandemdiabetes.com/). After logging in, tconnectsync fetches the list of pumps on the account along with a stream of raw pump event data, which is decoded locally (see [`tconnectsync/eventparser`](https://github.com/jwoglom/tconnectsync/tree/master/tconnectsync/eventparser)) to extract basal, bolus, CGM, and other pump events.
 
-* [**controliq**](https://github.com/jwoglom/tconnectsync/blob/master/tconnectsync/api/controliq.py) - Contains Control:IQ related data, namely a timeline of all Basal events uploaded by the pump, separated by type (temp basals, algorithmically-updated basals, or profile-updated basals). Additionally includes CGM and Bolus data.
-* [**android**](https://github.com/jwoglom/tconnectsync/blob/master/tconnectsync/api/android.py) - Used internally by the t:connect Android app, these API endpoints were discovered by reverse-engineering the Android app. Most of the API endpoints are used for uploading pump data, and tconnectsync uses one endpoint which returns the most recent event ID uploaded by the pump, so we know when more data has been uploaded.
-* [**tconnectws2**](https://github.com/jwoglom/tconnectsync/blob/master/tconnectsync/api/ws2.py) - More legacy than the others, this seems to power the bulk of the main t:connect website. It is used as a last resort due to severe performance issues with this API (see https://github.com/jwoglom/tconnectsync/issues/43). We can use it to retrieve a CSV export of non-ControlIQ basal data, as well as bolus and IOB data. It is only used for bolus data as a fallback, and for pump-reported IOB data if requested. Full tracking of pump events also uses a limited version of this API.
+> Earlier versions of tconnectsync (1.x) instead used three separate legacy t:connect APIs (`controliq`, `android`, and `tconnectws2`). Those APIs — and the code supporting them — were removed once t:connect was shut down in favor of Tandem Source.
 
-I have only tested tconnectsync with a Tandem pump set in the US Eastern timezone. Tandem's (to us, undocumented) APIs are [a bit loose with timezones](https://github.com/jwoglom/tconnectsync/blob/master/tconnectsync/parser.py#L15), so please let me know if you notice any timezone-related bugs.
+I have only tested tconnectsync with a Tandem pump set in the US Eastern timezone. Tandem's (to us, undocumented) APIs are a bit loose with timezones, so please let me know if you notice any timezone-related bugs.
 ## Backfilling t:connect Data
 
 To backfill existing t:connect data in to Nightscout, you can use the `--start-date` and `--end-date` options. For example, the following will upload all t:connect data between January 1st and March 1st, 2020 to Nightscout:
@@ -438,14 +436,14 @@ In order to bulk-import a lot of data, you may need to use shorter intervals, an
 
 One oddity when backfilling data is that the Control:IQ specific API endpoints return errors if they are queried before you updated your pump to utilize Control:IQ. This is [partially worked around in tconnectsync's code](https://github.com/jwoglom/tconnectsync/blob/d841c3811aeff3671d941a7d3ff4b80cce6a219e/main.py#L238), but you might need to update the logic if you did not switch to a Control:IQ enabled pump immediately after launch.
 
-## t:connect API Testing
+## Tandem Source API Testing
 
-To test t:connect API endpoints in a Python shell, you can do something like the following:
+To test Tandem Source API endpoints in a Python shell, you can do something like the following:
 
 ```python
 import tconnectsync
 tconnectsync.util.cli.enable_logging()
 api = tconnectsync.util.cli.get_api()
 # Make API calls, e.g.
-therapy_timeline = api.controliq.therapy_timeline('2022-08-01', '2022-08-10')
+pumps = api.tandemsource.pump_event_metadata()
 ```
