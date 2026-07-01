@@ -20,8 +20,96 @@ from ..util import timeago, cap_length
 from .common import parse_ymd_date, base_headers, base_session, ApiException, ApiLoginException
 from ..secret import CACHE_CREDENTIALS, CACHE_CREDENTIALS_PATH
 from ..eventparser.generic import Events, decode_raw_events, EVENT_LEN
+from ..eventparser.json_events import build_events_from_json
 
 logger = logging.getLogger(__name__)
+
+
+def _bff_transform_settings(pump):
+    """Reshape a BFF pump's ``settings.details`` into the legacy ``settings``
+    dict consumed by ``UpdateProfiles`` / ``domain.tandemsource.PumpSettings``.
+
+    The BFF renamed ``tDependentSegs`` -> ``timeDependentSegments`` and flattened
+    the CGM alert thresholds; the per-segment fields are otherwise unchanged.
+    """
+    details = (pump.get('settings') or {}).get('details') or {}
+    profiles = details.get('profiles') or {}
+    cgm = details.get('cgmSettings') or {}
+
+    def segment(seg):
+        return {
+            'startTime': seg.get('startTime', 0),
+            'basalRate': seg.get('basalRate', 0),   # milliunits/hr
+            'isf': seg.get('isf', 0),
+            'carbRatio': seg.get('carbRatio', 0),    # milli-grams/unit
+            'targetBg': seg.get('targetBg', 0),
+        }
+
+    def profile(prof):
+        return {
+            'name': prof.get('name'),
+            'idp': prof.get('idp', 0),
+            'insulinDuration': prof.get('insulinDuration', 300),
+            'carbEntry': 1 if prof.get('carbEntry') else 0,
+            'maxBolus': prof.get('maxBolus', 0),
+            'tDependentSegs': [segment(s) for s in (prof.get('timeDependentSegments') or [])],
+        }
+
+    def alert(prefix):
+        return {
+            'mgPerDl': cgm.get(prefix + 'MgPerDl', 0),
+            'enabled': 1 if cgm.get(prefix + 'Enabled') else 0,
+            'duration': cgm.get(prefix + 'DurationMin', 0),
+            'status': 0,
+        }
+
+    return {
+        'profiles': {
+            'activeIdp': profiles.get('activeIdp', 0),
+            'profile': [profile(p) for p in (profiles.get('profile') or [])],
+        },
+        'cgmSettings': {
+            'highGlucoseAlert': alert('highGlucoseAlert'),
+            'lowGlucoseAlert': alert('lowGlucoseAlert'),
+        },
+    }
+
+
+def _bff_remap_pump(pump):
+    """Remap one BFF ``pumper`` pump entry to the legacy pumpeventmetadata dict."""
+    data_range = pump.get('availableDataRange') or {}
+    return {
+        'tconnectDeviceId': pump.get('assignmentId'),
+        'serialNumber': pump.get('serialNumber'),
+        'modelNumber': pump.get('modelNumber'),
+        'softwareVersion': pump.get('softwareVersion'),
+        'maxDateWithEvents': pump.get('maxDateOfEvents'),
+        'minDateWithEvents': data_range.get('start'),
+        # The legacy consumer reads settings from lastUpload['settings'].
+        'lastUpload': {'settings': _bff_transform_settings(pump)},
+        'lastUploadDate': pump.get('lastUploadDate'),
+    }
+
+
+def _bff_select_active_pumps(pumps):
+    """The BFF lists every pump ever associated with the account (including some
+    with null/placeholder dates). Return only pump(s) uploaded within the last 30
+    days, falling back to the single most-recently-uploaded pump."""
+    def uploaded_recently(pump):
+        try:
+            return bool(pump['lastUploadDate']) and \
+                (arrow.utcnow() - arrow.get(pump['lastUploadDate'])).days <= 30
+        except (TypeError, ValueError, arrow.parser.ParserError):
+            return False
+
+    recent = [p for p in pumps if uploaded_recently(p)]
+    if recent:
+        return recent
+    dated = [p for p in pumps if p.get('lastUploadDate')]
+    if dated:
+        return [max(dated, key=lambda p: arrow.get(p['lastUploadDate']))]
+    return pumps
+
 
 class TandemSourceApi:
     # Common URLs that are shared between regions
@@ -365,8 +453,10 @@ class TandemSourceApi:
             raise Exception('No access token provided')
         return {
             'Authorization': 'Bearer %s' % self.accessToken,
-            'Origin': 'https://tconnect.tandemdiabetes.com',
-            'Referer': 'https://tconnect.tandemdiabetes.com/',
+            # The BFF endpoints are served from source.tandemdiabetes.com and the
+            # WAF rejects (HTTP 403) requests carrying the legacy tconnect origin.
+            'Origin': 'https://source.tandemdiabetes.com',
+            'Referer': 'https://source.tandemdiabetes.com/',
             **base_headers()
         }
 
@@ -412,44 +502,50 @@ class TandemSourceApi:
     ]
     """
     def pump_event_metadata(self):
-        return self.get('api/reports/reportsfacade/%s/pumpeventmetadata' % (self.pumperId), {})
+        # Tandem retired api/reports/reportsfacade/{pumperId}/pumpeventmetadata on
+        # 2026-06-30 (issue #146); pump metadata now comes from the BFF pumper
+        # endpoint, which we remap to the legacy per-pump dict shape.
+        body = self.get('api/reports/bff/pumper/%s' % (self.pumperId), {})
+        pumps = [_bff_remap_pump(p) for p in body.get('pumps', [])]
+        return _bff_select_active_pumps(pumps)
 
     DEFAULT_EVENT_IDS = [229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,399,256,213,406,394,212,404,214,405,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191]
 
     """
-    Returns raw unparsed string for pump events
+    Returns the raw BFF pump-logs response (JSON) for pump events.
     tconnect_device_id is "tconnectDeviceId" from pump_event_metadata()
     """
     def pump_events_raw(self, tconnect_device_id, min_date=None, max_date=None, event_ids_filter=DEFAULT_EVENT_IDS):
-        minDate = parse_ymd_date(min_date)
-        maxDate = parse_ymd_date(max_date)
-        logger.debug(f'pump_events_raw({tconnect_device_id}, {minDate}, {maxDate})')
+        # The BFF pump-logs endpoint takes ISO-8601 start/end datetimes (rather
+        # than the old YYYY-MM-DD minDate/maxDate) and returns structured JSON.
+        start = arrow.get(min_date).format('YYYY-MM-DD') + 'T00:00:00Z' if min_date else arrow.utcnow().shift(days=-1).format('YYYY-MM-DD') + 'T00:00:00Z'
+        end = arrow.get(max_date).shift(days=1).format('YYYY-MM-DD') + 'T00:00:00Z' if max_date else arrow.utcnow().shift(days=1).format('YYYY-MM-DD') + 'T00:00:00Z'
+        logger.debug(f'pump_events_raw({tconnect_device_id}, {start}, {end})')
 
-        # default: 229,5,28,4,26,99,279,3,16,59,21,55,20,280,64,65,66,61,33,371,171,369,460,172,370,461,372,399,256,213,406,394,212,404,214,405,447,313,60,14,6,90,230,140,12,11,53,13,63,203,307,191
         eventIdsFilter = '%2C'.join(map(str, event_ids_filter)) if event_ids_filter else None
-        return self.get('api/reports/reportsfacade/pumpevents/%s/%s?minDate=%s&maxDate=%s%s' % (
-            self.pumperId,
+        return self.get('api/reports/bff/pump-logs/%s?pumperId=%s&startDate=%s&endDate=%s%s' % (
             tconnect_device_id,
-            minDate,
-            maxDate,
+            self.pumperId,
+            start,
+            end,
             '&eventIds=%s' % eventIdsFilter if eventIdsFilter else ''
         ), {})
 
     """
-    Fetch and decode pump events using eventparser.
+    Fetch and decode pump events from the BFF pump-logs endpoint.
     Default of fetch_all_events=False will filter to the same eventids used in the Tandem Source backend.
     If fetch_all_events=True, then all event types from the history log will be returned.
     """
     def pump_events(self, tconnect_device_id, min_date=None, max_date=None, fetch_all_event_types=False):
-        pump_events_raw = self.pump_events_raw(
+        body = self.pump_events_raw(
             tconnect_device_id,
             min_date,
             max_date,
             event_ids_filter=None if fetch_all_event_types else self.DEFAULT_EVENT_IDS
         )
 
-        pump_events_decoded = decode_raw_events(pump_events_raw)
-        logger.info(f"Read {len(pump_events_decoded)} bytes (est. {len(pump_events_decoded)/EVENT_LEN} events)")
-        return Events(pump_events_decoded)
+        events = build_events_from_json(body)
+        logger.info(f"Read {len(events)} events from BFF pump-logs")
+        return events
 
 
