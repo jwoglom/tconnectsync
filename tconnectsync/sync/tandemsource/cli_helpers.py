@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def fetch_oneshot(username, password, time_start=None, time_end=None, region='US'):
+def fetch_oneshot(username, password, time_start=None, time_end=None, region=None):
     tconnect = TConnectApi(username, password, region)
     if not time_start and not time_end:
         time_end = datetime.datetime.now()

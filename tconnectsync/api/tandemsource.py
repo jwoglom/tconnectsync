@@ -24,6 +24,7 @@ from jwt.algorithms import RSAAlgorithm
 
 from ..util import timeago, cap_length
 from .common import parse_ymd_date, base_headers, base_session, ApiException, ApiLoginException
+from .. import secret
 from ..secret import CACHE_CREDENTIALS, CACHE_CREDENTIALS_PATH, TIMEZONE_NAME
 from ..eventparser.generic import Events
 
@@ -214,7 +215,11 @@ class TandemSourceApi:
         'AUTHORIZATION_ENDPOINT': 'https://tdcservices.eu.tandemdiabetes.com/accounts/api/connect/authorize'
     }
 
-    def __init__(self, email: str, password: str, region: str = 'US') -> None:
+    def __init__(self, email: str, password: str, region: Optional[str] = None) -> None:
+        # No region means "use the configured TCONNECT_REGION": a hardcoded
+        # US default would send EU accounts to the US endpoints (#152).
+        if not region:
+            region = secret.TCONNECT_REGION
         self.region = region.upper()
         if self.region not in ['US', 'EU']:
             raise ValueError(f"Invalid region '{region}'. Must be 'US' or 'EU'.")
