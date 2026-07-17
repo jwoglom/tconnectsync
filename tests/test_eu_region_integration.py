@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
-"""Top-level EU region integration tests (issue #152).
+"""EU region integration tests (issue #152).
 
-The v3.0.0 regression: TConnectApi's region parameter defaulted to a
-hardcoded 'US', so any caller that constructed it without an explicit
-region (e.g. tconnectsync-heroku's check_login path) sent EU accounts to
-the US login endpoint, which rejected them with HTTP 401
-account/invalid_credentials.
-
-These tests configure the EU region through each supported mechanism --
-the TCONNECT_REGION environment variable, a .env file, and the --region
-CLI flag -- and then run the real downstream code (TConnectApi ->
-TandemSourceApi login -> Tandem Source API calls, including the full
-`main(['--check-login'])` entrypoint) against a mocked HTTP layer. Only
-the EU endpoints are registered with requests_mock, so any request to a
-US endpoint fails the test immediately; the tests additionally assert
-that every contacted host is an expected EU (or region-shared) host and
-that the specific EU login/token/jwks/data endpoints were invoked.
+Configures the EU region via each supported mechanism (TCONNECT_REGION
+environment variable, .env file, --region CLI flag) and runs the real
+downstream code against a mocked HTTP layer on which only the EU
+endpoints are registered, so any request to a US endpoint fails.
 """
 
 import contextlib
@@ -54,11 +43,9 @@ EU_PUMP_LOGS_URL = EU_SOURCE + 'api/reports/bff/pump-logs/' + DEVICE_ID
 
 NS_URL = 'http://nightscout.example.com/'
 
-# The US hosts that must never be contacted when the EU region is configured.
 US_HOSTS = {'tdcservices.tandemdiabetes.com', 'source.tandemdiabetes.com'}
 
-# sso.tandemdiabetes.com hosts the login page for both regions; every other
-# host must be region-specific.
+# sso.tandemdiabetes.com hosts the login page for both regions.
 ALLOWED_HOSTS = {
     'sso.tandemdiabetes.com',
     'tdcservices.eu.tandemdiabetes.com',
@@ -69,7 +56,6 @@ ALLOWED_HOSTS = {
 TEST_EMAIL = 'eu-user@example.com'
 TEST_PASSWORD = 'eu-password'
 
-# Signing key for the fake OIDC id_token, generated once for the module.
 _PRIVATE_KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 _PRIVATE_PEM = _PRIVATE_KEY.private_bytes(
     serialization.Encoding.PEM,
@@ -79,9 +65,8 @@ _PRIVATE_PEM = _PRIVATE_KEY.private_bytes(
 
 
 def make_id_token():
-    """A real RS256-signed id_token carrying the EU issuer/audience, so
-    TandemSourceApi.extract_jwt() performs full signature, issuer, and
-    audience verification against the mocked EU jwks endpoint."""
+    """RS256-signed id_token with the EU issuer/audience, so extract_jwt()
+    performs full verification against the mocked EU jwks endpoint."""
     now = int(time.time())
     claims = {
         'iss': EU_API,
@@ -129,9 +114,8 @@ PUMP_LOGS = {'events': [], 'clockChanges': []}
 
 
 def register_eu_endpoints(m):
-    """Register ONLY the EU (and region-shared) endpoints needed for the
-    full login flow and the Tandem Source data calls. No US endpoint is
-    registered, so any US request raises requests_mock.NoMockAddress."""
+    """Register only the EU (and region-shared) endpoints; any US request
+    raises requests_mock.NoMockAddress."""
     m.get('https://sso.tandemdiabetes.com/', text='')
     m.post(EU_LOGIN_URL, json={'redirectUrl': '/', 'status': 'SUCCESS'})
     m.get(EU_AUTHORIZE_URL, status_code=302,
@@ -154,8 +138,7 @@ def register_nightscout_endpoints(m):
 
 class EuRegionTestBase(unittest.TestCase):
     """Runs each test in a scratch cwd with a controlled environment, and
-    re-imports tconnectsync so that module-level configuration (secret.py)
-    is loaded from that environment."""
+    re-imports tconnectsync so secret.py is loaded from that environment."""
     maxDiff = None
 
     ENV_KEYS = [
@@ -190,8 +173,6 @@ class EuRegionTestBase(unittest.TestCase):
                 os.environ.pop(k, None)
             else:
                 os.environ[k] = v
-        # Drop the EU-configured module instances so later tests re-import
-        # with their own environment.
         self._purge_modules()
 
     @staticmethod
@@ -207,8 +188,6 @@ class EuRegionTestBase(unittest.TestCase):
         self._purge_modules()
         import tconnectsync
         return tconnectsync
-
-    # ---- assertion helpers ----
 
     def called(self, m):
         """(method, url-without-query) pairs for every mocked request."""
@@ -235,9 +214,8 @@ class TestEuRegionFromEnvironmentVariable(EuRegionTestBase):
     """TCONNECT_REGION=EU set as an environment variable."""
 
     def test_tconnect_api_without_region_argument_uses_eu(self):
-        # The exact downstream pattern that regressed in #152: the caller
-        # builds TConnectApi without a region argument, relying on the
-        # configured TCONNECT_REGION.
+        # The downstream pattern that regressed in #152: TConnectApi built
+        # without a region argument.
         self.import_tconnectsync({'TCONNECT_REGION': 'EU'})
         from tconnectsync.api import TConnectApi
 
@@ -261,8 +239,6 @@ class TestEuRegionFromEnvironmentVariable(EuRegionTestBase):
             self.assertIn(('GET', EU_PUMPER_URL), self.called(m))
 
     def test_tandem_source_api_without_region_argument_uses_eu(self):
-        # TandemSourceApi itself must also fall back to the configured
-        # region when constructed directly without one.
         self.import_tconnectsync({'TCONNECT_REGION': 'EU'})
         from tconnectsync.api.tandemsource import TandemSourceApi
 
@@ -283,9 +259,7 @@ class TestEuRegionFromDotEnvFile(EuRegionTestBase):
     """TCONNECT_REGION=EU set through a .env file in the working directory."""
 
     def test_tconnect_api_without_region_argument_uses_eu(self):
-        # Configure everything through .env instead of process environment
-        # variables (secret.py reads $CWD/.env, and setUp chdir'd us into a
-        # scratch directory).
+        # secret.py reads $CWD/.env; setUp chdir'd into a scratch directory.
         with open(os.path.join(self._tmpdir, '.env'), 'w') as f:
             for k, v in dict(self.BASE_ENV, TCONNECT_REGION='EU').items():
                 f.write('%s=%s\n' % (k, v))
@@ -308,10 +282,7 @@ class TestEuRegionFromDotEnvFile(EuRegionTestBase):
 
 
 class TestEuRegionThroughMainEntrypoint(EuRegionTestBase):
-    """Full `tconnectsync --check-login` runs through main(), covering the
-    complete downstream path: secret loading -> main() region resolution ->
-    TConnectApi -> TandemSourceApi login -> get_pumper/ChooseDevice ->
-    pump_events -> Nightscout."""
+    """Full `tconnectsync --check-login` runs through main()."""
 
     def run_check_login(self, tconnectsync, argv):
         with requests_mock.Mocker() as m:
@@ -327,8 +298,6 @@ class TestEuRegionThroughMainEntrypoint(EuRegionTestBase):
         calls = self.called(m)
         self.assertIn(('GET', EU_PUMPER_URL), calls)
         self.assertIn(('GET', EU_PUMP_LOGS_URL), calls)
-        # check_login must complete without any API errors: the EU login
-        # and every downstream Tandem Source + Nightscout call succeeded.
         self.assertIn('No API errors returned!', output)
         self.assertNotIn('API errors occurred', output)
 
@@ -339,9 +308,8 @@ class TestEuRegionThroughMainEntrypoint(EuRegionTestBase):
         self.assert_full_eu_check_login(m, output)
 
     def test_check_login_with_region_from_cli_flag(self):
-        # No TCONNECT_REGION configured (config default is US): the
-        # --region EU CLI flag alone must route everything to the EU
-        # endpoints.
+        # No TCONNECT_REGION configured: --region EU alone must route
+        # everything to the EU endpoints.
         tconnectsync = self.import_tconnectsync()
         self.assertEqual(tconnectsync.secret.TCONNECT_REGION, 'US')
         m, output = self.run_check_login(tconnectsync, ['--check-login', '--region', 'EU'])
