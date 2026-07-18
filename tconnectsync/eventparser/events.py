@@ -6209,31 +6209,35 @@ class LidDailyBasal(BaseEvent):
     dailyTotalBasal: float # units
     lastBasalRate: float # units/hour
     iob: float # units
-    batteryChargePercentMSBRaw: int
-    batteryChargePercentLSBRaw: int
-    batteryLipoMilliVolts: int
+    batterychargepercent: int
+    batterylipomillivolts: int
+
 
     @property
     def batteryChargePercent(self):
-        return (256*(self.batteryChargePercentMSBRaw-14)+self.batteryChargePercentLSBRaw)/(3*256)
+        return self.batterychargepercent
+
+    @property
+    def batteryLipoMilliVolts(self):
+        return self.batterylipomillivolts
 
     @staticmethod
     def build(raw):
         dailyTotalBasal, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
         lastBasalRate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
-        batteryChargePercentMSBRaw, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
-        batteryChargePercentLSBRaw, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
-        batteryLipoMilliVolts, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+        batterylipomillivolts, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
+        batterychargepercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        batterystatusRaw, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
 
         return LidDailyBasal(
             raw = RawEvent.build(raw),
             dailyTotalBasal = dailyTotalBasal,
             lastBasalRate = lastBasalRate,
             iob = iob,
-            batteryChargePercentMSBRaw = batteryChargePercentMSBRaw,
-            batteryChargePercentLSBRaw = batteryChargePercentLSBRaw,
-            batteryLipoMilliVolts = batteryLipoMilliVolts,
+            batterylipomillivolts = batterylipomillivolts,
+            batterychargepercent = batterychargepercent,
+            batterystatusRaw = batterystatusRaw,
         )
 
     @staticmethod
@@ -6244,9 +6248,8 @@ class LidDailyBasal(BaseEvent):
             dailyTotalBasal = props.get("dailytotalbasal", None),
             lastBasalRate = props.get("lastbasalrate", None),
             iob = props.get("iob", None),
-            batteryChargePercentMSBRaw = props.get("batterychargepercentmsbraw", None),
-            batteryChargePercentLSBRaw = props.get("batterychargepercentlsbraw", None),
-            batteryLipoMilliVolts = props.get("batterylipomillivolts", None),
+            batterychargepercent=props.get("abc", None),
+            batterylipomillivolts = props.get("lipomv", None),
         )
 
     @property
@@ -6270,9 +6273,9 @@ class LidDailyBasal(BaseEvent):
             dailyTotalBasal=self.dailyTotalBasal,
             lastBasalRate=self.lastBasalRate,
             iob=self.iob,
-            batteryChargePercentMSBRaw=self.batteryChargePercentMSBRaw,
-            batteryChargePercentLSBRaw=self.batteryChargePercentLSBRaw,
-            batteryLipoMilliVolts=self.batteryLipoMilliVolts,
+            batterylipomillivolts=self.batterylipomillivolts,
+            batterychargepercent=self.batterychargepercent,
+            batterystatusRaw=self.batterylipomillivolts,
         )
 
 

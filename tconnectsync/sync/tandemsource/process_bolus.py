@@ -1,6 +1,6 @@
 import logging
 import arrow
-
+from tconnectsync.util.time import format_datetime
 from ...features import DEFAULT_FEATURES
 from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
@@ -113,7 +113,7 @@ class ProcessBolus:
         return NightscoutEntry.bolus(
             bolus = insulin_float_round(bolusCompleted.insulinDelivered),
             carbs = bolusRequested1.carbAmount if bolusRequested1 and bolusRequested1.carbAmount>0 else None,
-            created_at = bolusCompleted.eventTimestamp.format(),
+            created_at = format_datetime(bolusCompleted.eventTimestamp),
             notes = notes + suffix,
             bg = bolusRequested1.bg if bolusRequested1 and bolusRequested1.bg > 0 else None,
             pump_event_id = ",".join(seq_nums)
@@ -126,9 +126,8 @@ class ProcessBolus:
         return NightscoutEntry.bolus(
             bolus = insulin_float_round(bolexCompleted.insulinDelivered),
             carbs = None,
-            created_at = bolexCompleted.eventTimestamp.format(),
+            created_at = format_datetiem(bolexCompleted.eventTimestamp),
             notes = "Extended Bolus",
             bg = None,
             pump_event_id = "%s" % bolexCompleted.seqNum
         )
-

@@ -142,7 +142,15 @@ def transform_battery_charge_percent(event_def, name, name_fmt, field, tx):
     out += [
         '@property',
         f'def batteryChargePercent(self):',
-        f'    return (256*(self.batteryChargePercentMSBRaw-14)+self.batteryChargePercentLSBRaw)/(3*256)',
+        f'    return self.batterychargepercent / 100',
+        '',
+        '@property',
+        f'def batterychargepercentmsbRaw(self):',
+        f'    return (self.batterylipomillivolts >> 8) & 0xff',
+        '',
+        '@property',
+        f'def batterychargepercentlsbRaw(self):',
+        f'    return self.batterylipomillivolts & 0xff',
         ''
     ]
 

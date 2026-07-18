@@ -261,6 +261,7 @@ class NightscoutEntry:
             "units": "mg/dl"
         }
 
+
 def minutes_to_ns_time(minutes_time: int) -> str:
     hr = minutes_time // 60
     mn = minutes_time % 60

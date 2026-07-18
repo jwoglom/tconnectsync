@@ -1,6 +1,6 @@
 import logging
 import arrow
-
+from tconnectsync.util.time import format_datetime
 from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
@@ -67,7 +67,7 @@ class ProcessBasalSuspension:
     def suspension_to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
         if type(event) == eventtypes.LidPumpingSuspended:
             return NightscoutEntry.basalsuspension(
-                created_at = event.eventTimestamp.format(),
+                created_at = format_datetime(event.eventTimestamp),
                 reason = ', '.join(bitmask_to_list(event.suspendReason)),
                 pump_event_id = "%s" % event.seqNum
             )

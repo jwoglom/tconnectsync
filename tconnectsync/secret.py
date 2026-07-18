@@ -54,6 +54,9 @@ if not get('NS_SECRET') and get('API_SECRET'):
 
 NS_SKIP_TLS_VERIFY = get_bool('NS_SKIP_TLS_VERIFY', 'false')
 NS_IGNORE_CONN_ERRORS = get_bool('NS_IGNORE_CONN_ERRORS', 'false')
+EMULATE_LOOP = get_bool('EMULATE_LOOP', 'false')
+SKIP_ENTRIES = get_bool('SKIP_ENTRIES', 'false')
+
 
 # This should be the timezone your pump is set to.
 TIMEZONE_NAME = get('TIMEZONE_NAME', 'America/New_York')

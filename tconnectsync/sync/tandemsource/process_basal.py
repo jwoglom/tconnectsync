@@ -2,7 +2,7 @@ import datetime
 import logging
 import arrow
 
-from ...secret import IGNORE_ZERO_UNIT_BASAL
+from ...secret import IGNORE_ZERO_UNIT_BASAL,EMULATE_LOOP
 from ...features import DEFAULT_FEATURES
 from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
@@ -14,6 +14,7 @@ from ...parser.nightscout import (
     BASAL_EVENTTYPE,
     NightscoutEntry
 )
+from tconnectsync.util.time import format_datetime
 
 from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -70,6 +71,7 @@ class ProcessBasal:
 
     def write(self, ns_entries: List[dict]) -> int:
         count = 0
+ 
         for entry in ns_entries:
             if self.pretend:
                 logger.info("Would upload to Nightscout: %s" % entry)
@@ -90,7 +92,7 @@ class ProcessBasal:
             return NightscoutEntry.basal(
                 value = value,
                 duration_mins = duration.total_seconds() / 60,
-                created_at = start.format(),
+                created_at = format_datetime(start),
                 reason = ', '.join(bitmask_to_list(event.changeType)),
                 pump_event_id = "%s" % event.seqNum
             )
@@ -102,7 +104,7 @@ class ProcessBasal:
             return NightscoutEntry.basal(
                 value = value,
                 duration_mins = duration.total_seconds() / 60,
-                created_at = start.format(),
+                created_at = format_datetime(start),
                 reason = ', '.join(bitmask_to_list(event.commandedRateSource)),
                 pump_event_id = "%s" % event.seqNum
             )

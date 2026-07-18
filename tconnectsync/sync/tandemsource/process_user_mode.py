@@ -1,6 +1,6 @@
 import logging
 import arrow
-
+from tconnectsync.util.time import format_datetime
 from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
@@ -159,7 +159,7 @@ class ProcessUserMode:
 
             duration_mins = (stop.eventTimestamp - start.eventTimestamp).total_seconds() / 60
             return NightscoutEntry.activity(
-                created_at=start.eventTimestamp.format(),
+                created_at=format_datetime(start.eventTimestamp),
                 reason=reason,
                 duration=duration_mins,
                 event_type=SLEEP_EVENTTYPE,
@@ -174,7 +174,7 @@ class ProcessUserMode:
 
             duration_mins = (time_end - start.eventTimestamp).total_seconds() / 60
             return NightscoutEntry.activity(
-                created_at=start.eventTimestamp.format(),
+                created_at=format_datetime(start.eventTimestamp),
                 reason=reason + " - " + NOT_ENDED if reason else NOT_ENDED,
                 duration=duration_mins,
                 event_type=SLEEP_EVENTTYPE,
@@ -193,7 +193,7 @@ class ProcessUserMode:
 
             duration_mins = (stop.eventTimestamp - start.eventTimestamp).total_seconds() / 60
             return NightscoutEntry.activity(
-                created_at=start.eventTimestamp.format(),
+                created_at=foramt_datetime(start.eventTimestamp),
                 reason=reason,
                 duration=duration_mins,
                 event_type=EXERCISE_EVENTTYPE,
@@ -206,7 +206,7 @@ class ProcessUserMode:
 
             duration_mins = (time_end - start.eventTimestamp).total_seconds() / 60
             return NightscoutEntry.activity(
-                created_at=start.eventTimestamp.format(),
+                created_at=format_datetime(start.eventTimestamp),
                 reason=reason + " - " + NOT_ENDED,
                 duration=duration_mins,
                 event_type=EXERCISE_EVENTTYPE,
@@ -222,7 +222,7 @@ class ProcessUserMode:
 
         duration_mins = (event.eventTimestamp - arrow.get(sleep_last_upload["created_at"])).total_seconds() / 60
         return NightscoutEntry.activity(
-            created_at=sleep_last_upload["created_at"],
+            created_at=format_datetime(sleep_last_upload["created_at"]),
             reason=sleep_last_upload["reason"].replace(" - %s" % NOT_ENDED, ""),
             duration=duration_mins,
             event_type=SLEEP_EVENTTYPE,
@@ -242,7 +242,7 @@ class ProcessUserMode:
 
         duration_mins = (event.eventTimestamp - arrow.get(exercise_last_upload["created_at"])).total_seconds() / 60
         return NightscoutEntry.activity(
-            created_at=exercise_last_upload["created_at"],
+            created_at=format_datetime(exercise_last_upload["created_at"]),
             reason=reason,
             duration=duration_mins,
             event_type=EXERCISE_EVENTTYPE,

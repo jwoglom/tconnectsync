@@ -22,8 +22,6 @@ def format_datetime(date: DateLike) -> str:
 def time_range(field_name: str, start_time: Optional[DateLike], end_time: Optional[DateLike], t_to_space: bool = False) -> str:
 	def fmt(date: DateLike) -> str:
 		ret = format_datetime(date)
-		if t_to_space:
-			return ret.replace('T', ' ')
 		return ret
 	arg = ''
 	if start_time:
@@ -106,7 +104,43 @@ class NightscoutApi:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
 			else:
 				raise e
+	def get_entries(self, eventType: str, time_start: Optional[DateLike] = None, time_end: Optional[DateLike] = None) -> Optional[dict]:
+		def internal(t_to_space: bool) -> Optional[dict]:
+			dateFilter = time_range('created_at', time_start, time_end, t_to_space=t_to_space)
+			latest = requests.get(urljoin(self.url, 'api/v1/treatments?find[enteredBy]=' + urllib.parse.quote(ENTERED_BY) + '&find[eventType]=' + urllib.parse.quote(eventType) + dateFilter + '&ts=' + str(time.time())), headers={
+				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
+			}, verify=self.verify)
+			if latest.status_code != 200:
+				if 'as a valid ISO-8601 date' in latest.text:
+					logger.warning("Nightscout last_uploaded_entry %s could not process ISO-8601 date: start=%s end=%s dateFilter=%s" % (eventType, time_start, time_end, dateFilter))
+					return None
+				raise ApiException(latest.status_code, "Nightscout last_uploaded_entry %s response: %s" % (latest.status_code, latest.text))
 
+			j = latest.json()
+			if j and len(j) > 0:
+				return j
+			return None
+		try:
+			ret = None
+			try:
+				ret = internal(False)
+			except ApiException as e:
+				#logger.warning("last_uploaded_entry with no t_to_space: %s", e)
+				ret = None
+			if ret is None and (time_start or time_end):
+				try:
+					ret = internal(True)
+				except ApiException as e:
+					#logger.warning("last_uploaded_entry with t_to_space: %s", e)
+					ret = None
+				if ret is not None:
+					logger.warning("last_uploaded_entry with eventType=%s time_start=%s time_end=%s only returned data when timestamps contained a space" % (eventType, time_start, time_end))
+			return ret
+		except requests.exceptions.ConnectionError as e:
+			if self.ignore_conn_errors:
+				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
+			else:
+				raise e
 	def last_uploaded_bg_entry(self, time_start: Optional[DateLike] = None, time_end: Optional[DateLike] = None) -> Optional[dict]:
 		def internal(t_to_space: bool) -> Optional[dict]:
 			dateFilter = time_range('dateString', time_start, time_end, t_to_space=t_to_space)

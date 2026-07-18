@@ -1,6 +1,6 @@
 import logging
 import arrow
-
+from tconnectsync.util.time import format_datetime
 from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
@@ -76,13 +76,13 @@ class ProcessAlarm:
     def alarm_to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
         if type(event) == eventtypes.LidAlarmActivated:
             return NightscoutEntry.alarm(
-                created_at = event.eventTimestamp.format(),
+                created_at = format_datetime(event.eventTimestamp),
                 reason = "%s" % event.alarmId.name,
                 pump_event_id = "%s" % event.seqNum
             )
         elif type(event) == eventtypes.LidMalfunctionActivated:
             return NightscoutEntry.alarm(
-                created_at = event.eventTimestamp.format(),
+                created_at = format_datetime(event.eventTimestamp),
                 reason = "Malfunction",
                 pump_event_id = "%s" % event.seqNum
             )

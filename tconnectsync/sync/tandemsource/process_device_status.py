@@ -1,6 +1,6 @@
 import logging
 import arrow
-
+from tconnectsync.util.time import format_datetime
 from ...features import DEFAULT_FEATURES
 from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
@@ -73,14 +73,15 @@ class ProcessDeviceStatus:
         # The battery percent is derived from the msb/lsb raw fields; if the
         # event arrived without them (an event shape we can't yet parse), skip
         # it rather than raise on the arithmetic below.
-        if event.batteryChargePercentMSBRaw is None or event.batteryChargePercentLSBRaw is None:
+        print("EVENT",event)
+        if event.batterylipomillivolts == None or event.batterychargepercent is None:
             logger.warning("ProcessDeviceStatus: skipping daily basal event missing battery data: %s" % event)
             return None
 
         return NightscoutEntry.devicestatus(
-            created_at=event.eventTimestamp.format(),
-            batteryVoltage=(float(event.batteryLipoMilliVolts or 0)/1000),
-            batteryPercent=int(100*event.batteryChargePercent),
+            created_at=format_datetime(event.eventTimestamp),
+            batteryVoltage=(float(event.batterylipomillivolts or 0)/1000),
+            batteryPercent=event.batterychargepercent,
             pump_event_id = "%s" % event.seqNum
         )
 

@@ -677,6 +677,7 @@ class TandemSourceApi:
         # clockChanges (LID_TIME_CHANGED/LID_DATE_CHANGED) are not consumed by any
         # processor, so they are counted for visibility but not parsed.
         logger.info(f"Read {len(events)} events ({clock_change_count} clock changes skipped)")
+
         return Events(events)
 
     def pump_clock_changes(self, tconnect_device_id: str, min_date: Optional[str] = None, max_date: Optional[str] = None) -> Iterator:

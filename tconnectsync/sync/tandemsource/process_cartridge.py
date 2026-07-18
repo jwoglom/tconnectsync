@@ -1,6 +1,6 @@
 import logging
 import arrow
-
+from tconnectsync.util.time import format_datetime
 from ...features import DEFAULT_FEATURES
 from ... import features
 from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
@@ -88,7 +88,7 @@ class ProcessCartridge:
         # insulinVolume is populated on t:slim X2 / Mobi; v2Volume is a legacy fallback.
         volume = cartFilled.insulinVolume or cartFilled.v2Volume
         return NightscoutEntry.sitechange(
-            created_at = cartFilled.eventTimestamp.format(),
+            created_at = format_datetime(cartFilled.eventTimestamp),
             reason = "Cartridge Filled" + (" (%du filled)" % round(volume) if volume else ""),
             pump_event_id = "%s" % cartFilled.seqNum
         )
@@ -97,7 +97,7 @@ class ProcessCartridge:
         # primeSize is fractional (e.g. 0.3u); format with one decimal, not %d.
         primed = cannulaFilled.primeSize if cannulaFilled.primeSize and cannulaFilled.primeSize > 0 else None
         return NightscoutEntry.sitechange(
-            created_at = cannulaFilled.eventTimestamp.format(),
+            created_at = format_datetime(cannulaFilled.eventTimestamp),
             reason = "Cannula Filled" + (" (%.1fu primed)" % primed if primed else ""),
             pump_event_id = "%s" % cannulaFilled.seqNum
         )
@@ -106,7 +106,7 @@ class ProcessCartridge:
         # primeSize is -1 (sentinel, "not recorded") on real tubing fills; only show a real prime volume.
         primed = tubingFilled.primeSize if tubingFilled.primeSize and tubingFilled.primeSize > 0 else None
         return NightscoutEntry.sitechange(
-            created_at = tubingFilled.eventTimestamp.format(),
+            created_at = format_datetime(tubingFilled.eventTimestamp),
             reason = "Tubing Filled" + (" (%du primed)" % round(primed) if primed else ""),
             pump_event_id = "%s" % tubingFilled.seqNum
         )

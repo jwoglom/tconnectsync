@@ -5,7 +5,11 @@ import sys
 import arrow
 
 from ...features import DEFAULT_FEATURES
+
+
 from ...api.tandemsource import naive_local_to_utc
+from ...util.emulate_loop import UpdateLoop
+
 from .process import ProcessTimeRange
 from .choose_device import ChooseDevice
 
@@ -58,7 +62,8 @@ class TandemSourceAutoupdate:
                     added, event_seqnum = ProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend, self.secret, features=features).process(time_start, time_end)
                     logger.info('Added %d items from ProcessTimeRange' % added)
                     self.last_successful_process_time_range = now
-
+                    if self.secret.EMULATE_LOOP:
+                        UpdateLoop(nightscout,tconnect,tconnectDevice["assignmentId"],)
                 # Track the time it took to find a new event between runs,
                 # but skip this calculation the first process cycle (since
                 # we don't know at what exact point the event index changed)
@@ -125,16 +130,19 @@ class TandemSourceAutoupdate:
                         int(self.secret.AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS)))
 
                     logger.debug("Last event time: %s, time diffs between attempts: %s" % (self.last_event_time, self.time_diffs_between_attempts))
-
+                    if self.secret.EMULATE_LOOP:
+                        UpdateLoop(nightscout,tconnect,tconnectDevice["assignmentId"],)
                     time.sleep(self.secret.AUTOUPDATE_UNEXPECTED_NO_INDEX_SLEEP_SECONDS)
 
                     # Since we bail early, update the invocations count and potentially exit after sleeping.
                     self.autoupdate_invocations += 1
                     if self.secret.AUTOUPDATE_MAX_LOOP_INVOCATIONS > 0 and self.autoupdate_invocations >= self.secret.AUTOUPDATE_MAX_LOOP_INVOCATIONS:
+                        if self.secret.EMULATE_LOOP:
+                            UpdateLoop(nightscout,tconnect,tconnectDevice["assignmentId"],)
                         return 0
 
                     continue
-
+            
             sleep_secs = self.secret.AUTOUPDATE_DEFAULT_SLEEP_SECONDS
 
             # Sleep for a rolling average of time between updates
@@ -153,7 +161,8 @@ class TandemSourceAutoupdate:
                 # of how often we're seeing new data appear
                 if sleep_secs > self.secret.AUTOUPDATE_MAX_SLEEP_SECONDS:
                     sleep_secs = self.secret.AUTOUPDATE_MAX_SLEEP_SECONDS
-
+            if self.secret.EMULATE_LOOP:
+                UpdateLoop(nightscout,tconnect,tconnectDevice["assignmentId"],)
             logger.info('Sleeping for %0.01f sec' % sleep_secs)
             time.sleep(sleep_secs)
 

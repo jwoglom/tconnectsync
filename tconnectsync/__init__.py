@@ -14,12 +14,15 @@ else:
     from importlib.metadata import PackageNotFoundError, version
 
 from .api import TConnectApi
+
+
 from .sync.tandemsource.autoupdate import TandemSourceAutoupdate
 from .sync.tandemsource.choose_device import ChooseDevice as TandemSourceChooseDevice
 from .sync.tandemsource.process import ProcessTimeRange as TandemSourceProcessTimeRange
 from .check import check_login
 from .nightscout import NightscoutApi
 from .features import DEFAULT_FEATURES, ALL_FEATURES
+from .util.emulate_loop import UpdateLoop
 
 try:
     from .secret import (
@@ -30,7 +33,9 @@ try:
         NS_SECRET,
         NS_SKIP_TLS_VERIFY,
         PUMP_SERIAL_NUMBER,
-        NS_IGNORE_CONN_ERRORS
+        NS_IGNORE_CONN_ERRORS,
+        EMULATE_LOOP,
+        SKIP_ENTRIES
     )
     from . import secret
 except Exception as e:
@@ -121,10 +126,18 @@ def main(*args, **kwargs):
 
     if args.auto_update:
         u = TandemSourceAutoupdate(secret)
-        sys.exit(u.process(tconnect, nightscout, args.pretend, features=args.features))
+        u.process(tconnect, nightscout, args.pretend, features=args.features)
+        if EMULATE_LOOP:
+            tconnectDevice = TandemSourceChooseDevice(secret, tconnect).choose()
+
+            UpdateLoop(nightscout,tconnect,tconnectDevice["assignmentId"],)
+        sys.exit()
     else:
         tconnectDevice = TandemSourceChooseDevice(secret, tconnect).choose()
-        added, last_event_id = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, secret=secret, features=args.features).process(time_start, time_end)
-
+        if not SKIP_ENTRIES:
+            added, last_event_id = TandemSourceProcessTimeRange(tconnect, nightscout, tconnectDevice, pretend=args.pretend, secret=secret, features=args.features).process(time_start, time_end)
+        if EMULATE_LOOP:
+            UpdateLoop(nightscout,tconnect,tconnectDevice["assignmentId"],)
         # return exit code 0 if processed events
-        sys.exit(0 if added>0 else 1)
+        if not SKIP_ENTRIES:
+            sys.exit(0 if added>0 else 1)

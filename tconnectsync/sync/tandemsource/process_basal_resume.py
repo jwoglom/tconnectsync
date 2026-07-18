@@ -13,6 +13,7 @@ from ...eventparser.generic import Events, decode_raw_events, EVENT_LEN
 from ...eventparser.utils import bitmask_to_list
 from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
+from tconnectsync.util.time import format_datetime
 from ...parser.nightscout import (
     BASALRESUME_EVENTTYPE,
     NightscoutEntry
@@ -67,6 +68,6 @@ class ProcessBasalResume:
     def resume_to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
         if type(event) == eventtypes.LidPumpingResumed:
             return NightscoutEntry.basalresume(
-                created_at = event.eventTimestamp.format(),
+                created_at = format_datetime(event.eventTimestamp),
                 pump_event_id = "%s" % event.seqNum
             )

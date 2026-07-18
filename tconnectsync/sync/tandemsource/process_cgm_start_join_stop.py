@@ -1,6 +1,6 @@
 import logging
 import arrow
-
+from ...nightscout import format_datetime
 from ...features import DEFAULT_FEATURES
 from ... import features
 from ...domain.tandemsource.event_class import EventClass
