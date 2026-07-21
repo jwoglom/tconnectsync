@@ -112,7 +112,7 @@ def days_between(start, end) -> int:
     return diff.days
 
 # both inclusive
-def split_days_range(start_a, end_a, days: int = 5) -> List[Tuple[str, str]]:
+def split_days_range(start_a, end_a, days: int = 5) -> List[Tuple[arrow.Arrow, arrow.Arrow]]:
     ranges = []
     start = arrow.get(start_a)
     end = arrow.get(end_a)

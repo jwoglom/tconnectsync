@@ -2,7 +2,7 @@ from enum import Enum
 
 from ...eventparser import events
 
-class EventClass(set, Enum):
+class EventClass(set, Enum):  # type: ignore[misc]  # set/Enum both define __hash__; the combination works at runtime
     # LidBasalDelivery = every 5min entry
     # LidBasalRateChange = only when basal rate changes
     BASAL = {events.LidBasalDelivery} # , LidBasalRateChange

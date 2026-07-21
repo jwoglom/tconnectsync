@@ -17,7 +17,6 @@ from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +40,7 @@ class ProcessBolus:
         logger.info("Last Nightscout bolus upload: %s" % last_upload_time)
 
         # Correlate a bolus's request/completion messages by bolusid.
-        bolusEventsForId = {}
+        bolusEventsForId: dict = {}
         for event in sorted(events, key=lambda x: x.eventTimestamp):
             bolusEventsForId.setdefault(event.bolusId, {})[type(event)] = event
 
@@ -90,7 +89,7 @@ class ProcessBolus:
         return count
 
 
-    def bolus_to_nsentry(self, bolusCompleted: "BaseEvent", bolusRequested1: "BaseEvent", bolusRequested2: "BaseEvent", bolusRequested3: "BaseEvent") -> Optional[dict]:
+    def bolus_to_nsentry(self, bolusCompleted: eventtypes.LidBolusCompleted, bolusRequested1: Optional[eventtypes.LidBolusRequestedMsg1], bolusRequested2: Optional[eventtypes.LidBolusRequestedMsg2], bolusRequested3: Optional[eventtypes.LidBolusRequestedMsg3]) -> dict:
         suffixes = []
         if bolusRequested2 and bolusRequested2.userOverride == eventtypes.LidBolusRequestedMsg2.UseroverrideEnum.Yes:
             suffixes.append('(Override)')
@@ -119,7 +118,7 @@ class ProcessBolus:
             pump_event_id = ",".join(seq_nums)
         )
 
-    def bolex_to_nsentry(self, bolexCompleted: "BaseEvent") -> Optional[dict]:
+    def bolex_to_nsentry(self, bolexCompleted: eventtypes.LidBolexCompleted) -> dict:
         # The extended portion of a combo bolus, added as its own treatment at
         # the time it finished delivering. Insulin only; carbs/bg belong to the
         # initial LidBolusCompleted entry and must not be double-counted here.

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from dataclasses_json import dataclass_json
+from dataclasses_json import dataclass_json, DataClassJsonMixin
 from typing import List
 
 # These dataclasses model the `settings.details` blob from the Tandem Source
@@ -52,6 +52,6 @@ class PumpCgmSettings:
 
 @dataclass_json
 @dataclass
-class PumpSettings:
+class PumpSettings(DataClassJsonMixin):
     profiles: PumpProfiles
     cgmSettings: PumpCgmSettings

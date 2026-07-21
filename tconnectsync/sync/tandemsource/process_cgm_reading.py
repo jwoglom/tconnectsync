@@ -12,7 +12,6 @@ from typing import Iterable, List, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 # The four CGM-reading event types share the glucoseValueStatus /
 # currentGlucoseDisplayValue fields determine_glucose_value() reads.
@@ -52,22 +51,22 @@ def determine_glucose_value(event: CgmReadingEvent) -> int:
     status = event.glucoseValueStatus
 
     if isinstance(event, eventtypes.LidCgmDataG7):
-        e = eventtypes.LidCgmDataG7.GlucosevaluestatusEnum
+        g7 = eventtypes.LidCgmDataG7.GlucosevaluestatusEnum
         return _resolve_glucose_value(display_value, status,
-                                      precise=e.PreciseValue, high=e.SpecialHigh, low=e.SpecialLow)
+                                      precise=g7.PreciseValue, high=g7.SpecialHigh, low=g7.SpecialLow)
     if isinstance(event, eventtypes.LidCgmDataGxb):
-        e = eventtypes.LidCgmDataGxb.GlucosevaluestatusEnum
+        gxb = eventtypes.LidCgmDataGxb.GlucosevaluestatusEnum
         return _resolve_glucose_value(display_value, status,
-                                      precise=e.CurrentglucosedisplayvalueContainsTheGlucoseReading,
-                                      high=e.TheGlucoseReadingIsHigh, low=e.TheGlucoseReadingIsLow)
+                                      precise=gxb.CurrentglucosedisplayvalueContainsTheGlucoseReading,
+                                      high=gxb.TheGlucoseReadingIsHigh, low=gxb.TheGlucoseReadingIsLow)
     if isinstance(event, eventtypes.LidCgmDataFsl3):
-        e = eventtypes.LidCgmDataFsl3.GlucosevaluestatusEnum
+        fsl3 = eventtypes.LidCgmDataFsl3.GlucosevaluestatusEnum
         return _resolve_glucose_value(display_value, status,
-                                      precise=e.PreciseValue, high=e.SpecialHigh, low=e.SpecialLow)
+                                      precise=fsl3.PreciseValue, high=fsl3.SpecialHigh, low=fsl3.SpecialLow)
     if isinstance(event, eventtypes.LidCgmDataFsl2):
-        e = eventtypes.LidCgmDataFsl2.GlucosevaluestatusEnum
+        fsl2 = eventtypes.LidCgmDataFsl2.GlucosevaluestatusEnum
         return _resolve_glucose_value(display_value, status,
-                                      precise=e.PreciseValue, high=e.SpecialHigh, low=e.SpecialLow)
+                                      precise=fsl2.PreciseValue, high=fsl2.SpecialHigh, low=fsl2.SpecialLow)
 
     return display_value
 
@@ -120,12 +119,12 @@ class ProcessCGMReading:
 
         return count
 
-    def timestamp_for(self, event: "BaseEvent") -> arrow.Arrow:
+    def timestamp_for(self, event: CgmReadingEvent) -> arrow.Arrow:
         # For backfills the time the event was added to the pump's event store
         # might not be the time it actually occurred, so we use the egvTimestamp
         return arrow.get(TANDEM_EPOCH + event.egvTimeStamp, tzinfo='UTC').replace(tzinfo=self.timezone)
 
-    def to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
+    def to_nsentry(self, event: CgmReadingEvent) -> dict:
         return NightscoutEntry.entry(
             sgv = determine_glucose_value(event),
             created_at = self.timestamp_for(event).format(),

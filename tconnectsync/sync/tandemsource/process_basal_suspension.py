@@ -5,7 +5,6 @@ from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 from ...features import DEFAULT_FEATURES
 from ... import features
@@ -46,7 +45,9 @@ class ProcessBasalSuspension:
                     logger.info("Skipping basalsuspension event not after last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
                 continue
 
-            ns_entries.append(self.suspension_to_nsentry(event))
+            ns = self.suspension_to_nsentry(event)
+            if ns:
+                ns_entries.append(ns)
 
 
         return ns_entries
@@ -64,10 +65,12 @@ class ProcessBasalSuspension:
         return count
 
 
-    def suspension_to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
+    def suspension_to_nsentry(self, event: eventtypes.LidPumpingSuspended) -> Optional[dict]:
         if type(event) == eventtypes.LidPumpingSuspended:
             return NightscoutEntry.basalsuspension(
                 created_at = event.eventTimestamp.format(),
                 reason = ', '.join(bitmask_to_list(event.suspendReason)),
                 pump_event_id = "%s" % event.seqNum
             )
+
+        return None

@@ -15,13 +15,14 @@ from ...parser.nightscout import (
     NightscoutEntry
 )
 
-from typing import Iterable, List, Optional, TYPE_CHECKING
+from typing import Iterable, List, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 logger = logging.getLogger(__name__)
+
+BasalEvent = Union[eventtypes.LidBasalRateChange, eventtypes.LidBasalDelivery]
 
 class ProcessBasal:
     def __init__(self, tconnect: "TConnectApi", nightscout: "NightscoutApi", tconnect_device_id: str, pretend: bool, features: List[str] = DEFAULT_FEATURES) -> None:
@@ -81,7 +82,7 @@ class ProcessBasal:
         return count
 
 
-    def basal_to_nsentry(self, start: arrow.Arrow, duration: datetime.timedelta, event: "BaseEvent") -> Optional[dict]:
+    def basal_to_nsentry(self, start: arrow.Arrow, duration: datetime.timedelta, event: BasalEvent) -> Optional[dict]:
         if type(event) == eventtypes.LidBasalRateChange:
             value = insulin_float_round(event.commandedBasalRate)
             if IGNORE_ZERO_UNIT_BASAL and value < 0.01:
@@ -106,3 +107,5 @@ class ProcessBasal:
                 reason = ', '.join(bitmask_to_list(event.commandedRateSource)),
                 pump_event_id = "%s" % event.seqNum
             )
+
+        return None

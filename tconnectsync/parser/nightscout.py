@@ -215,32 +215,40 @@ class NightscoutEntry:
         return {
             # insulin duration in hours; Nightscout JS bug requires all top-level fields to be strings
             "dia": "%s" % (profile.insulinDuration / 60),
-            "carbratio": list(sorted([
+            # Sort by the typed segment.startTime (monotonic with timeAsSeconds)
+            # so the sort key is a well-typed int rather than an untyped dict value.
+            "carbratio": [
                 {
                     "time": minutes_to_ns_time(segment.startTime),
                     "timeAsSeconds": segment.startTime * 60,
                     "value": segment.carbRatio / 1000 # milliunits->units
-                } for segment in profile.tDependentSegs if not segment.skip
-            ], key=lambda x: x["timeAsSeconds"])),
+                } for segment in sorted(
+                    (s for s in profile.tDependentSegs if not s.skip),
+                    key=lambda s: s.startTime)
+            ],
 
             "carbs_hr": NIGHTSCOUT_PROFILE_CARBS_HR_VALUE,
             "delay": NIGHTSCOUT_PROFILE_DELAY_VALUE,
 
-            "sens": list(sorted([ # Correction factor / isf
+            "sens": [ # Correction factor / isf
                 {
                     "time": minutes_to_ns_time(segment.startTime),
                     "timeAsSeconds": segment.startTime * 60,
                     "value": segment.isf
-                } for segment in profile.tDependentSegs if not segment.skip
-            ], key=lambda x: x["timeAsSeconds"])),
+                } for segment in sorted(
+                    (s for s in profile.tDependentSegs if not s.skip),
+                    key=lambda s: s.startTime)
+            ],
 
-            "basal": list(sorted([
+            "basal": [
                 {
                     "time": minutes_to_ns_time(segment.startTime),
                     "timeAsSeconds": segment.startTime * 60,
                     "value": segment.basalRate / 1000 # milliunits->units
-                } for segment in profile.tDependentSegs
-            ], key=lambda x: x["timeAsSeconds"])),
+                } for segment in sorted(
+                    profile.tDependentSegs,
+                    key=lambda s: s.startTime)
+            ],
 
             "target_low": [
                 {

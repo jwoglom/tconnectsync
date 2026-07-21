@@ -3,6 +3,7 @@ import arrow
 
 from ...features import DEFAULT_FEATURES
 from ... import features
+from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
 from ...nightscout import format_datetime
 from ...parser.nightscout import (
@@ -12,13 +13,27 @@ from ...parser.nightscout import (
     NightscoutEntry
 )
 
-from typing import Iterable, List, Optional, TYPE_CHECKING
+from typing import Iterable, List, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 logger = logging.getLogger(__name__)
+
+# The CGM session start/join/stop event types (see EventClass._CGM_START /
+# _CGM_JOIN / _CGM_STOP); all expose seqNum and eventTimestamp.
+CgmSessionEvent = Union[
+    eventtypes.LidCgmStartSessionGx,
+    eventtypes.LidCgmStartSessionFsl2,
+    eventtypes.LidCgmJoinSessionGx,
+    eventtypes.LidCgmJoinSessionG7,
+    eventtypes.LidCgmJoinSessionFsl2,
+    eventtypes.LidCgmJoinSessionFsl3,
+    eventtypes.LidCgmStopSessionGx,
+    eventtypes.LidCgmStopSessionG7,
+    eventtypes.LidCgmStopSessionFsl2,
+    eventtypes.LidCgmStopSessionFsl3,
+]
 
 class ProcessCGMStartJoinStop:
     def __init__(self, tconnect: "TConnectApi", nightscout: "NightscoutApi", tconnect_device_id: str, pretend: bool, features: List[str] = DEFAULT_FEATURES) -> None:
@@ -63,7 +78,9 @@ class ProcessCGMStartJoinStop:
 
         ns_entries = []
         for event in allEvents:
-            ns_entries.append(self.to_nsentry(event))
+            ns = self.to_nsentry(event)
+            if ns:
+                ns_entries.append(ns)
 
         return ns_entries
 
@@ -80,7 +97,7 @@ class ProcessCGMStartJoinStop:
         return count
 
 
-    def to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
+    def to_nsentry(self, event: CgmSessionEvent) -> Optional[dict]:
         if type(event) in EventClass._CGM_START:
             return NightscoutEntry.cgm_start(
                 created_at = format_datetime(event.eventTimestamp),
@@ -99,3 +116,5 @@ class ProcessCGMStartJoinStop:
                 reason = "CGM Session Stopped",
                 pump_event_id = "%s" % event.seqNum
             )
+
+        return None

@@ -5,7 +5,6 @@ from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 from ...features import DEFAULT_FEATURES
 from ... import features
@@ -46,7 +45,9 @@ class ProcessBasalResume:
                     logger.info("Skipping BasalResume event not after last upload time: %s (time range: %s - %s)" % (event, time_start, time_end))
                 continue
 
-            ns_entries.append(self.resume_to_nsentry(event))
+            ns = self.resume_to_nsentry(event)
+            if ns:
+                ns_entries.append(ns)
 
 
         return ns_entries
@@ -64,9 +65,11 @@ class ProcessBasalResume:
         return count
 
 
-    def resume_to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
+    def resume_to_nsentry(self, event: eventtypes.LidPumpingResumed) -> Optional[dict]:
         if type(event) == eventtypes.LidPumpingResumed:
             return NightscoutEntry.basalresume(
                 created_at = event.eventTimestamp.format(),
                 pump_event_id = "%s" % event.seqNum
             )
+
+        return None

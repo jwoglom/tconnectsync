@@ -12,11 +12,10 @@ from ...parser.nightscout import (
     NightscoutEntry
 )
 
-from typing import Iterable, List, Optional, TYPE_CHECKING
+from typing import Iterable, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +83,7 @@ class ProcessCartridge:
 
         return count
 
-    def cart_to_nsentry(self, cartFilled: "BaseEvent") -> Optional[dict]:
+    def cart_to_nsentry(self, cartFilled: eventtypes.LidCartridgeFilled) -> dict:
         # insulinVolume is populated on t:slim X2 / Mobi; v2Volume is a legacy fallback.
         volume = cartFilled.insulinVolume or cartFilled.v2Volume
         return NightscoutEntry.sitechange(
@@ -93,7 +92,7 @@ class ProcessCartridge:
             pump_event_id = "%s" % cartFilled.seqNum
         )
 
-    def cannula_to_nsentry(self, cannulaFilled: "BaseEvent") -> Optional[dict]:
+    def cannula_to_nsentry(self, cannulaFilled: eventtypes.LidCannulaFilled) -> dict:
         # primeSize is fractional (e.g. 0.3u); format with one decimal, not %d.
         primed = cannulaFilled.primeSize if cannulaFilled.primeSize and cannulaFilled.primeSize > 0 else None
         return NightscoutEntry.sitechange(
@@ -102,7 +101,7 @@ class ProcessCartridge:
             pump_event_id = "%s" % cannulaFilled.seqNum
         )
 
-    def tubing_to_nsentry(self, tubingFilled: "BaseEvent") -> Optional[dict]:
+    def tubing_to_nsentry(self, tubingFilled: eventtypes.LidTubingFilled) -> dict:
         # primeSize is -1 (sentinel, "not recorded") on real tubing fills; only show a real prime volume.
         primed = tubingFilled.primeSize if tubingFilled.primeSize and tubingFilled.primeSize > 0 else None
         return NightscoutEntry.sitechange(

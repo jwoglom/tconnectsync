@@ -17,7 +17,6 @@ from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ class ProcessDeviceStatus:
             return []
         return [entry]
 
-    def daily_basal_to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
+    def daily_basal_to_nsentry(self, event: eventtypes.LidDailyBasal) -> Optional[dict]:
         # NOTE: the pump-logs endpoint does not emit event 81 (LID_DAILY_BASAL)
         # for either t:slim X2 or Mobi (verified against live accounts), and no
         # other returned event carries battery data. DEVICE_STATUS therefore

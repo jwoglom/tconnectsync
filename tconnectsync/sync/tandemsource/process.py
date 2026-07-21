@@ -3,11 +3,18 @@ import collections
 import arrow
 
 from types import ModuleType
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import Dict, Iterable, List, Optional, Protocol, Tuple, Type, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
     from ...api.tandemsource import BffPump
+
+class EventProcessor(Protocol):
+    """Structural interface implemented by every Process* event handler."""
+    def __init__(self, tconnect: "TConnectApi", nightscout: "NightscoutApi", tconnect_device_id: str, pretend: bool, features: List[str]) -> None: ...
+    def enabled(self) -> bool: ...
+    def process(self, events: Iterable, time_start: arrow.Arrow, time_end: arrow.Arrow) -> List[dict]: ...
+    def write(self, ns_entries: List[dict]) -> int: ...
 
 from ...features import DEVICE_STATUS, DEFAULT_FEATURES
 from ...eventparser import events as eventtypes
@@ -37,7 +44,7 @@ class ProcessTimeRange:
         self.secret = secret
         self.features = features
 
-    event_classes = {
+    event_classes: Dict[str, Type[EventProcessor]] = {
         EventClass.BASAL.name: ProcessBasal,
         EventClass.BASAL_SUSPENSION.name: ProcessBasalSuspension,
         EventClass.BASAL_RESUME.name: ProcessBasalResume,
@@ -93,7 +100,10 @@ class ProcessTimeRange:
                     # Ensure time_end is timezone-aware for comparison
                     time_end_aware = arrow.get(time_end)
                     capped_time_end = min(events_last_time, time_end_aware) if events_last_time else time_end_aware
-                    ns_entries = c.process(events, events_first_time, capped_time_end)
+                    # events_first_time is populated whenever for_eventclass has entries
+                    # (i.e. at least one event was seen); fall back to time_start otherwise.
+                    time_start_for_events = events_first_time if events_first_time else time_start
+                    ns_entries = c.process(events, time_start_for_events, capped_time_end)
                     w = c.write(ns_entries)
                     if w:
                         processed_count += w
@@ -101,10 +111,10 @@ class ProcessTimeRange:
                     logger.info("Skipping %s, is not enabled from features %s" % (clazz, self.features))
 
         for updater_class in self.updater_classes:
-            c = updater_class(self.tconnect, self.nightscout, self.tconnect_device_id, self.pretend, self.features)
-            if c.enabled():
+            updater = updater_class(self.tconnect, self.nightscout, self.tconnect_device_id, self.pretend, self.features)
+            if updater.enabled():
                 logger.info("%s is enabled from features %s" % (updater_class.__name__, self.features))
-                done = c.update(self.pretend)
+                done = updater.update(self.pretend)
                 logger.info("%s completed with update required: %s" % (updater_class.__name__, done))
             else:
                 logger.info("Skipping %s, is not enabled from features %s" % (updater_class.__name__, self.features))

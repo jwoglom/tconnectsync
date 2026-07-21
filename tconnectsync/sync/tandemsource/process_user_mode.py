@@ -5,7 +5,6 @@ from typing import Iterable, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 from ...features import DEFAULT_FEATURES
 from ... import features
@@ -90,7 +89,7 @@ class ProcessUserMode:
                     processed_sleep.append((start_sleep, event))
                     start_sleep = None
                 else:
-                    if sleep_not_ended:
+                    if sleep_not_ended and sleep_last_upload:
                         logger.info("ProcessUserMode: Found StopSleep without StartSleep, with incomplete sleep event in nightscout: %s NS: %s" % (event, sleep_last_upload))
                         ns_entries.append(self.process_unended_sleep_stop(event, sleep_last_upload))
                     else:
@@ -102,7 +101,7 @@ class ProcessUserMode:
                     processed_exercise.append((start_exercise, event))
                     start_exercise = None
                 else:
-                    if exercise_not_ended:
+                    if exercise_not_ended and exercise_last_upload:
                         logger.info("ProcessUserMode: Found StopExercise without StartExercise, with incomplete exercise event in nightscout: %s NS: %s" % (event, exercise_last_upload))
                         ns_entries.append(self.process_unended_exercise_stop(event, exercise_last_upload))
                     else:
@@ -118,10 +117,14 @@ class ProcessUserMode:
             logger.info("ProcessUserMode: exercise is active")
 
         for items in processed_sleep:
-            ns_entries.append(self.sleep_to_nsentry(start=items[0], stop=items[1], time_end=time_end))
+            ns = self.sleep_to_nsentry(start=items[0], stop=items[1], time_end=time_end)
+            if ns:
+                ns_entries.append(ns)
 
         for items in processed_exercise:
-            ns_entries.append(self.exercise_to_nsentry(start=items[0], stop=items[1], time_end=time_end))
+            ns = self.exercise_to_nsentry(start=items[0], stop=items[1], time_end=time_end)
+            if ns:
+                ns_entries.append(ns)
 
         return ns_entries
 
@@ -137,19 +140,19 @@ class ProcessUserMode:
 
         return count
 
-    def is_start_sleep(self, event: "BaseEvent") -> bool:
+    def is_start_sleep(self, event: eventtypes.LidAaUserModeChange) -> bool:
         return event.requestedAction == eventtypes.LidAaUserModeChange.RequestedactionEnum.StartSleep
-    def is_stop_sleep(self, event: "BaseEvent") -> bool:
+    def is_stop_sleep(self, event: eventtypes.LidAaUserModeChange) -> bool:
         return event.requestedAction == eventtypes.LidAaUserModeChange.RequestedactionEnum.StopSleep or \
                event.requestedAction == eventtypes.LidAaUserModeChange.RequestedactionEnum.StopAll
-    def is_start_exercise(self, event: "BaseEvent") -> bool:
+    def is_start_exercise(self, event: eventtypes.LidAaUserModeChange) -> bool:
         return event.requestedAction == eventtypes.LidAaUserModeChange.RequestedactionEnum.StartExercise
-    def is_stop_exercise(self, event: "BaseEvent") -> bool:
+    def is_stop_exercise(self, event: eventtypes.LidAaUserModeChange) -> bool:
         return event.requestedAction == eventtypes.LidAaUserModeChange.RequestedactionEnum.StopExercise or \
                event.requestedAction == eventtypes.LidAaUserModeChange.RequestedactionEnum.StopAll
 
 
-    def sleep_to_nsentry(self, start: "BaseEvent", stop: Optional["BaseEvent"] = None, time_end: Optional[arrow.Arrow] = None) -> Optional[dict]:
+    def sleep_to_nsentry(self, start: eventtypes.LidAaUserModeChange, stop: Optional[eventtypes.LidAaUserModeChange] = None, time_end: Optional[arrow.Arrow] = None) -> Optional[dict]:
         if start and stop:
             reason = None
             if start.sleepStartedByGui == eventtypes.LidAaUserModeChange.SleepstartedbyguiEnum.TrueVal:
@@ -181,8 +184,10 @@ class ProcessUserMode:
                 pump_event_id = "%s" % start.seqNum
             )
 
+        return None
 
-    def exercise_to_nsentry(self, start: "BaseEvent", stop: Optional["BaseEvent"] = None, time_end: Optional[arrow.Arrow] = None) -> Optional[dict]:
+
+    def exercise_to_nsentry(self, start: eventtypes.LidAaUserModeChange, stop: Optional[eventtypes.LidAaUserModeChange] = None, time_end: Optional[arrow.Arrow] = None) -> Optional[dict]:
         if start and stop:
             reason = "Exercise"
             if start.exerciseChoice == eventtypes.LidAaUserModeChange.ExercisechoiceEnum.Timed:
@@ -213,7 +218,9 @@ class ProcessUserMode:
                 pump_event_id = "%s" % start.seqNum
             )
 
-    def process_unended_sleep_stop(self, event: "BaseEvent", sleep_last_upload: dict) -> dict:
+        return None
+
+    def process_unended_sleep_stop(self, event: eventtypes.LidAaUserModeChange, sleep_last_upload: dict) -> dict:
         logger.info("ProcessUserMode: Deleting old sleep event treatment before pushing update (delete treatments/%s)" % sleep_last_upload["_id"])
         if self.pretend:
             logger.info("ProcessUserMode: Skipping delete in pretend mode")
@@ -229,7 +236,7 @@ class ProcessUserMode:
             pump_event_id="%s,%s" % (sleep_last_upload.get("pump_event_id",""), event.seqNum)
         )
 
-    def process_unended_exercise_stop(self, event: "BaseEvent", exercise_last_upload: dict) -> dict:
+    def process_unended_exercise_stop(self, event: eventtypes.LidAaUserModeChange, exercise_last_upload: dict) -> dict:
         logger.info("ProcessUserMode: Deleting old exercise event treatment before pushing update (delete treatments/%s)" % exercise_last_upload["_id"])
         if self.pretend:
             logger.info("ProcessUserMode: Skipping delete in pretend mode")

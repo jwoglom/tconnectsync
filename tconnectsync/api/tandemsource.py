@@ -20,6 +20,7 @@ from requests_oidc.plugins import OSCachedPlugin
 from requests_oidc.utils import ServerDetails
 from requests_oauthlib import OAuth2Session
 from jwt.algorithms import RSAAlgorithm
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
 
 from ..util import timeago, cap_length
@@ -391,6 +392,10 @@ class TandemSourceApi:
         key = public_keys.get(kid)
         if not key:
             raise ApiException(0, 'Public key not found for JWT: %s' % kid)
+        # A JWKS endpoint publishes public keys; from_jwk() is typed as possibly
+        # returning a private key, so narrow it before passing to jwt.decode().
+        if not isinstance(key, RSAPublicKey):
+            raise ApiException(0, 'JWK is not an RSA public key for JWT: %s' % kid)
 
         audience = self.TDC_OIDC_CLIENT_ID
         issuer = self.TDC_OIDC_ISSUER
@@ -575,7 +580,7 @@ class TandemSourceApi:
             # Trigger automatic re-login, and try again once
             if e.status_code == 401:
                 logger.info("Performing automatic re-login after HTTP 401 for TandemSourceApi")
-                self.accessTokenExpiresAt = time.time()
+                self.accessTokenExpiresAt = arrow.get()
                 self.login(self._email, self._password)
 
                 return self.get(endpoint, query, tries=tries+1)

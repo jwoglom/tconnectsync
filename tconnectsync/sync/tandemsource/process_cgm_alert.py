@@ -12,13 +12,19 @@ from ...parser.nightscout import (
     NightscoutEntry
 )
 
-from typing import Iterable, List, Optional, TYPE_CHECKING
+from typing import Iterable, List, Optional, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 logger = logging.getLogger(__name__)
+
+# The three CGM alert event types all expose dalertId / dalertIdRaw / seqNum.
+CgmAlertEvent = Union[
+    eventtypes.LidCgmAlertActivated,
+    eventtypes.LidCgmAlertActivatedDex,
+    eventtypes.LidCgmAlertActivatedFsl2,
+]
 
 class ProcessCGMAlert:
     def __init__(self, tconnect: "TConnectApi", nightscout: "NightscoutApi", tconnect_device_id: str, pretend: bool, features: List[str] = DEFAULT_FEATURES) -> None:
@@ -70,7 +76,7 @@ class ProcessCGMAlert:
 
         return count
 
-    def alert_to_nsentry(self, alert: "BaseEvent") -> Optional[dict]:
+    def alert_to_nsentry(self, alert: CgmAlertEvent) -> Optional[dict]:
         # FSL3 alert codes are defined in eventparser/static_dicts.py:CGM_ALERTS_DICT
         # Alert code meanings are documented in comments there.
         if not alert.dalertId:
@@ -98,3 +104,5 @@ class ProcessCGMAlert:
                 reason = ("Libre CGM Alert (%s)" % alert.dalertId.name) if alert.dalertId else "Libre CGM Alert (Unknown)",
                 pump_event_id = "%s" % alert.seqNum
             )
+
+        return None

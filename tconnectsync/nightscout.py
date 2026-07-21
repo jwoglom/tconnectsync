@@ -87,6 +87,7 @@ class NightscoutApi:
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
+				return None
 			else:
 				raise e
 
@@ -106,6 +107,7 @@ class NightscoutApi:
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
+				return None
 			else:
 				raise e
 
@@ -125,6 +127,7 @@ class NightscoutApi:
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
+				return None
 			else:
 				raise e
 
@@ -144,6 +147,7 @@ class NightscoutApi:
 		except requests.exceptions.ConnectionError as e:
 			if self.ignore_conn_errors:
 				logger.warn('Ignoring ConnectionError because ignore_conn_errors=true', e)
+				return None
 			else:
 				raise e
 
