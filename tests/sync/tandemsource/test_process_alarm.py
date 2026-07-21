@@ -92,6 +92,16 @@ ALARM_RESUME = {
     "eventProperties": {"alarmId": 18, "faultLocatorData": 8311, "param1": 5228339, "param2": 0},
 }
 
+MALFUNCTION = {
+    "deviceAssignmentId": "00000000-0000-0000-0000-000000000000",
+    "eventCode": 6,
+    "sequenceGroup": 0,
+    "sequenceNumber": 500123,
+    "pumpDateTime": "2026-05-16T00:07:00",
+    "estimatedDateTime": "2026-05-16T00:07:00Z",
+    "eventProperties": {"malfId": 7, "faultLocatorData": 8311, "param1": 42, "param2": 0},
+}
+
 
 class TestProcessAlarmJson(unittest.TestCase):
     maxDiff = None
@@ -126,6 +136,41 @@ class TestProcessAlarmJson(unittest.TestCase):
     def test_resume_alarm_skipped(self):
         p = self.process.process(list(Events([dict(ALARM_RESUME)])), None, None)
         self.assertEqual(p, [])
+
+    def test_malfunction_alarm_uploaded(self):
+        event = Event(dict(MALFUNCTION))
+        self.assertEqual(type(event), eventtypes.LidMalfunctionActivated)
+        self.assertFalse(hasattr(event, 'alarmId'))
+
+        p = self.process.process([event], None, None)
+
+        self.assertEqual(len(p), 1)
+        self.assertDictEqual(p[0], {
+            'eventType': 'Alarm',
+            'reason': 'Malfunction',
+            'notes': 'Malfunction',
+            'created_at': '2026-05-16 00:07:00-04:00',
+            'enteredBy': 'Pump (tconnectsync)',
+            'pump_event_id': '500123'
+        })
+
+    def test_alarm_and_malfunction_mixed(self):
+        # A batch mixing both ALARM-class event types must not crash and must
+        # emit an entry for each.
+        p = self.process.process(list(Events([dict(ALARM_PUMP_RESET), dict(MALFUNCTION)])), None, None)
+
+        self.assertEqual(len(p), 2)
+        reasons = {entry['reason'] for entry in p}
+        self.assertEqual(reasons, {'PumpResetAlarm', 'Malfunction'})
+
+
+class TestAlarmOrMalfunctionUnion(unittest.TestCase):
+    def test_union_matches_eventclass(self):
+        from typing import get_args
+        from tconnectsync.sync.tandemsource.process_alarm import AlarmOrMalfunction
+        from tconnectsync.domain.tandemsource.event_class import EventClass
+
+        self.assertEqual(set(get_args(AlarmOrMalfunction)), set(EventClass.ALARM))
 
 
 if __name__ == '__main__':

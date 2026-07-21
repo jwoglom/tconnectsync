@@ -1,11 +1,11 @@
 import logging
 import arrow
 
-from typing import Iterable, List, Optional, TYPE_CHECKING
+from typing import Iterable, List, Union, TYPE_CHECKING
+from typing_extensions import assert_never
 if TYPE_CHECKING:
     from ...api import TConnectApi
     from ...nightscout import NightscoutApi
-    from ...eventparser.raw_event import BaseEvent
 
 from ...features import DEFAULT_FEATURES
 from ... import features
@@ -19,6 +19,8 @@ from ...parser.nightscout import (
 )
 
 logger = logging.getLogger(__name__)
+
+AlarmOrMalfunction = Union[eventtypes.LidAlarmActivated, eventtypes.LidMalfunctionActivated]
 
 class ProcessAlarm:
     def __init__(self, tconnect: "TConnectApi", nightscout: "NightscoutApi", tconnect_device_id: str, pretend: bool, features: List[str] = DEFAULT_FEATURES) -> None:
@@ -54,7 +56,10 @@ class ProcessAlarm:
 
         return ns_entries
 
-    def skip_event(self, event: "BaseEvent") -> bool:
+    def skip_event(self, event: AlarmOrMalfunction) -> bool:
+        if not isinstance(event, eventtypes.LidAlarmActivated):
+            return False
+
         return event.alarmId in (
             eventtypes.LidAlarmActivated.AlarmidEnum.ResumePumpAlarm,
             eventtypes.LidAlarmActivated.AlarmidEnum.ResumePumpAlarm2
@@ -73,16 +78,19 @@ class ProcessAlarm:
         return count
 
 
-    def alarm_to_nsentry(self, event: "BaseEvent") -> Optional[dict]:
-        if type(event) == eventtypes.LidAlarmActivated:
+    def alarm_to_nsentry(self, event: AlarmOrMalfunction) -> dict:
+        if isinstance(event, eventtypes.LidAlarmActivated):
+            alarmId = event.alarmId
+            reason = alarmId.name if alarmId is not None else "Alarm%s" % event.alarmIdRaw
             return NightscoutEntry.alarm(
                 created_at = event.eventTimestamp.format(),
-                reason = "%s" % event.alarmId.name,
+                reason = reason,
                 pump_event_id = "%s" % event.seqNum
             )
-        elif type(event) == eventtypes.LidMalfunctionActivated:
+        elif isinstance(event, eventtypes.LidMalfunctionActivated):
             return NightscoutEntry.alarm(
                 created_at = event.eventTimestamp.format(),
                 reason = "Malfunction",
                 pump_event_id = "%s" % event.seqNum
             )
+        assert_never(event)
