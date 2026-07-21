@@ -221,6 +221,8 @@ class TandemSourceApi:
         # US default would send EU accounts to the US endpoints (#152).
         if not region:
             region = secret.TCONNECT_REGION
+        if not region:
+            raise ValueError("No region configured. Set TCONNECT_REGION to 'US' or 'EU'.")
         self.region = region.upper()
         if self.region not in ['US', 'EU']:
             raise ValueError(f"Invalid region '{region}'. Must be 'US' or 'EU'.")
