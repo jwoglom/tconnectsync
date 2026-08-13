@@ -10,18 +10,8 @@ from tconnectsync.eventparser.raw_event import RawEvent
 from ...api.fake import TConnectApi
 from ...nightscout_fake import NightscoutApi
 
-# Every raw event 81 (LID_DAILY_BASAL) capture observed from a real pump, with
-# its full expected decode. Ordered by pump timestamp. The last four bytes of
-# each are one packed uint32 -- (batteryLipoMilliVolts << 16) |
-# (batteryChargePercent << 8) | finalEventForDay -- serialized big-endian by
-# Tandem Source, so they read as [lipo_hi, lipo_lo, percent, final] at absolute
-# offsets 22-25.
-#
-# The "Mobi @ ..." comments are the battery levels these captures were
-# originally annotated with when they were collected. Where a label disagrees
-# with the pump's own SoC byte the byte wins: it is what the pump reports, and
-# the labels appear to have been estimates. Their relative ordering agrees with
-# the decoded values.
+# Every event 81 capture observed from a real pump, with its expected decode.
+# The "Mobi @" labels are collection-time estimates; the pump's SoC byte wins.
 OBSERVED_EVENTS = [
     {
         'raw': b'\x00Q\x1f\xd6\x14g\x00\x0f\xf7\xa4A\xb2\xd3\xe2?L\xcc\xcd@~\xdeb\x0e\xf67\x00',
@@ -78,7 +68,6 @@ OBSERVED_EVENTS = [
     },
     {
         # Mobi @ MAX seen
-        # The only observed capture with finalEventForDay set: 23:58 pump-local.
         'raw': b'\x00Q \x19U=\x00\x01\x0f\xa8A\xa5\x04V?L\xcc\xcd?s\x83b\x10Pd\x01',
         'seqNum': 69544, 'timestampRaw': 538531133,
         'timestamp': '2025-01-23 23:58:53-05:00',
@@ -119,8 +108,6 @@ OBSERVED_EVENTS = [
     },
     {
         # Mobi @ ~5%
-        # Same battery tail as the capture above, an hour later: the packed u32
-        # repeats verbatim while the float fields ahead of it move on.
         'raw': b'\x00Q \x1e\xb0\xcd\x00\x01C\xd3@L9W@#33@\x8b\x04\xd2\x0e\x88\x15\x00',
         'seqNum': 82899, 'timestampRaw': 538882253,
         'timestamp': '2025-01-28 01:30:53-05:00',
@@ -308,8 +295,6 @@ class TestProcessDeviceStatus(unittest.TestCase):
         self.assertEqual(p, [])
 
     def test_all_observed_events_parse(self):
-        # Every observed capture must decode end to end, not just its battery
-        # fields: a bad offset anywhere in the record shows up here.
         for expected in OBSERVED_EVENTS:
             with self.subTest(seqNum=expected['seqNum']):
                 event = Event(expected['raw'])
@@ -329,10 +314,6 @@ class TestProcessDeviceStatus(unittest.TestCase):
                 self.assertEqual(event.finalEventForDay, expected['finalEventForDay'])
 
     def test_all_observed_events_have_sane_battery_fields(self):
-        # The SoC byte is emitted verbatim -- no scaling, no derivation from the
-        # millivolt bytes -- so it must stay within 0-100 across every capture,
-        # and the voltage must stay in 1S LiPo range. The old layout produced
-        # 14080 mV for the first of these.
         for expected in OBSERVED_EVENTS:
             with self.subTest(seqNum=expected['seqNum']):
                 event = Event(expected['raw'])
@@ -347,15 +328,11 @@ class TestProcessDeviceStatus(unittest.TestCase):
                 self.assertIn(event.finalEventForDay, (0, 1))
 
     def test_observed_charge_percent_tracks_voltage(self):
-        # Independent corroboration that the two fields are aligned: sorted by
-        # voltage, the SoC byte is non-decreasing across every capture.
         by_voltage = sorted(OBSERVED_EVENTS, key=lambda e: e['batteryLipoMilliVolts'])
         percents = [e['batteryChargePercent'] for e in by_voltage]
         self.assertEqual(percents, sorted(percents))
 
     def test_observed_events_upload_expected_device_status(self):
-        # Each capture on its own must produce the device status the decoded
-        # fields imply, with percent passed through unscaled.
         self.nightscout.last_uploaded_devicestatus = lambda *args, **kwargs: None
 
         for expected in OBSERVED_EVENTS:
@@ -372,8 +349,6 @@ class TestProcessDeviceStatus(unittest.TestCase):
                 })
 
     def test_final_event_for_day_is_decoded_but_not_acted_on(self):
-        # The only capture in this set with finalEventForDay=1 is the 23:58
-        # end-of-day record. Decoding it must not change what is uploaded.
         self.nightscout.last_uploaded_devicestatus = lambda *args, **kwargs: None
 
         event = Event(b'\x00Q \x19U=\x00\x01\x0f\xa8A\xa5\x04V?L\xcc\xcd?s\x83b\x10Pd\x01')
