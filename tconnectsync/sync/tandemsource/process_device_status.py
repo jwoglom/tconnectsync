@@ -69,17 +69,17 @@ class ProcessDeviceStatus:
         # yields nothing on the new API; this path stays for the binary decoder
         # and in case the endpoint starts returning event 81.
         #
-        # The battery percent is derived from the msb/lsb raw fields; if the
-        # event arrived without them (an event shape we can't yet parse), skip
-        # it rather than raise on the arithmetic below.
-        if event.batteryChargePercentMSBRaw is None or event.batteryChargePercentLSBRaw is None:
+        # batteryChargePercent is the pump's own state-of-charge byte, already
+        # scaled 0-100; if the event arrived without it (an event shape we
+        # can't yet parse), skip it rather than emit a bogus device status.
+        if event.batteryChargePercent is None:
             logger.warning("ProcessDeviceStatus: skipping daily basal event missing battery data: %s" % event)
             return None
 
         return NightscoutEntry.devicestatus(
             created_at=event.eventTimestamp.format(),
             batteryVoltage=(float(event.batteryLipoMilliVolts or 0)/1000),
-            batteryPercent=int(100*event.batteryChargePercent),
+            batteryPercent=int(event.batteryChargePercent),
             pump_event_id = "%s" % event.seqNum
         )
 

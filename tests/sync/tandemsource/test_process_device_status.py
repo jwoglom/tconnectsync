@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
 import unittest
-import struct
 
 from tconnectsync.sync.tandemsource.process_device_status import ProcessDeviceStatus
 from tconnectsync.eventparser import events as eventtypes
-from tconnectsync.eventparser.events import UINT16
 from tconnectsync.eventparser.generic import Event, Events
 from tconnectsync.eventparser.raw_event import RawEvent
 
@@ -29,9 +27,9 @@ class TestProcessDeviceStatus(unittest.TestCase):
         ]
 
         self.assertEqual(type(events[0]), eventtypes.LidDailyBasal)
-        self.assertEqual(events[0].batteryChargePercentMSBRaw, 14)
-        self.assertEqual(events[0].batteryChargePercentLSBRaw, 246)
-        self.assertEqual(events[0].batteryLipoMilliVolts, 14080)
+        self.assertEqual(events[0].batteryLipoMilliVolts, 3830)
+        self.assertEqual(events[0].batteryChargePercent, 55)
+        self.assertEqual(events[0].finalEventForDay, 0)
 
         p = self.process.process(events, time_start=None, time_end=None)
 
@@ -42,9 +40,9 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'pump': {
                 'clock': '2024-12-03 23:40:23-05:00',
                 'battery': {
-                    'status': '32%',
-                    'percent': 32,
-                    'voltage': 14.08
+                    'status': '55%',
+                    'percent': 55,
+                    'voltage': 3.83
                 }
             },
             'pump_event_id': '1046436'
@@ -58,9 +56,9 @@ class TestProcessDeviceStatus(unittest.TestCase):
         ]
 
         self.assertEqual(type(events[0]), eventtypes.LidDailyBasal)
-        self.assertEqual(events[0].batteryChargePercentMSBRaw, 14)
-        self.assertEqual(events[0].batteryChargePercentLSBRaw, 246)
-        self.assertEqual(events[0].batteryLipoMilliVolts, 14080)
+        self.assertEqual(events[0].batteryLipoMilliVolts, 3830)
+        self.assertEqual(events[0].batteryChargePercent, 55)
+        self.assertEqual(events[0].finalEventForDay, 0)
 
         p = self.process.process(events, time_start=None, time_end=None)
 
@@ -77,15 +75,15 @@ class TestProcessDeviceStatus(unittest.TestCase):
 
         self.assertEqual(type(events[0]), eventtypes.LidDailyBasal)
         self.assertEqual(events[0].raw.timestampRaw, 534123623) # 2024-12-03 23:40:23-05:00
-        self.assertEqual(events[0].batteryChargePercentMSBRaw, 14)
-        self.assertEqual(events[0].batteryChargePercentLSBRaw, 246)
-        self.assertEqual(events[0].batteryLipoMilliVolts, 14080)
+        self.assertEqual(events[0].batteryLipoMilliVolts, 3830)
+        self.assertEqual(events[0].batteryChargePercent, 55)
+        self.assertEqual(events[0].finalEventForDay, 0)
 
         self.assertEqual(type(events[1]), eventtypes.LidDailyBasal)
         self.assertEqual(events[1].raw.timestampRaw, 534133823) # 2024-12-04 02:30:23-05:00
-        self.assertEqual(events[1].batteryChargePercentMSBRaw, 14)
-        self.assertEqual(events[1].batteryChargePercentLSBRaw, 243)
-        self.assertEqual(events[1].batteryLipoMilliVolts, 13824)
+        self.assertEqual(events[1].batteryLipoMilliVolts, 3827)
+        self.assertEqual(events[1].batteryChargePercent, 54)
+        self.assertEqual(events[1].finalEventForDay, 0)
 
         p = self.process.process(events, time_start=None, time_end=None)
 
@@ -96,9 +94,9 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'pump': {
                 'clock': '2024-12-04 02:30:23-05:00',
                 'battery': {
-                    'status': '31%',
-                    'percent': 31,
-                    'voltage': 13.824
+                    'status': '54%',
+                    'percent': 54,
+                    'voltage': 3.827
                 }
             },
             'pump_event_id': '1046875'
@@ -115,21 +113,21 @@ class TestProcessDeviceStatus(unittest.TestCase):
 
         self.assertEqual(type(events[0]), eventtypes.LidDailyBasal)
         self.assertEqual(events[0].raw.timestampRaw, 534123623) # 2024-12-03 23:40:23-05:00
-        self.assertEqual(events[0].batteryChargePercentMSBRaw, 14)
-        self.assertEqual(events[0].batteryChargePercentLSBRaw, 246)
-        self.assertEqual(events[0].batteryLipoMilliVolts, 14080)
+        self.assertEqual(events[0].batteryLipoMilliVolts, 3830)
+        self.assertEqual(events[0].batteryChargePercent, 55)
+        self.assertEqual(events[0].finalEventForDay, 0)
 
         self.assertEqual(type(events[1]), eventtypes.LidDailyBasal)
         self.assertEqual(events[1].raw.timestampRaw, 534133823) # 2024-12-04 02:30:23-05:00
-        self.assertEqual(events[1].batteryChargePercentMSBRaw, 14)
-        self.assertEqual(events[1].batteryChargePercentLSBRaw, 243)
-        self.assertEqual(events[1].batteryLipoMilliVolts, 13824)
+        self.assertEqual(events[1].batteryLipoMilliVolts, 3827)
+        self.assertEqual(events[1].batteryChargePercent, 54)
+        self.assertEqual(events[1].finalEventForDay, 0)
 
         self.assertEqual(type(events[2]), eventtypes.LidDailyBasal)
         self.assertEqual(events[2].raw.timestampRaw, 534145823) # 2024-12-04 05:50:23-05:00
-        self.assertEqual(events[2].batteryChargePercentMSBRaw, 14)
-        self.assertEqual(events[2].batteryChargePercentLSBRaw, 238)
-        self.assertEqual(events[2].batteryLipoMilliVolts, 13568)
+        self.assertEqual(events[2].batteryLipoMilliVolts, 3822)
+        self.assertEqual(events[2].batteryChargePercent, 53)
+        self.assertEqual(events[2].finalEventForDay, 0)
 
         p = self.process.process(events, time_start=None, time_end=None)
 
@@ -140,9 +138,9 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'pump': {
                 'clock': '2024-12-04 05:50:23-05:00',
                 'battery': {
-                    'status': '30%',
-                    'percent': 30,
-                    'voltage': 13.568
+                    'status': '53%',
+                    'percent': 53,
+                    'voltage': 3.822
                 }
             },
             'pump_event_id': '1047614'
@@ -181,102 +179,59 @@ class TestProcessDeviceStatus(unittest.TestCase):
             dailyTotalBasal=None,
             lastBasalRate=None,
             iob=None,
-            batteryChargePercentMSBRaw=None,
-            batteryChargePercentLSBRaw=None,
             batteryLipoMilliVolts=None,
+            batteryChargePercent=None,
+            finalEventForDay=None,
         )
 
         p = self.process.process([event], time_start=None, time_end=None)
         self.assertEqual(p, [])
 
-    @unittest.skip
-    def test_device_status_battery_calculation(self):
+    def test_device_status_battery_percent_is_the_pumps_own_byte(self):
+        # The SoC byte is emitted verbatim: no scaling, no derivation from the
+        # millivolt bytes. Across a spread of real captures it stays within
+        # 0-100 and tracks batteryLipoMilliVolts monotonically.
+        captures = [
+            # (raw event, batteryLipoMilliVolts, batteryChargePercent)
+            (b'\x00Q \x19U=\x00\x01\x0f\xa8A\xa5\x04V?L\xcc\xcd?s\x83b\x10Pd\x01', 4176, 100),
+            (b'\x00Q\x1f\xfdm\xf5\x00\x00\x04P@4\xa7\xed?L\xcc\xcd@+\xd8\x81\x0f\xa1P\x00', 4001, 80),
+            (b'\x00Q \x04\x15\xdd\x00\x00E\xb1A\x86\xe0\xcf\x00\x00\x00\x00A9\xd2w\x0f\x1d=\x00', 3869, 61),
+            (b'\x00Q \x04\xd8f\x00\x00L^A^\xc5\x9a>49X\x00\x00\x00\x00\x0e\xfa7\x00', 3834, 55),
+            (b'\x00Q \x1d\xbb\xa5\x00\x019zA\x1e\x1f`@%p\xa4>\xad\xaa\xf1\x0e\xc1$\x00', 3777, 36),
+            (b'\x00Q \x06#U\x00\x00X{A\t\xed\xeb?\tx\xd5<\xe0\x81[\x0e\xb5 \x00', 3765, 32),
+            (b'\x00Q \x1e\\m\x00\x01?}A\xa0\xe2\x8b?L\xcc\xcd?\xda\xeaj\x0e\xa1\x1b\x00', 3745, 27),
+            (b'\x00Q \x1ej~\x00\x01@2A\xa5\xafZ\x00\x00\x00\x00@\x8c[\xed\x0e\x9f\x1a\x00', 3743, 26),
+            (b'\x00Q \x1e\xa2\xbd\x00\x01C\x1a?\xd9?}@MO\xdf@uz<\x0e\x88\x15\x00', 3720, 21),
+            (b'\x00Q \x1e\xb0\xcd\x00\x01C\xd3@L9W@#33@\x8b\x04\xd2\x0e\x88\x15\x00', 3720, 21),
+        ]
+
+        for raw, millivolts, percent in captures:
+            with self.subTest(millivolts=millivolts):
+                event = Event(raw)
+                self.assertEqual(type(event), eventtypes.LidDailyBasal)
+                self.assertEqual(event.batteryLipoMilliVolts, millivolts)
+                self.assertEqual(event.batteryChargePercent, percent)
+                self.assertLessEqual(event.batteryChargePercent, 100)
+
+        # Sorted descending by voltage above; percent must be non-increasing.
+        percents = [percent for _, _, percent in captures]
+        self.assertEqual(percents, sorted(percents, reverse=True))
+
+    def test_final_event_for_day_is_decoded_but_not_acted_on(self):
+        # The only capture in this set with finalEventForDay=1 is the 23:58
+        # end-of-day record. Decoding it must not change what is uploaded.
         self.nightscout.last_uploaded_devicestatus = lambda *args, **kwargs: None
 
-        def test_percentage_about(percent_str, event):
-            with self.subTest(percent_str, event=event):
-                # p = self.process.process([event], time_start=None, time_end=None)
-                # self.assertEqual(len(p), 1)
-                # self.assertEqual(p[0]['pump']['battery']['status'], percent_str)
-                msb = event.batteryChargePercentMSBRaw
-                lsb = event.batteryChargePercentLSBRaw
+        event = Event(b'\x00Q \x19U=\x00\x01\x0f\xa8A\xa5\x04V?L\xcc\xcd?s\x83b\x10Pd\x01')
+        self.assertEqual(event.finalEventForDay, 1)
 
-
-                MAX = struct.unpack(UINT16, bytearray((16, 128)))[0]
-                MIN = struct.unpack(UINT16, bytearray((14, 128)))[0]
-                val = struct.unpack(UINT16, bytearray((msb, lsb)))[0]
-                pct = (val - MIN)/(MAX-MIN)
-                # print(pct)
-                # print(struct.unpack(UINT16, bytearray((msb, lsb))
-                # (14, 100) =~ 0%
-                # (15, 100) =~ 50%
-                # (16, 98) =~ 100%
-                # msb*256 + lsb - 14*256
-                # pct = (msb*256 + lsb - 14*256 - 100) / 512
-
-                calc_str = "%.0f%s" % (100*pct, '%')
-                print(f'comp {calc_str=} {percent_str=}')
-                self.assertEqual(calc_str, percent_str)
-
-
-        test_percentage_about('80%', Event(b'\x00Q\x1f\xfdm\xf5\x00\x00\x04P@4\xa7\xed?L\xcc\xcd@+\xd8\x81\x0f\xa1P\x00'))
-        test_percentage_about('55%', Event(b'\x00Q \x04\x15\xdd\x00\x00E\xb1A\x86\xe0\xcf\x00\x00\x00\x00A9\xd2w\x0f\x1d=\x00'))
-        test_percentage_about('45%', Event(b'\x00Q \x04\xd8f\x00\x00L^A^\xc5\x9a>49X\x00\x00\x00\x00\x0e\xfa7\x00'))
-        test_percentage_about('15%', Event(b'\x00Q \x06#U\x00\x00X{A\t\xed\xeb?\tx\xd5<\xe0\x81[\x0e\xb5 \x00'))
-        test_percentage_about('20%', Event(b'\x00Q \x1d\xbb\xa5\x00\x019zA\x1e\x1f`@%p\xa4>\xad\xaa\xf1\x0e\xc1$\x00'))
-        test_percentage_about('10%', Event(b'\x00Q \x1e\\m\x00\x01?}A\xa0\xe2\x8b?L\xcc\xcd?\xda\xeaj\x0e\xa1\x1b\x00'))
-        test_percentage_about('10%', Event(b'\x00Q \x1ej~\x00\x01@2A\xa5\xafZ\x00\x00\x00\x00@\x8c[\xed\x0e\x9f\x1a\x00'))
-        test_percentage_about('5%', Event(b'\x00Q \x1e\xa2\xbd\x00\x01C\x1a?\xd9?}@MO\xdf@uz<\x0e\x88\x15\x00'))
-
-
-# Mobi @ MAX seen
-# bytearray(b'\x00Q \x19U=\x00\x01\x0f\xa8A\xa5\x04V?L\xcc\xcd?s\x83b\x10Pd\x01')
-#   batteryChargePercentMSBRaw=16, batteryChargePercentLSBRaw=80, batteryLipoMilliVolts=25601
-
-# Mobi @ ~80%
-# bytearray(b'\x00Q\x1f\xfdm\xf5\x00\x00\x04P@4\xa7\xed?L\xcc\xcd@+\xd8\x81\x0f\xa1P\x00'):
-#   batteryChargePercentMSBRaw=15, batteryChargePercentLSBRaw=161, batteryLipoMilliVolts=20480
-#   calc batteryChargePercent = 0.54296875
-
-# Mobi @ ~55%
-# bytearray(b'\x00Q \x04\x15\xdd\x00\x00E\xb1A\x86\xe0\xcf\x00\x00\x00\x00A9\xd2w\x0f\x1d=\x00')
-#    batteryChargePercentMSBRaw=15, batteryChargePercentLSBRaw=29, batteryLipoMilliVolts=15616
-#    calc batteryChargePercent = 0.37109375
-
-# Mobi @ ~45%
-# bytearray(b'\x00Q \x04\xd8f\x00\x00L^A^\xc5\x9a>49X\x00\x00\x00\x00\x0e\xfa7\x00')
-#    batteryChargePercentMSBRaw=14, batteryChargePercentLSBRaw=250 batteryLipoMilliVolts=14080
-#    calc batteryChargePercent = 0.3255208333333333
-
-# Mobi @ ~15%
-# bytearray(b'\x00Q \x06#U\x00\x00X{A\t\xed\xeb?\tx\xd5<\xe0\x81[\x0e\xb5 \x00')
-#   batteryChargePercentMSBRaw=14, batteryChargePercentLSBRaw=181 batteryLipoMilliVolts=8192
-#   calc batteryChargePercent = 0.23567708333333334
-
-# Mobi @ ~20%
-# bytearray(b'\x00Q \x1d\xbb\xa5\x00\x019zA\x1e\x1f`@%p\xa4>\xad\xaa\xf1\x0e\xc1$\x00')
-#   batteryChargePercentMSBRaw=14, batteryChargePercentLSBRaw=193 batteryLipoMilliVolts=9216
-#   calc batteryChargePercent = 0.2513020833333333
-
-# Mobi @ ~10%
-# bytearray(b'\x00Q \x1e\\m\x00\x01?}A\xa0\xe2\x8b?L\xcc\xcd?\xda\xeaj\x0e\xa1\x1b\x00')
-#    batteryChargePercentMSBRaw=14, batteryChargePercentLSBRaw=161 batteryLipoMilliVolts=6912
-#    calc batteryChargePercent = 0.20963541666666666
-
-# Mobi @ ~10%
-# bytearray(b'\x00Q \x1ej~\x00\x01@2A\xa5\xafZ\x00\x00\x00\x00@\x8c[\xed\x0e\x9f\x1a\x00')
-#   batteryChargePercentMSBRaw=14, batteryChargePercentLSBRaw=159 batteryLipoMilliVolts=6656
-#   calc batteryChargePercent = 0.20703125
-
-# Mobi @ ~5%
-# bytearray(b'\x00Q \x1e\xa2\xbd\x00\x01C\x1a?\xd9?}@MO\xdf@uz<\x0e\x88\x15\x00')
-#   batteryChargePercentMSBRaw=14, batteryChargePercentLSBRaw=136
-#   calc batteryChargePercent = 0.17708333333333334 batteryLipoMilliVolts=5376
-
-# Mobi @ ~5%
-# bytearray(b'\x00Q \x1e\xb0\xcd\x00\x01C\xd3@L9W@#33@\x8b\x04\xd2\x0e\x88\x15\x00')
-#   batteryChargePercentMSBRaw=14 batteryChargePercentLSBRaw=136 batteryLipoMilliVolts=5376
-#   calc 0.17708333333333334
+        p = self.process.process([event], time_start=None, time_end=None)
+        self.assertEqual(len(p), 1)
+        self.assertEqual(p[0]['pump']['battery'], {
+            'status': '100%',
+            'percent': 100,
+            'voltage': 4.176,
+        })
 
 
 if __name__ == '__main__':
