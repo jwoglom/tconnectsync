@@ -10,6 +10,115 @@ from tconnectsync.eventparser.raw_event import RawEvent
 from ...api.fake import TConnectApi
 from ...nightscout_fake import NightscoutApi
 
+# Every raw event 81 (LID_DAILY_BASAL) capture observed from a real pump, with
+# its full expected decode. Ordered by pump timestamp. The last four bytes of
+# each are one packed uint32 -- (batteryLipoMilliVolts << 16) |
+# (batteryChargePercent << 8) | finalEventForDay -- serialized big-endian by
+# Tandem Source, so they read as [lipo_hi, lipo_lo, percent, final] at absolute
+# offsets 22-25.
+#
+# The "labelled" key is the battery level the capture was originally annotated
+# with when it was collected. Where it disagrees with the pump's own SoC byte
+# the byte wins: it is what the pump reports, and the labels appear to have
+# been estimates. Their relative ordering agrees with the decoded values.
+OBSERVED_EVENTS = [
+    {
+        'raw': b'\x00Q\x1f\xd6\x14g\x00\x0f\xf7\xa4A\xb2\xd3\xe2?L\xcc\xcd@~\xdeb\x0e\xf67\x00',
+        'seqNum': 1046436, 'timestampRaw': 534123623,
+        'timestamp': '2024-12-03 23:40:23-05:00',
+        'dailyTotalBasal': 22.3535, 'lastBasalRate': 0.8, 'iob': 3.9823,
+        'batteryLipoMilliVolts': 3830, 'batteryChargePercent': 55, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q\x1f\xd6<?\x00\x0f\xf9[@\r\xcd{?\x9b\xa5\xe3?\xe3\x9a;\x0e\xf36\x00',
+        'seqNum': 1046875, 'timestampRaw': 534133823,
+        'timestamp': '2024-12-04 02:30:23-05:00',
+        'dailyTotalBasal': 2.2157, 'lastBasalRate': 1.216, 'iob': 1.7781,
+        'batteryLipoMilliVolts': 3827, 'batteryChargePercent': 54, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q\x1f\xd6k\x1f\x00\x0f\xfc>A\x0e\xa3\x80?\x9a~\xfa@\x11z6\x0e\xee5\x00',
+        'seqNum': 1047614, 'timestampRaw': 534145823,
+        'timestamp': '2024-12-04 05:50:23-05:00',
+        'dailyTotalBasal': 8.9149, 'lastBasalRate': 1.207, 'iob': 2.2731,
+        'batteryLipoMilliVolts': 3822, 'batteryChargePercent': 53, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q\x1f\xfdm\xf5\x00\x00\x04P@4\xa7\xed?L\xcc\xcd@+\xd8\x81\x0f\xa1P\x00',
+        'seqNum': 1104, 'timestampRaw': 536702453,
+        'timestamp': '2025-01-02 20:00:53-05:00', 'labelled': '~80%',
+        'dailyTotalBasal': 2.8227, 'lastBasalRate': 0.8, 'iob': 2.6851,
+        'batteryLipoMilliVolts': 4001, 'batteryChargePercent': 80, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q \x04\x15\xdd\x00\x00E\xb1A\x86\xe0\xcf\x00\x00\x00\x00A9\xd2w\x0f\x1d=\x00',
+        'seqNum': 17841, 'timestampRaw': 537138653,
+        'timestamp': '2025-01-07 21:10:53-05:00', 'labelled': '~55%',
+        'dailyTotalBasal': 16.8598, 'lastBasalRate': 0.0, 'iob': 11.6139,
+        'batteryLipoMilliVolts': 3869, 'batteryChargePercent': 61, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q \x04\xd8f\x00\x00L^A^\xc5\x9a>49X\x00\x00\x00\x00\x0e\xfa7\x00',
+        'seqNum': 19550, 'timestampRaw': 537188454,
+        'timestamp': '2025-01-08 11:00:54-05:00', 'labelled': '~45%',
+        'dailyTotalBasal': 13.9232, 'lastBasalRate': 0.176, 'iob': 0.0,
+        'batteryLipoMilliVolts': 3834, 'batteryChargePercent': 55, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q \x06#U\x00\x00X{A\t\xed\xeb?\tx\xd5<\xe0\x81[\x0e\xb5 \x00',
+        'seqNum': 22651, 'timestampRaw': 537273173,
+        'timestamp': '2025-01-09 10:32:53-05:00', 'labelled': '~15%',
+        'dailyTotalBasal': 8.6206, 'lastBasalRate': 0.537, 'iob': 0.0274,
+        'batteryLipoMilliVolts': 3765, 'batteryChargePercent': 32, 'finalEventForDay': 0,
+    },
+    {
+        # The only observed capture with finalEventForDay set: 23:58 pump-local.
+        'raw': b'\x00Q \x19U=\x00\x01\x0f\xa8A\xa5\x04V?L\xcc\xcd?s\x83b\x10Pd\x01',
+        'seqNum': 69544, 'timestampRaw': 538531133,
+        'timestamp': '2025-01-23 23:58:53-05:00', 'labelled': 'MAX seen',
+        'dailyTotalBasal': 20.6271, 'lastBasalRate': 0.8, 'iob': 0.9512,
+        'batteryLipoMilliVolts': 4176, 'batteryChargePercent': 100, 'finalEventForDay': 1,
+    },
+    {
+        'raw': b'\x00Q \x1d\xbb\xa5\x00\x019zA\x1e\x1f`@%p\xa4>\xad\xaa\xf1\x0e\xc1$\x00',
+        'seqNum': 80250, 'timestampRaw': 538819493,
+        'timestamp': '2025-01-27 08:04:53-05:00', 'labelled': '~20%',
+        'dailyTotalBasal': 9.8827, 'lastBasalRate': 2.585, 'iob': 0.3392,
+        'batteryLipoMilliVolts': 3777, 'batteryChargePercent': 36, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q \x1e\\m\x00\x01?}A\xa0\xe2\x8b?L\xcc\xcd?\xda\xeaj\x0e\xa1\x1b\x00',
+        'seqNum': 81789, 'timestampRaw': 538860653,
+        'timestamp': '2025-01-27 19:30:53-05:00', 'labelled': '~10%',
+        'dailyTotalBasal': 20.1106, 'lastBasalRate': 0.8, 'iob': 1.7103,
+        'batteryLipoMilliVolts': 3745, 'batteryChargePercent': 27, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q \x1ej~\x00\x01@2A\xa5\xafZ\x00\x00\x00\x00@\x8c[\xed\x0e\x9f\x1a\x00',
+        'seqNum': 81970, 'timestampRaw': 538864254,
+        'timestamp': '2025-01-27 20:30:54-05:00', 'labelled': '~10%',
+        'dailyTotalBasal': 20.7106, 'lastBasalRate': 0.0, 'iob': 4.3862,
+        'batteryLipoMilliVolts': 3743, 'batteryChargePercent': 26, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x00Q \x1e\xa2\xbd\x00\x01C\x1a?\xd9?}@MO\xdf@uz<\x0e\x88\x15\x00',
+        'seqNum': 82714, 'timestampRaw': 538878653,
+        'timestamp': '2025-01-28 00:30:53-05:00', 'labelled': '~5%',
+        'dailyTotalBasal': 1.6973, 'lastBasalRate': 3.208, 'iob': 3.8356,
+        'batteryLipoMilliVolts': 3720, 'batteryChargePercent': 21, 'finalEventForDay': 0,
+    },
+    {
+        # Same battery tail as the capture above, an hour later: the packed u32
+        # repeats verbatim while the float fields ahead of it move on.
+        'raw': b'\x00Q \x1e\xb0\xcd\x00\x01C\xd3@L9W@#33@\x8b\x04\xd2\x0e\x88\x15\x00',
+        'seqNum': 82899, 'timestampRaw': 538882253,
+        'timestamp': '2025-01-28 01:30:53-05:00', 'labelled': '~5%',
+        'dailyTotalBasal': 3.191, 'lastBasalRate': 2.55, 'iob': 4.3443,
+        'batteryLipoMilliVolts': 3720, 'batteryChargePercent': 21, 'finalEventForDay': 0,
+    },
+]
+
+
 class TestProcessDeviceStatus(unittest.TestCase):
     maxDiff = None
 
@@ -187,35 +296,69 @@ class TestProcessDeviceStatus(unittest.TestCase):
         p = self.process.process([event], time_start=None, time_end=None)
         self.assertEqual(p, [])
 
-    def test_device_status_battery_percent_is_the_pumps_own_byte(self):
-        # The SoC byte is emitted verbatim: no scaling, no derivation from the
-        # millivolt bytes. Across a spread of real captures it stays within
-        # 0-100 and tracks batteryLipoMilliVolts monotonically.
-        captures = [
-            # (raw event, batteryLipoMilliVolts, batteryChargePercent)
-            (b'\x00Q \x19U=\x00\x01\x0f\xa8A\xa5\x04V?L\xcc\xcd?s\x83b\x10Pd\x01', 4176, 100),
-            (b'\x00Q\x1f\xfdm\xf5\x00\x00\x04P@4\xa7\xed?L\xcc\xcd@+\xd8\x81\x0f\xa1P\x00', 4001, 80),
-            (b'\x00Q \x04\x15\xdd\x00\x00E\xb1A\x86\xe0\xcf\x00\x00\x00\x00A9\xd2w\x0f\x1d=\x00', 3869, 61),
-            (b'\x00Q \x04\xd8f\x00\x00L^A^\xc5\x9a>49X\x00\x00\x00\x00\x0e\xfa7\x00', 3834, 55),
-            (b'\x00Q \x1d\xbb\xa5\x00\x019zA\x1e\x1f`@%p\xa4>\xad\xaa\xf1\x0e\xc1$\x00', 3777, 36),
-            (b'\x00Q \x06#U\x00\x00X{A\t\xed\xeb?\tx\xd5<\xe0\x81[\x0e\xb5 \x00', 3765, 32),
-            (b'\x00Q \x1e\\m\x00\x01?}A\xa0\xe2\x8b?L\xcc\xcd?\xda\xeaj\x0e\xa1\x1b\x00', 3745, 27),
-            (b'\x00Q \x1ej~\x00\x01@2A\xa5\xafZ\x00\x00\x00\x00@\x8c[\xed\x0e\x9f\x1a\x00', 3743, 26),
-            (b'\x00Q \x1e\xa2\xbd\x00\x01C\x1a?\xd9?}@MO\xdf@uz<\x0e\x88\x15\x00', 3720, 21),
-            (b'\x00Q \x1e\xb0\xcd\x00\x01C\xd3@L9W@#33@\x8b\x04\xd2\x0e\x88\x15\x00', 3720, 21),
-        ]
+    def test_all_observed_events_parse(self):
+        # Every observed capture must decode end to end, not just its battery
+        # fields: a bad offset anywhere in the record shows up here.
+        for expected in OBSERVED_EVENTS:
+            with self.subTest(seqNum=expected['seqNum']):
+                event = Event(expected['raw'])
 
-        for raw, millivolts, percent in captures:
-            with self.subTest(millivolts=millivolts):
-                event = Event(raw)
                 self.assertEqual(type(event), eventtypes.LidDailyBasal)
-                self.assertEqual(event.batteryLipoMilliVolts, millivolts)
-                self.assertEqual(event.batteryChargePercent, percent)
+                self.assertEqual(event.eventId, 81)
+                self.assertEqual(event.seqNum, expected['seqNum'])
+                self.assertEqual(event.raw.timestampRaw, expected['timestampRaw'])
+                self.assertEqual(event.eventTimestamp.format(), expected['timestamp'])
+
+                self.assertAlmostEqual(event.dailyTotalBasal, expected['dailyTotalBasal'], places=4)
+                self.assertAlmostEqual(event.lastBasalRate, expected['lastBasalRate'], places=4)
+                self.assertAlmostEqual(event.iob, expected['iob'], places=4)
+
+                self.assertEqual(event.batteryLipoMilliVolts, expected['batteryLipoMilliVolts'])
+                self.assertEqual(event.batteryChargePercent, expected['batteryChargePercent'])
+                self.assertEqual(event.finalEventForDay, expected['finalEventForDay'])
+
+    def test_all_observed_events_have_sane_battery_fields(self):
+        # The SoC byte is emitted verbatim -- no scaling, no derivation from the
+        # millivolt bytes -- so it must stay within 0-100 across every capture,
+        # and the voltage must stay in 1S LiPo range. The old layout produced
+        # 14080 mV for the first of these.
+        for expected in OBSERVED_EVENTS:
+            with self.subTest(seqNum=expected['seqNum']):
+                event = Event(expected['raw'])
+
+                self.assertIsInstance(event.batteryChargePercent, int)
+                self.assertGreaterEqual(event.batteryChargePercent, 0)
                 self.assertLessEqual(event.batteryChargePercent, 100)
 
-        # Sorted descending by voltage above; percent must be non-increasing.
-        percents = [percent for _, _, percent in captures]
-        self.assertEqual(percents, sorted(percents, reverse=True))
+                self.assertGreater(event.batteryLipoMilliVolts, 3000)
+                self.assertLess(event.batteryLipoMilliVolts, 4400)
+
+                self.assertIn(event.finalEventForDay, (0, 1))
+
+    def test_observed_charge_percent_tracks_voltage(self):
+        # Independent corroboration that the two fields are aligned: sorted by
+        # voltage, the SoC byte is non-decreasing across every capture.
+        by_voltage = sorted(OBSERVED_EVENTS, key=lambda e: e['batteryLipoMilliVolts'])
+        percents = [e['batteryChargePercent'] for e in by_voltage]
+        self.assertEqual(percents, sorted(percents))
+
+    def test_observed_events_upload_expected_device_status(self):
+        # Each capture on its own must produce the device status the decoded
+        # fields imply, with percent passed through unscaled.
+        self.nightscout.last_uploaded_devicestatus = lambda *args, **kwargs: None
+
+        for expected in OBSERVED_EVENTS:
+            with self.subTest(seqNum=expected['seqNum']):
+                p = self.process.process([Event(expected['raw'])], time_start=None, time_end=None)
+
+                self.assertEqual(len(p), 1)
+                self.assertEqual(p[0]['created_at'], expected['timestamp'])
+                self.assertEqual(p[0]['pump_event_id'], str(expected['seqNum']))
+                self.assertEqual(p[0]['pump']['battery'], {
+                    'status': '%d%%' % expected['batteryChargePercent'],
+                    'percent': expected['batteryChargePercent'],
+                    'voltage': expected['batteryLipoMilliVolts'] / 1000,
+                })
 
     def test_final_event_for_day_is_decoded_but_not_acted_on(self):
         # The only capture in this set with finalEventForDay=1 is the 23:58
