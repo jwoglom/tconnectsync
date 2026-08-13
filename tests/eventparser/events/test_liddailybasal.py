@@ -17,6 +17,14 @@ class TestLidDailyBasal(unittest.TestCase):
     [lipo_hi, lipo_lo, percent, final] at absolute offsets 22, 23, 24, 25.
     pumpX2's BLE stream packs the same u32 little-endian, which is why its
     Java/Swift ports read the three fields in the opposite order.
+
+    finalEventForDay is a boolean close-out marker whose usual -- but not only
+    -- trigger is the daily rollover: in a 452-record capture it precedes both
+    day resets, and is also set once mid-afternoon, a second before
+    LID_PUMPING_RESUMED ended an alarm suspension, with no reset following. Not
+    enough to pin the semantics, so pumpX2's TODO(confirm) on the field stays
+    open. The generator has no bool type, so it surfaces as an int here where
+    the Java/Swift ports expose a bool.
     """
     maxDiff = None
 
