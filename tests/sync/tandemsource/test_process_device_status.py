@@ -116,6 +116,63 @@ OBSERVED_EVENTS = [
     },
 ]
 
+# Captured over BLE from a second pump and re-serialized into Source byte order,
+# so they are not "observed from a real pump" in the sense the table above is.
+# They cover what the Source captures do not: the charging phase, and
+# finalEventForDay set. They are also what shows percent to be non-monotonic in
+# voltage -- charging lifts terminal voltage well above the resting SoC curve,
+# so a charging sample can read a higher voltage at a lower SoC than a resting
+# one. Do not assert a global percent-vs-voltage correlation over these.
+RESERIALIZED_BLE_EVENTS = [
+    # Lowest SoC observed; the pump alarm-suspended for low battery 41 s later.
+    {
+        'raw': b'\x10Q#\x01\xb8\xe0\x00\x0b[o@\xe2\x93x=\xcc\xcc\xcd@P\xd6C\x0e\x82\x14\x00',
+        'seqNum': 744303, 'timestampRaw': 587315424,
+        'timestamp': '2026-08-11 15:10:24-04:00',
+        'dailyTotalBasal': 7.0805, 'lastBasalRate': 0.1, 'iob': 3.2631,
+        'batteryLipoMilliVolts': 3714, 'batteryChargePercent': 20, 'finalEventForDay': 0,
+    },
+    # finalEventForDay set mid-afternoon, 1 s before PumpingResumed, no daily reset.
+    {
+        'raw': b'\x10Q#\x01\xba\xc5\x00\x0b[\x89@\xe2\x93x\x00\x00\x00\x00@;\x81\xed\x0e\xf0\x18\x01',
+        'seqNum': 744329, 'timestampRaw': 587315909,
+        'timestamp': '2026-08-11 15:18:29-04:00',
+        'dailyTotalBasal': 7.0805, 'lastBasalRate': 0.0, 'iob': 2.9298,
+        'batteryLipoMilliVolts': 3824, 'batteryChargePercent': 24, 'finalEventForDay': 1,
+    },
+    # Charging: higher voltage, lower SoC than the 3900 mV / 55% resting sample.
+    {
+        'raw': b'\x10Q#\x01\xbd\x85\x00\x0b[\xb1@\xe7\x1c\x02?\x80\x00\x00@\x1eho\x0fX0\x00',
+        'seqNum': 744369, 'timestampRaw': 587316613,
+        'timestamp': '2026-08-11 15:30:13-04:00',
+        'dailyTotalBasal': 7.2222, 'lastBasalRate': 1.0, 'iob': 2.4751,
+        'batteryLipoMilliVolts': 3928, 'batteryChargePercent': 48, 'finalEventForDay': 0,
+    },
+    {
+        'raw': b'\x10Q#\x02\xd6\xc5\x00\x0bl\xf4@\xf6e\x08\x00\x00\x00\x00?\xa9eL\x10"W\x00',
+        'seqNum': 748788, 'timestampRaw': 587388613,
+        'timestamp': '2026-08-12 11:30:13-04:00',
+        'dailyTotalBasal': 7.6998, 'lastBasalRate': 0.0, 'iob': 1.3234,
+        'batteryLipoMilliVolts': 4130, 'batteryChargePercent': 87, 'finalEventForDay': 0,
+    },
+    # Day rollover: the next record, 00:00:13, has dailyTotalBasal 0.0.
+    {
+        'raw': b'\x10Q#\x024\x95\x00\x0bbfAIP\x93@ \x00\x00@\xb6\xb7\x17\x0f\x1a=\x01',
+        'seqNum': 746086, 'timestampRaw': 587347093,
+        'timestamp': '2026-08-11 23:58:13-04:00',
+        'dailyTotalBasal': 12.5822, 'lastBasalRate': 2.5, 'iob': 5.7098,
+        'batteryLipoMilliVolts': 3866, 'batteryChargePercent': 61, 'finalEventForDay': 1,
+    },
+    # The second rollover; three consecutive records carry final=1 here.
+    {
+        'raw': b'\x10Q#\x00\xe3 \x00\x0bOX@\xfabP\x00\x00\x00\x00AX\x99\xaa\x0e\xd3+\x01',
+        'seqNum': 741208, 'timestampRaw': 587260704,
+        'timestamp': '2026-08-10 23:58:24-04:00',
+        'dailyTotalBasal': 7.8245, 'lastBasalRate': 0.0, 'iob': 13.5375,
+        'batteryLipoMilliVolts': 3795, 'batteryChargePercent': 43, 'finalEventForDay': 1,
+    },
+]
+
 
 class TestProcessDeviceStatus(unittest.TestCase):
     maxDiff = None
@@ -327,10 +384,24 @@ class TestProcessDeviceStatus(unittest.TestCase):
 
                 self.assertIn(event.finalEventForDay, (0, 1))
 
-    def test_observed_charge_percent_tracks_voltage(self):
-        by_voltage = sorted(OBSERVED_EVENTS, key=lambda e: e['batteryLipoMilliVolts'])
-        percents = [e['batteryChargePercent'] for e in by_voltage]
-        self.assertEqual(percents, sorted(percents))
+    def test_all_reserialized_ble_events_parse(self):
+        for expected in RESERIALIZED_BLE_EVENTS:
+            with self.subTest(seqNum=expected['seqNum']):
+                event = Event(expected['raw'])
+
+                self.assertEqual(type(event), eventtypes.LidDailyBasal)
+                self.assertEqual(event.eventId, 81)
+                self.assertEqual(event.seqNum, expected['seqNum'])
+                self.assertEqual(event.raw.timestampRaw, expected['timestampRaw'])
+                self.assertEqual(event.eventTimestamp.format(), expected['timestamp'])
+
+                self.assertAlmostEqual(event.dailyTotalBasal, expected['dailyTotalBasal'], places=4)
+                self.assertAlmostEqual(event.lastBasalRate, expected['lastBasalRate'], places=4)
+                self.assertAlmostEqual(event.iob, expected['iob'], places=4)
+
+                self.assertEqual(event.batteryLipoMilliVolts, expected['batteryLipoMilliVolts'])
+                self.assertEqual(event.batteryChargePercent, expected['batteryChargePercent'])
+                self.assertEqual(event.finalEventForDay, expected['finalEventForDay'])
 
     def test_observed_events_upload_expected_device_status(self):
         self.nightscout.last_uploaded_devicestatus = lambda *args, **kwargs: None
@@ -349,6 +420,10 @@ class TestProcessDeviceStatus(unittest.TestCase):
                 })
 
     def test_final_event_for_day_is_decoded_but_not_acted_on(self):
+        # A close-out marker, usually but not only the daily rollover: one
+        # capture sets it mid-afternoon, a second before PumpingResumed ends an
+        # alarm suspension, with no daily reset. Either way nothing here acts
+        # on it, so the device status is the same as for any other record.
         self.nightscout.last_uploaded_devicestatus = lambda *args, **kwargs: None
 
         event = Event(b'\x00Q \x19U=\x00\x01\x0f\xa8A\xa5\x04V?L\xcc\xcd?s\x83b\x10Pd\x01')
