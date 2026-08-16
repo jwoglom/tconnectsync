@@ -189,7 +189,7 @@ class LidAlertActivated(BaseEvent):
         "46": "TRANSMITTER_EXPIRING_ALERT3",
         "47": "DEFAULT_ALERT_47",
         "48": "CGM_UNAVAILABLE",
-        "49": "DEFAULT_ALERT_49",
+        "49": "FILL_TUBING_STILL_IN_PROGRESS",
         "50": "DEFAULT_ALERT_50",
         "51": "CONTROL_IQ_LOW",
         "52": "DEFAULT_ALERT_52",
@@ -255,7 +255,7 @@ class LidAlertActivated(BaseEvent):
         TransmitterExpiringAlert3 = 46
         DefaultAlert47 = 47
         CgmUnavailable = 48
-        DefaultAlert49 = 49
+        FillTubingStillInProgress = 49
         DefaultAlert50 = 50
         ControlIqLow = 51
         DefaultAlert52 = 52
@@ -1265,7 +1265,7 @@ class LidAlertCleared(BaseEvent):
         "46": "TRANSMITTER_EXPIRING_ALERT3",
         "47": "DEFAULT_ALERT_47",
         "48": "CGM_UNAVAILABLE",
-        "49": "DEFAULT_ALERT_49",
+        "49": "FILL_TUBING_STILL_IN_PROGRESS",
         "50": "DEFAULT_ALERT_50",
         "51": "CONTROL_IQ_LOW",
         "52": "DEFAULT_ALERT_52",
@@ -1331,7 +1331,7 @@ class LidAlertCleared(BaseEvent):
         TransmitterExpiringAlert3 = 46
         DefaultAlert47 = 47
         CgmUnavailable = 48
-        DefaultAlert49 = 49
+        FillTubingStillInProgress = 49
         DefaultAlert50 = 50
         ControlIqLow = 51
         DefaultAlert52 = 52
