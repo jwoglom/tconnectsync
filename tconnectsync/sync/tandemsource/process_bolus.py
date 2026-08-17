@@ -126,7 +126,7 @@ class ProcessBolus:
         return NightscoutEntry.bolus(
             bolus = insulin_float_round(bolexCompleted.insulinDelivered),
             carbs = None,
-            created_at = format_datetiem(bolexCompleted.eventTimestamp),
+            created_at = format_datetime(bolexCompleted.eventTimestamp),
             notes = "Extended Bolus",
             bg = None,
             pump_event_id = "%s" % bolexCompleted.seqNum
