@@ -1,13 +1,13 @@
-FROM python:3.11-slim as base
+FROM python:3.11-slim AS base
 
 # The following is adapted from:
 # https://sourcery.ai/blog/python-docker/
 
 # Setup env
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONFAULTHANDLER 1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONFAULTHANDLER=1
 
 FROM base AS python-deps
 

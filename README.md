@@ -57,7 +57,7 @@ The following synchronization features can be optionally enabled:
 To specify custom synchronization features, pass the names of the desired features to the `--features` flag, e.g.:
 
 ```bash
-$ tconnectsync --features BASAL BOLUS PUMP_EVENTS PROFILES
+tconnectsync --features BASAL BOLUS PUMP_EVENTS PROFILES
 ```
 
 If you're using tconnectsync-heroku, see [this section in its README](https://github.com/jwoglom/tconnectsync-heroku#Updating-synchronization-features).
@@ -86,22 +86,22 @@ You should specify the following parameters:
 
 ```bash
 # Your credentials for t:connect
-TCONNECT_EMAIL='email@email.com'
-TCONNECT_PASSWORD='password'
+TCONNECT_EMAIL=email@email.com
+TCONNECT_PASSWORD=password
 
 # OPTIONAL: Your region (US or EU)
 TCONNECT_REGION=US
 
 # URL of your Nightscout site
-NS_URL='https://yournightscouturl/'
+NS_URL=https://yournightscouturl/
 # Your Nightscout API_SECRET value
-NS_SECRET='apisecret'
+NS_SECRET=apisecret
 
 # Current timezone of the pump
-TIMEZONE_NAME='America/New_York'
+TIMEZONE_NAME=America/New_York
 
 # OPTIONAL: Your pump's serial number (numeric)
-PUMP_SERIAL_NUMBER=11111111
+PUMP_SERIAL_NUMBER=12345678
 
 ```
 
@@ -129,12 +129,12 @@ First, ensure that you have **Python 3** with **Pip** installed:
 
 Now install the `tconnectsync` package with pip:
 
-```
-$ pip3 install tconnectsync
+```bash
+pip3 install tconnectsync
 ```
 To install into a user environment instead of system-wide for a more contained install:
-````
-$ pip3 install --user tconnectsync
+````bash
+pip3 install --user tconnectsync
 ````
   - This will place the tconnectsync binary file at ``/home/<username>/.local/bin/tconnectsync``
   - For non-WSL Windows, it will be in ``<PYTHON DIRECTORY>\Lib\site-packages\tconnectsync``
@@ -170,8 +170,8 @@ Move the `.env` file you created to the following folder:
 * **Linux:** `$HOME/.config/tconnectsync/.env`
 * **Windows:** `$HOME/.config/tconnectsync/.env` (inside WSL) OR `C:\Users\<username>\.config\tconnectsync` (native Windows)
 
-```
-$ tconnectsync --check-login
+```bash
+tconnectsync --check-login
 ```
 
 If you receive no errors, then you can move on to the **Running Tconnectsync Continuously** section.
@@ -183,9 +183,9 @@ You can run the application using Pipenv.
 First, ensure you have Python 3 and pip installed, then install pipenv with `pip3 install pipenv`.
 
 Clone the Git repository for tconnectsync and cd into it with:
-```
-$ git clone https://github.com/jwoglom/tconnectsync
-$ cd tconnectsync
+```bash
+git clone https://github.com/jwoglom/tconnectsync
+cd tconnectsync
 ```
 
 Then install tconnectsync's dependencies with `pipenv install`.
@@ -193,35 +193,17 @@ Afterwards, you can launch the program with `pipenv run tconnectsync` so long as
 you are inside the checked-out tconnectsync folder.
 
 ```bash
-$ git clone https://github.com/jwoglom/tconnectsync && cd tconnectsync
-$ pip3 install pipenv
-$ pipenv install
-$ pipenv run tconnectsync --help
-usage: main.py [-h] [--version] [--pretend] [-v] [--start-date START_DATE] [--end-date END_DATE] [--days DAYS] [--auto-update] [--check-login]
-               [--features {BASAL,BOLUS,IOB,PUMP_EVENTS} [{BASAL,BOLUS,IOB,PUMP_EVENTS} ...]]
-
-Syncs bolus, basal, and IOB data from Tandem Diabetes t:connect to Nightscout.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --version             show program's version number and exit
-  --pretend             Pretend mode: do not upload any data to Nightscout.
-  -v, --verbose         Verbose mode: show extra logging details
-  --start-date START_DATE
-                        The oldest date to process data from. Must be specified with --end-date.
-  --end-date END_DATE   The newest date to process data until (inclusive). Must be specified with --start-date.
-  --days DAYS           The number of days of t:connect data to read in. Cannot be used with --from-date and --until-date.
-  --auto-update         If set, continuously checks for updates from t:connect and syncs with Nightscout.
-  --check-login         If set, checks that the provided t:connect credentials can be used to log in.
-  --features {BASAL,BOLUS,IOB,PUMP_EVENTS} [{BASAL,BOLUS,IOB,PUMP_EVENTS} ...]
-                        Specifies what data should be synchronized between tconnect and Nightscout.
+git clone https://github.com/jwoglom/tconnectsync && cd tconnectsync
+pip3 install pipenv
+pipenv install
+pipenv run tconnectsync --help
 ```
 
 
 Move the `.env` file you created earlier into the `tconnectsync` folder, and run:
 
-```
-$ pipenv run tconnectsync --check-login
+```bash
+pipenv run tconnectsync --check-login
 ```
 
 If you receive no errors, then you can move on to the **Running Tconnectsync Continuously** section.
@@ -233,14 +215,14 @@ First, [ensure that you have Docker running and installed](https://docs.docker.c
 To download and run the prebuilt Docker image from GitHub Packages:
 
 ```bash
-$ docker pull ghcr.io/jwoglom/tconnectsync/tconnectsync:latest
-$ docker run ghcr.io/jwoglom/tconnectsync/tconnectsync --help
+docker pull ghcr.io/jwoglom/tconnectsync/tconnectsync:latest
+docker run ghcr.io/jwoglom/tconnectsync/tconnectsync --help
 ```
 
 Move the `.env` file you created earlier into the current folder, and run:
 
-```
-$ docker run tconnectsync --check-login
+```bash
+docker run tconnectsync --check-login
 ```
 
 If you receive no errors, then you can move on to the **Running Tconnectsync Continuously** section.
@@ -251,15 +233,15 @@ If you receive no errors, then you can move on to the **Running Tconnectsync Con
 To instead build the image locally and launch the project:
 
 ```bash
-$ git clone https://github.com/jwoglom/tconnectsync
-$ cd tconnectsync
-$ docker build -t tconnectsync .
-$ docker run tconnectsync --help
+git clone https://github.com/jwoglom/tconnectsync
+cd tconnectsync
+docker build -t tconnectsync .
+docker run tconnectsync --help
 ```
 
 Move the `.env` file you created earlier into this folder, and run:
-```
-$ docker run --env-file=.env tconnectsync --check-login
+```bash
+docker run --env-file=.env tconnectsync --check-login
 ```
 
 **NOTE:** If using the `--env-file` option to `docker run`, you may need to remove all quotation marks (`'` and `"`s) around values in the `.env` file for Docker to propagate the variables correctly.
@@ -283,7 +265,7 @@ Supervisord is configured by creating a configuration file in `/etc/supervisor/c
 
 Here is an example `tconnectsync.conf` which you can place in that folder:
 
-```
+```conf
 [program:tconnectsync]
 command=/path/to/tconnectsync/run.sh
 directory=/path/to/tconnectsync/
@@ -298,13 +280,18 @@ autorestart=true
 In order to create a `run.sh` file, see the section below which aligns with your
 choice of installation method.
 
+> [!IMPORTANT]
+> After making your `run.sh` file, run: 
+> `chmod +x run.sh`
+> to make your file executable
+
 After the configuration file has been created, ensure that Supervisor is running
 and configured to start on boot:
 
 ```bash
-$ sudo systemctl daemon-reload
-$ sudo systemctl start supervisord
-$ sudo systemctl enable supervisord
+sudo systemctl daemon-reload
+sudo systemctl start supervisor
+sudo systemctl enable supervisor
 ```
 
 Then use the `supervisorctl` command to manage the status of the tconnectsync program:
@@ -407,7 +394,7 @@ You can use one of the same `run.sh` files referenced above, but remove the `--a
 
 Create a batch file 'tconnectsync.bat' file containing:
 
-```
+```bash
 python "C:\Users\<USERNAME>\AppData\Local\Programs\Python\<PYTHONVERSIONDIRECTORY>\Lib\site-packages\tconnectsync\main.py" --auto-update
 ```
 
@@ -428,7 +415,7 @@ I have only tested tconnectsync with a Tandem pump set in the US Eastern timezon
 
 To backfill existing t:connect data in to Nightscout, you can use the `--start-date` and `--end-date` options. For example, the following will upload all t:connect data between January 1st and March 1st, 2020 to Nightscout:
 
-```
+```bash
 python3 main.py --start-date 2020-01-01 --end-date 2020-03-01
 ```
 
