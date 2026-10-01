@@ -169,7 +169,7 @@ class TestGetPumpLogs(unittest.TestCase):
         with patch.object(TandemSourceApi, "get", return_value=PUMP_LOGS) as mock_get:
             api.get_pump_logs("dev", min_date="2024-01-01", max_date="2024-01-02")
         _, qs = self._qs(self._endpoint(mock_get))
-        self.assertEqual(qs["eventIds"][0].split(","),
+        self.assertEqual(qs["eventCodes"][0].split(","),
                          [str(i) for i in TandemSourceApi.DEFAULT_EVENT_IDS])
 
     def test_custom_event_ids_comma_joined(self):
@@ -177,14 +177,14 @@ class TestGetPumpLogs(unittest.TestCase):
         with patch.object(TandemSourceApi, "get", return_value=PUMP_LOGS) as mock_get:
             api.get_pump_logs("dev", "2024-01-01", "2024-01-02", event_ids_filter=[16, 5, 28])
         _, qs = self._qs(self._endpoint(mock_get))
-        self.assertEqual(qs["eventIds"], ["16,5,28"])
+        self.assertEqual(qs["eventCodes"], ["16,5,28"])
 
     def test_none_event_ids_empty(self):
         api = self._api()
         with patch.object(TandemSourceApi, "get", return_value=PUMP_LOGS) as mock_get:
             api.get_pump_logs("dev", "2024-01-01", "2024-01-02", event_ids_filter=None)
         _, qs = self._qs(self._endpoint(mock_get), keep_blank=True)
-        self.assertEqual(qs["eventIds"], [""])
+        self.assertEqual(qs["eventCodes"], [""])
 
     def test_return_value_passthrough(self):
         api = self._api()
