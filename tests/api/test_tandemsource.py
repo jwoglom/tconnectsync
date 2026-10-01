@@ -102,8 +102,8 @@ class TestNaiveLocalToUtc(unittest.TestCase):
 class TestDefaultEventIds(unittest.TestCase):
     def test_default_event_ids(self):
         ids = TandemSourceApi.DEFAULT_EVENT_IDS
-        self.assertEqual(len(ids), 55)
-        self.assertEqual(len(set(ids)), 55, "DEFAULT_EVENT_IDS contains duplicates")
+        self.assertEqual(len(ids), 64)
+        self.assertEqual(len(set(ids)), 64, "DEFAULT_EVENT_IDS contains duplicates")
         # FSL3 ids added for the BFF pump-logs endpoint
         self.assertTrue({477, 480, 486}.issubset(set(ids)))
 
