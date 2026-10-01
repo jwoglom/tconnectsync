@@ -619,10 +619,12 @@ class TandemSourceApi:
         The server caps the window at ~4 weeks; callers needing a longer range
         must page by date window (see pump_events).
 
-        Note: the server currently ignores eventIds and returns every event in
-        the window regardless of the filter (verified against live accounts), so
-        the effective filtering happens client-side via EventClass dispatch. We
-        still send eventIds to mirror the web app and stay forward-compatible."""
+        Note: as of ~2026-10, the server rejects an unrecognized eventIds key
+        with HTTP 400 (ZodError) -- it was renamed to eventCodes (see #163).
+        Historically the server ignored this filter and returned every event
+        in the window regardless, so the effective filtering happens
+        client-side via EventClass dispatch. We still send eventCodes to
+        mirror the web app and stay forward-compatible."""
         minDate = parse_ymd_date(min_date)
         maxDate = parse_ymd_date(max_date)
         logger.debug(f'get_pump_logs({device_id}, {minDate}, {maxDate})')
@@ -631,7 +633,7 @@ class TandemSourceApi:
             'pumperId': self.pumperId,
             'startDate': '%sT00:00:00Z' % minDate,
             'endDate': '%sT23:59:59Z' % maxDate,
-            'eventIds': ','.join(map(str, event_ids_filter)) if event_ids_filter else '',
+            'eventCodes': ','.join(map(str, event_ids_filter)) if event_ids_filter else '',
         })
         return self.get('api/reports/bff/pump-logs/%s?%s' % (device_id, query), {})
 
