@@ -10,6 +10,22 @@ on:
     branches: [ master, dev ]
 
 jobs:
+  pipfile-lock:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify Pipfile.lock is up to date with Pipfile
+        run: |
+          # The Dockerfile runs `pipenv install --deploy`, which aborts if the lock is stale
+          python -m pip install pipenv
+          pipenv verify
+
   build:
 
     runs-on: ubuntu-latest
