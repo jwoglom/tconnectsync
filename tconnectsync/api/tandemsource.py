@@ -9,7 +9,7 @@ import os
 import jwt
 import pickle
 
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple, cast
 try:
     from typing import TypedDict
 except ImportError:  # Python 3.7
@@ -409,25 +409,25 @@ class TandemSourceApi:
         # login outright.
         id_token_claims: JwtClaims
         try:
-            id_token_claims = jwt.decode(
+            id_token_claims = cast(JwtClaims, jwt.decode(
                 id_token,
                 key=key,
                 algorithms=['RS256'],
                 audience=audience,
                 issuer=issuer,
-            )
+            ))
         except jwt.InvalidAudienceError:
             logger.warning(
                 "id_token audience did not match client_id %s; decoding without audience verification",
                 audience,
             )
-            id_token_claims = jwt.decode(
+            id_token_claims = cast(JwtClaims, jwt.decode(
                 id_token,
                 key=key,
                 algorithms=['RS256'],
                 issuer=issuer,
                 options={"verify_aud": False},
-            )
+            ))
 
         logger.info("Decoded JWT: %s" % json.dumps(id_token_claims))
 
