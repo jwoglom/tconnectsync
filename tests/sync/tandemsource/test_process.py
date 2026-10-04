@@ -2,7 +2,10 @@
 
 import unittest
 import arrow
+from unittest.mock import patch
 
+from tconnectsync.api.tandemsource import TandemSourceApi
+from tconnectsync.features import DEFAULT_FEATURES, DEVICE_STATUS
 from tconnectsync.sync.tandemsource.process import ProcessTimeRange
 from tconnectsync.eventparser import events as eventtypes
 from tconnectsync.eventparser.generic import Event, Events
@@ -216,6 +219,50 @@ class TestProcessTimeRangeJsonBasal(unittest.TestCase):
             "enteredBy": "Pump (tconnectsync)",
             "pump_event_id": "417029"
         })
+
+
+class TestProcessTimeRangePumpLogsQuery(unittest.TestCase):
+    """FETCH_ALL_EVENT_TYPES or the DEVICE_STATUS feature must drop eventCodes
+    from the pump-logs request entirely, rather than sending eventCodes=."""
+
+    def _requested_endpoints(self, fetch_all_event_types, features):
+        api = TandemSourceApi.__new__(TandemSourceApi)
+        api.pumperId = "PUMPER123"
+        api.needs_relogin = lambda: False
+        tconnect = TConnectApi()
+        tconnect._tandemsource = api
+        nightscout = NightscoutApi()
+        nightscout.last_uploaded_entry = lambda *args, **kwargs: None
+
+        process = ProcessTimeRange(
+            tconnect,
+            nightscout,
+            {'assignmentId': 'test-device-123', 'maxDateOfEvents': '2025-11-18T13:00:00-05:00'},
+            pretend=False,
+            secret=build_secrets(FETCH_ALL_EVENT_TYPES=fetch_all_event_types),
+            features=features,
+        )
+
+        with patch.object(TandemSourceApi, "get", return_value={"events": [], "clockChanges": []}) as mock_get:
+            process.process(arrow.get('2025-11-18T00:00:00-05:00'), arrow.get('2025-11-18T23:00:00-05:00'))
+
+        return [c.args[0] for c in mock_get.call_args_list
+                if c.args[0].startswith('api/reports/bff/pump-logs/')]
+
+    def test_device_status_feature_omits_event_ids(self):
+        endpoints = self._requested_endpoints(False, DEFAULT_FEATURES + [DEVICE_STATUS])
+        self.assertEqual(len(endpoints), 1)
+        self.assertNotIn("eventCodes", endpoints[0])
+
+    def test_fetch_all_event_types_secret_omits_event_ids(self):
+        endpoints = self._requested_endpoints(True, DEFAULT_FEATURES)
+        self.assertEqual(len(endpoints), 1)
+        self.assertNotIn("eventCodes", endpoints[0])
+
+    def test_default_sends_event_ids(self):
+        endpoints = self._requested_endpoints(False, DEFAULT_FEATURES)
+        self.assertEqual(len(endpoints), 1)
+        self.assertIn("eventCodes=", endpoints[0])
 
 
 if __name__ == '__main__':

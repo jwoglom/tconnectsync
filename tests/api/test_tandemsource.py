@@ -179,12 +179,15 @@ class TestGetPumpLogs(unittest.TestCase):
         _, qs = self._qs(self._endpoint(mock_get))
         self.assertEqual(qs["eventCodes"], ["16,5,28"])
 
-    def test_none_event_ids_empty(self):
+    def test_none_event_ids_omitted(self):
         api = self._api()
         with patch.object(TandemSourceApi, "get", return_value=PUMP_LOGS) as mock_get:
             api.get_pump_logs("dev", "2024-01-01", "2024-01-02", event_ids_filter=None)
-        _, qs = self._qs(self._endpoint(mock_get), keep_blank=True)
-        self.assertEqual(qs["eventCodes"], [""])
+        endpoint = self._endpoint(mock_get)
+        _, qs = self._qs(endpoint, keep_blank=True)
+        self.assertNotIn("eventCodes", qs)
+        self.assertNotIn("eventCodes", endpoint)
+        self.assertEqual(set(qs), {"pumperId", "startDate", "endDate"})
 
     def test_return_value_passthrough(self):
         api = self._api()
@@ -284,6 +287,30 @@ class TestPumpEvents(unittest.TestCase):
         with patch.object(TandemSourceApi, "get_pump_logs", return_value=resp) as m:
             list(api.pump_events("dev", "2024-01-01", "2024-01-10", fetch_all_event_types=True))
         self.assertIsNone(m.call_args.args[3])
+
+    def _pump_events_endpoints(self, min_date, max_date, **kwargs):
+        api = self._api()
+        resp = {"events": [], "clockChanges": []}
+        with patch.object(TandemSourceApi, "get", return_value=resp) as mock_get:
+            list(api.pump_events("dev", min_date, max_date, **kwargs))
+        return [c.args[0] for c in mock_get.call_args_list]
+
+    def test_fetch_all_event_types_omits_event_ids_from_request(self):
+        endpoints = self._pump_events_endpoints("2024-01-01", "2024-01-10", fetch_all_event_types=True)
+        self.assertEqual(len(endpoints), 1)
+        self.assertNotIn("eventCodes", endpoints[0])
+
+    def test_fetch_all_event_types_omits_event_ids_in_every_window(self):
+        endpoints = self._pump_events_endpoints("2024-01-01", "2024-03-01", fetch_all_event_types=True)
+        self.assertGreater(len(endpoints), 1)
+        for endpoint in endpoints:
+            self.assertNotIn("eventCodes", endpoint)
+
+    def test_default_sends_event_ids_in_request(self):
+        endpoints = self._pump_events_endpoints("2024-01-01", "2024-01-10")
+        self.assertEqual(len(endpoints), 1)
+        qs = urllib.parse.parse_qs(urllib.parse.urlparse(endpoints[0]).query)
+        self.assertEqual(qs["eventCodes"], [",".join(map(str, TandemSourceApi.DEFAULT_EVENT_IDS))])
 
     def test_multi_window_paging_boundaries(self):
         api = self._api()

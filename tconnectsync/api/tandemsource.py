@@ -629,12 +629,12 @@ class TandemSourceApi:
         maxDate = parse_ymd_date(max_date)
         logger.debug(f'get_pump_logs({device_id}, {minDate}, {maxDate})')
 
-        query = urllib.parse.urlencode({
+        query = urllib.parse.urlencode({k: v for k, v in {
             'pumperId': self.pumperId,
             'startDate': '%sT00:00:00Z' % minDate,
             'endDate': '%sT23:59:59Z' % maxDate,
             'eventCodes': ','.join(map(str, event_ids_filter)) if event_ids_filter else '',
-        })
+        }.items() if v})
         return self.get('api/reports/bff/pump-logs/%s?%s' % (device_id, query), {})
 
     # The pump-logs endpoint caps each request at roughly four weeks, so a
