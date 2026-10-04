@@ -63,23 +63,22 @@ class ProcessDeviceStatus:
         return [entry]
 
     def daily_basal_to_nsentry(self, event: eventtypes.LidDailyBasal) -> Optional[dict]:
-        # NOTE: the pump-logs endpoint does not emit event 81 (LID_DAILY_BASAL)
-        # for either t:slim X2 or Mobi (verified against live accounts), and no
-        # other returned event carries battery data. DEVICE_STATUS therefore
-        # yields nothing on the new API; this path stays for the binary decoder
-        # and in case the endpoint starts returning event 81.
+        # The pump-logs endpoint only returns event 81 (LID_DAILY_BASAL) when no
+        # eventIds filter is sent, which is why DEVICE_STATUS implies
+        # fetch_all_event_types. No other returned event carries battery data.
         #
-        # batteryChargePercent is the pump's own state-of-charge byte, already
-        # scaled 0-100; if the event arrived without it (an event shape we
+        # Field names follow Tandem's pump-logs JSON: abc is the pump's own
+        # state-of-charge byte, already scaled 0-100, and liPoMV is the LiPo
+        # voltage in mV. If the event arrived without abc (an event shape we
         # can't yet parse), skip it rather than emit a bogus device status.
-        if event.batteryChargePercent is None:
+        if event.abc is None:
             logger.warning("ProcessDeviceStatus: skipping daily basal event missing battery data: %s" % event)
             return None
 
         return NightscoutEntry.devicestatus(
             created_at=event.eventTimestamp.format(),
-            batteryVoltage=(float(event.batteryLipoMilliVolts or 0)/1000),
-            batteryPercent=int(event.batteryChargePercent),
+            batteryVoltage=(float(event.liPoMV or 0)/1000),
+            batteryPercent=int(event.abc),
             pump_event_id = "%s" % event.seqNum
         )
 

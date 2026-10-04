@@ -18,17 +18,17 @@
           "offset": 8,
           "uom": "units"
         },
-        "batteryLipoMilliVolts": {
+        "liPoMV": {
           "type": "uint16",
           "offset": 12,
           "uom": "millivolts"
         },
-        "batteryChargePercent": {
+        "abc": {
           "type": "uint8",
           "offset": 14,
           "uom": "percent"
         },
-        "finalEventForDay": {
+        "displayInHistory": {
           "type": "uint8",
           "offset": 15
         }

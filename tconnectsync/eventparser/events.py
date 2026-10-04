@@ -6209,9 +6209,9 @@ class LidDailyBasal(BaseEvent):
     dailyTotalBasal: float # units
     lastBasalRate: float # units/hour
     iob: float # units
-    batteryLipoMilliVolts: int # millivolts
-    batteryChargePercent: int # percent
-    finalEventForDay: int
+    liPoMV: int # millivolts
+    abc: int # percent
+    displayInHistory: int
 
 
     @staticmethod
@@ -6219,18 +6219,18 @@ class LidDailyBasal(BaseEvent):
         dailyTotalBasal, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
         lastBasalRate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
-        batteryLipoMilliVolts, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
-        batteryChargePercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
-        finalEventForDay, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        liPoMV, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
+        abc, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        displayInHistory, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
 
         return LidDailyBasal(
             raw = RawEvent.build(raw),
             dailyTotalBasal = dailyTotalBasal,
             lastBasalRate = lastBasalRate,
             iob = iob,
-            batteryLipoMilliVolts = batteryLipoMilliVolts,
-            batteryChargePercent = batteryChargePercent,
-            finalEventForDay = finalEventForDay,
+            liPoMV = liPoMV,
+            abc = abc,
+            displayInHistory = displayInHistory,
         )
 
     @staticmethod
@@ -6241,9 +6241,9 @@ class LidDailyBasal(BaseEvent):
             dailyTotalBasal = props.get("dailytotalbasal", None),
             lastBasalRate = props.get("lastbasalrate", None),
             iob = props.get("iob", None),
-            batteryLipoMilliVolts = props.get("batterylipomillivolts", None),
-            batteryChargePercent = props.get("batterychargepercent", None),
-            finalEventForDay = props.get("finaleventforday", None),
+            liPoMV = props.get("lipomv", None),
+            abc = props.get("abc", None),
+            displayInHistory = props.get("displayinhistory", None),
         )
 
     @property
@@ -6267,9 +6267,9 @@ class LidDailyBasal(BaseEvent):
             dailyTotalBasal=self.dailyTotalBasal,
             lastBasalRate=self.lastBasalRate,
             iob=self.iob,
-            batteryLipoMilliVolts=self.batteryLipoMilliVolts,
-            batteryChargePercent=self.batteryChargePercent,
-            finalEventForDay=self.finalEventForDay,
+            liPoMV=self.liPoMV,
+            abc=self.abc,
+            displayInHistory=self.displayInHistory,
         )
 
 
