@@ -45,7 +45,7 @@ class TestLidAaPcmChange(unittest.TestCase):
             "estimatedDateTime": "2026-04-30T10:16:31Z",
         }
 
-        # currentPcm:2 (Pining) with cgmAvailable:0 -> FalseVal boolean-ish field.
+        # currentPcm:2 (Pining) with cgmAvailable:0.
         self.fixturePiningNoCgm = {
             "deviceAssignmentId": "4ff6bebc-d4d6-4423-b123-eecfcf5a4238",
             "eventCode": 230,
@@ -102,35 +102,23 @@ class TestLidAaPcmChange(unittest.TestCase):
 
     def test_boolean_fields_when_suspended(self):
         ev = Event(self.fixtureSuspendedNoControl)
-        self.assertEqual(ev.pumpSuspendedRaw, 1)
-        self.assertEqual(ev.pumpSuspended,
-                         eventtypes.LidAaPcmChange.PumpsuspendedEnum.TrueVal)
-        self.assertEqual(ev.calculationAvailable,
-                         eventtypes.LidAaPcmChange.CalculationavailableEnum.TrueVal)
-        self.assertEqual(ev.cgmAvailable,
-                         eventtypes.LidAaPcmChange.CgmavailableEnum.TrueVal)
-        self.assertEqual(ev.closedLoopPreferred,
-                         eventtypes.LidAaPcmChange.ClosedlooppreferredEnum.TrueVal)
-        self.assertEqual(ev.sufficientClosedLoopParams,
-                         eventtypes.LidAaPcmChange.SufficientclosedloopparamsEnum.TrueVal)
+        self.assertEqual(ev.pumpSuspended, 1)
+        self.assertEqual(ev.calculationAvailable, 1)
+        self.assertEqual(ev.cgmAvailable, 1)
+        self.assertEqual(ev.closedLoopPreferred, 1)
+        self.assertEqual(ev.sufficientClosedLoopParams, 1)
 
     def test_pump_suspended_false(self):
-        # pumpSuspended:0 -> FalseVal (0 must not be treated as missing)
+        # pumpSuspended:0 (0 must not be treated as missing)
         ev = Event(self.fixtureResumedClosedLoop)
-        self.assertEqual(ev.pumpSuspendedRaw, 0)
-        self.assertEqual(ev.pumpSuspended,
-                         eventtypes.LidAaPcmChange.PumpsuspendedEnum.FalseVal)
+        self.assertEqual(ev.pumpSuspended, 0)
 
     def test_cgm_available_false(self):
-        # cgmAvailable:0 -> FalseVal while other boolean-ish fields stay TrueVal
+        # cgmAvailable:0 while other boolean fields stay 1
         ev = Event(self.fixturePiningNoCgm)
-        self.assertEqual(ev.cgmAvailableRaw, 0)
-        self.assertEqual(ev.cgmAvailable,
-                         eventtypes.LidAaPcmChange.CgmavailableEnum.FalseVal)
-        self.assertEqual(ev.calculationAvailable,
-                         eventtypes.LidAaPcmChange.CalculationavailableEnum.TrueVal)
-        self.assertEqual(ev.closedLoopPreferred,
-                         eventtypes.LidAaPcmChange.ClosedlooppreferredEnum.TrueVal)
+        self.assertEqual(ev.cgmAvailable, 0)
+        self.assertEqual(ev.calculationAvailable, 1)
+        self.assertEqual(ev.closedLoopPreferred, 1)
 
     def test_todict_is_json_serializable(self):
         for fixture in (self.fixtureSuspendedNoControl,

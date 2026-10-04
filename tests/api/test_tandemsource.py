@@ -435,8 +435,8 @@ class TestPumpEventsRealEventTypes(unittest.TestCase):
         # cgmDataType bitmask array [0] -> bit 0 set -> Fmr
         self.assertEqual(e.cgmDataType,
                          eventtypes.LidCgmDataG7.CgmdatatypeBitmask.Fmr)
-        # rate is stored raw and scaled x0.1 by the property (-5 -> -0.5 mg/dL/min)
-        self.assertAlmostEqual(e.rate, -0.5)
+        # rate is in tenths of mg/dL/min; the schema no longer scales it
+        self.assertEqual(e.rate, -5)
 
     def test_alarm_activated_decodes(self):
         e = self._parse()["LidAlarmActivated"]

@@ -10,8 +10,7 @@ from tconnectsync.eventparser import events as eventtypes
 class TestLidAaDailyStatus(unittest.TestCase):
     """313 LID_AA_DAILY_STATUS: pumpControlState/usermode/sensorType enums.
 
-    Fixtures are real captured pump-log events copied verbatim, including the
-    extra weightUnit/weight/currentTdIpop keys the parser ignores.
+    Fixtures are real captured pump-log events copied verbatim.
     """
     maxDiff = None
 
@@ -83,13 +82,13 @@ class TestLidAaDailyStatus(unittest.TestCase):
         self.assertEqual(ev.sensorType,
                          eventtypes.LidAaDailyStatus.SensortypeEnum.CgmTypeDexcomG7)
 
-    def test_unknown_keys_ignored(self):
-        # weightUnit/weight/currentTdIpop are not in the schema and must be
-        # dropped without raising or becoming attributes.
+    def test_weight_and_tdi_fields_parsed(self):
         ev = Event(self.fixtureClosedLoop)
-        self.assertFalse(hasattr(ev, "weightUnit"))
-        self.assertFalse(hasattr(ev, "weight"))
-        self.assertFalse(hasattr(ev, "currentTdIpop"))
+        self.assertEqual(ev.weightUnitRaw, 0)
+        self.assertEqual(ev.weightUnit,
+                         eventtypes.LidAaDailyStatus.WeightunitEnum.WeightUnitNotSet)
+        self.assertEqual(ev.weight, 0)
+        self.assertEqual(ev.currentTdIpop, 0)
 
     def test_todict_is_json_serializable(self):
         ev = Event(self.fixtureClosedLoop)

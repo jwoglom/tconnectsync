@@ -42,7 +42,7 @@ class TestProcessCGMReadingG7(unittest.TestCase):
         self.assertEqual(events[0].egvTimeStamp, 566504204)
         self.assertEqual(events[0].seqNum, 505869)
         self.assertEqual(events[0].currentGlucoseDisplayValue, 80)
-        self.assertEqual(events[0].rateRaw, -9)
+        self.assertEqual(events[0].rate, -9)
 
         p = self.process.process(events, time_start=None, time_end=None)
 
@@ -141,7 +141,7 @@ class TestProcessCGMReadingG6(unittest.TestCase):
         self.assertEqual(events[0].raw.timestampRaw, 444182469)
         self.assertEqual(events[0].egvTimeStamp, 444182469)
         self.assertEqual(events[0].currentGlucoseDisplayValue, 75)
-        self.assertEqual(events[0].rateRaw, -4)
+        self.assertEqual(events[0].rate, -4)
 
         p = self.process.process(events, time_start=None, time_end=None)
 

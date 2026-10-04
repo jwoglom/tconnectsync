@@ -52,8 +52,30 @@ TYPE_TO_PYOBJ = {
 }
 
 HEADER_SIZE = 10
+TYPE_TO_NUM_BYTES = {
+    'uint8': 1,
+    'int8': 1,
+    'uint16': 2,
+    'int16': 2,
+    'uint32': 4,
+    'float32': 4,
+}
+
+def yml_offset_to_data_field_offset(yml_offset, field_type):
+    # Schema offsets address each 4-byte word little-endian, while the event
+    # bytes are big-endian, so mirror the field within its word. Port of
+    # ymlOffsetToDataFieldOffset in Tandem's reports-module Decoder.
+    num_bytes = TYPE_TO_NUM_BYTES[field_type]
+    word_base = (yml_offset // 4) * 4
+    byte_in_word = yml_offset % 4
+    converted = word_base + (4 - num_bytes - byte_in_word)
+    if converted < 0:
+        raise ValueError(f"Invalid YML offset '{yml_offset}' for field type '{field_type}'")
+    return converted
+
 def unpack_command_for(field_def):
-    return f'struct.unpack_from({field_def["type"].upper()}, raw[:EVENT_LEN], {HEADER_SIZE + field_def["offset"]})'
+    offset = HEADER_SIZE + yml_offset_to_data_field_offset(field_def["offset"], field_def["type"])
+    return f'struct.unpack_from({field_def["type"].upper()}, raw[:EVENT_LEN], {offset})'
 
 TEMPLATE = '''
 @dataclass
@@ -188,8 +210,14 @@ def build_transform_funcs(event_def):
         if not "transform" in field:
             continue
 
+        # Each transform defines the field's property, so only the first one
+        # that applies is used (e.g. our curated alert dictionary over the
+        # schema's own enum mapping for the same field).
         for tx in field["transform"]:
-            ret += TRANSFORMS[tx[0]](event_def, name, fieldNameFormat(name), field, tx[1])
+            out = TRANSFORMS[tx[0]](event_def, name, fieldNameFormat(name), field, tx[1] if len(tx) > 1 else None)
+            if out:
+                ret += out
+                break
 
     return '\n'.join([f'{" "*4}{f}' if f else '' for f in ret])
 

@@ -93,14 +93,14 @@ class TestLidBolusRequestedMsg1(unittest.TestCase):
         self.assertEqual(ev.correctionBolusIncludedRaw, 0)
         self.assertEqual(
             ev.correctionBolusIncluded,
-            eventtypes.LidBolusRequestedMsg1.CorrectionbolusincludedEnum.No)
+            eventtypes.LidBolusRequestedMsg1.CorrectionbolusincludedEnum.FalseVal)
 
     def test_correctionbolusincluded_yes(self):
         ev = Event(self.fixtureRemoteWithCorrection)
         self.assertEqual(ev.correctionBolusIncludedRaw, 1)
         self.assertEqual(
             ev.correctionBolusIncluded,
-            eventtypes.LidBolusRequestedMsg1.CorrectionbolusincludedEnum.Yes)
+            eventtypes.LidBolusRequestedMsg1.CorrectionbolusincludedEnum.TrueVal)
 
     def test_carbratio_scales(self):
         # carbratio is carbratioRaw * 0.001; real captures carry 0.

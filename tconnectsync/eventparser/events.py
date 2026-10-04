@@ -41,17 +41,15 @@ class LidBasalRateChange(BaseEvent):
     baseBasalRate: float # units/hour
     maxBasalRate: float # units/hour
     idp: int
-    changeTypeRaw: int
+    changeTypeRaw: int # bitmask
 
     ChangetypeMap = {
-        "0": "\"timed segment\" - change by timed segment (because either the segment advanced based on time, the user changed the pump time, the user changed the active segment or changed by an AID algorithm.)",
-        "1": "\"new profile\" - change by activation of new profile",
-        "2": "\"temp rate start\"",
-        "3": "\"temp rate end\"",
-        "4": "\"pump suspended\"",
-        "5": "\"pump resumed\"",
-        "6": "\u201cpump shut down\u201d",
-        "7": "\u201cbasal limit\u201d"
+        "0": "timed segment",
+        "1": "new profile",
+        "2": "temp rate start",
+        "3": "temp rate end",
+        "4": "pump suspended",
+        "5": "pump resumed"
     }
 
     class ChangetypeBitmask(IntFlag):
@@ -61,8 +59,6 @@ class LidBasalRateChange(BaseEvent):
         TempRateEnd = 2**3
         PumpSuspended = 2**4
         PumpResumed = 2**5
-        PumpShutDown = 2**6
-        BasalLimit = 2**7
 
     @property
     def changeType(self):
@@ -135,7 +131,7 @@ class LidAlertActivated(BaseEvent):
     NAME = "LID_ALERT_ACTIVATED"
 
     raw: RawEvent
-    alertIdRaw: int
+    alertIdRaw: int # enum
     faultLocatorData: int
     param1: int
     param2: float
@@ -338,7 +334,7 @@ class LidAlarmActivated(BaseEvent):
     NAME = "LID_ALARM_ACTIVATED"
 
     raw: RawEvent
-    alarmIdRaw: int
+    alarmIdRaw: int # enum
     faultLocatorData: int
     param1: int
     param2: float
@@ -543,12 +539,81 @@ class LidMalfunctionActivated(BaseEvent):
     NAME = "LID_MALFUNCTION_ACTIVATED"
 
     raw: RawEvent
-    malfIdRaw: int
+    malfIdRaw: int # enum
     faultLocatorData: int
     param1: int
     param2: float
 
-    # Dictionary unknown: malfs
+    MalfidMap = {
+        "0": "Malf_SOFTWARE",
+        "1": "Malf_CPU_CORE",
+        "2": "Malf_ARM_MSP_COM",
+        "3": "Malf_SENSOR",
+        "4": "Malf_LIPO",
+        "5": "Malf_TOUCHSCREEN",
+        "6": "Malf_NVM",
+        "7": "Malf_DISPLAY",
+        "8": "Malf_MSP",
+        "9": "Malf_MOTOR",
+        "10": "Malf_EXTERNAL_BINS",
+        "11": "Malf_SW_INIT",
+        "12": "Malf_VIBE",
+        "13": "Malf_PERIPH_POWER",
+        "14": "Malf_P2",
+        "15": "Malf_DATALOG",
+        "16": "Malf_SPEAKER",
+        "17": "Malf_MSP_SUPPLY",
+        "18": "Malf_CAL_DATA",
+        "19": "Malf_BTLE",
+        "20": "Malf_AP",
+        "21": "Malf_RTC",
+        "22": "Malf_ARM_BLE_COM",
+        "23": "Malf_OVERTRAVEL_STALL",
+        "24": "Malf_UNDERTRAVEL_STALL",
+        "25": "Malf_PUSHOFF_STALL",
+        "26": "Malf_HW_CRYPTO_FAIL",
+        "27": "NUM_MALFUNCTIONS"
+    }
+
+    class MalfidEnum(Enum):
+        MalfSoftware = 0
+        MalfCpuCore = 1
+        MalfArmMspCom = 2
+        MalfSensor = 3
+        MalfLipo = 4
+        MalfTouchscreen = 5
+        MalfNvm = 6
+        MalfDisplay = 7
+        MalfMsp = 8
+        MalfMotor = 9
+        MalfExternalBins = 10
+        MalfSwInit = 11
+        MalfVibe = 12
+        MalfPeriphPower = 13
+        MalfP2 = 14
+        MalfDatalog = 15
+        MalfSpeaker = 16
+        MalfMspSupply = 17
+        MalfCalData = 18
+        MalfBtle = 19
+        MalfAp = 20
+        MalfRtc = 21
+        MalfArmBleCom = 22
+        MalfOvertravelStall = 23
+        MalfUndertravelStall = 24
+        MalfPushoffStall = 25
+        MalfHwCryptoFail = 26
+        NumMalfunctions = 27
+
+    @property
+    def malfId(self):
+        try:
+            return self.MalfidEnum(self.malfIdRaw)
+        except ValueError as e:
+            logger.error("Invalid malfIdRaw in Malfid for "+str(self))
+            logger.error(e)
+            return None
+
     @staticmethod
     def build(raw):
         malfId, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
@@ -607,9 +672,9 @@ class LidPumpingSuspended(BaseEvent):
     NAME = "LID_PUMPING_SUSPENDED"
 
     raw: RawEvent
-    preSuspendState: int
+    preSuspendState: int # enum
     insulinAmount: int # units
-    suspendReasonRaw: int
+    suspendReasonRaw: int # enum
     rpaTimeout: int # minutes
 
     SuspendreasonMap = {
@@ -692,7 +757,7 @@ class LidPumpingResumed(BaseEvent):
     NAME = "LID_PUMPING_RESUMED"
 
     raw: RawEvent
-    preResumeState: int
+    preResumeState: int # enum
     insulinAmount: int # units
 
 
@@ -864,14 +929,50 @@ class LidBgReadingTaken(BaseEvent):
     NAME = "LID_BG_READING_TAKEN"
 
     raw: RawEvent
-    selectedIobRaw: int
     bg: int # mg/dL
-    bgEntryTypeRaw: int
+    cgmCalibrationRaw: int # enum
+    bgEntryTypeRaw: int # enum
     iob: float # units
     targetBg: int # mg/dL
     isf: int # (mg/dL)/unit
-    bgSourceTypeRaw: int
-    cgmCalibrationRaw: int
+    selectedIobRaw: int # enum
+    bgSourceTypeRaw: int # enum
+
+    CgmcalibrationMap = {
+        "0": "No, it was not used to Calibrate.",
+        "1": "Yes, it was used to calibrate."
+    }
+
+    class CgmcalibrationEnum(Enum):
+        No = 0
+        Yes = 1
+
+    @property
+    def cgmCalibration(self):
+        try:
+            return self.CgmcalibrationEnum(self.cgmCalibrationRaw)
+        except ValueError as e:
+            logger.error("Invalid cgmCalibrationRaw in Cgmcalibration for "+str(self))
+            logger.error(e)
+            return None
+
+    BgentrytypeMap = {
+        "0": "Manual Entry by the User via Numpad",
+        "1": "Auto Populated BG using CGM"
+    }
+
+    class BgentrytypeEnum(Enum):
+        ManualEntryByTheUserViaNumpad = 0
+        AutoPopulatedBgUsingCgm = 1
+
+    @property
+    def bgEntryType(self):
+        try:
+            return self.BgentrytypeEnum(self.bgEntryTypeRaw)
+        except ValueError as e:
+            logger.error("Invalid bgEntryTypeRaw in Bgentrytype for "+str(self))
+            logger.error(e)
+            return None
 
     SelectediobMap = {
         "0": "Mudaliar IOB",
@@ -888,24 +989,6 @@ class LidBgReadingTaken(BaseEvent):
             return self.SelectediobEnum(self.selectedIobRaw)
         except ValueError as e:
             logger.error("Invalid selectedIobRaw in Selectediob for "+str(self))
-            logger.error(e)
-            return None
-
-    BgentrytypeMap = {
-        "0": "Manual Entry by the User via Numpad",
-        "1": "Auto Populated BG using Dexcom EGV"
-    }
-
-    class BgentrytypeEnum(Enum):
-        ManualEntryByTheUserViaNumpad = 0
-        AutoPopulatedBgUsingDexcomEgv = 1
-
-    @property
-    def bgEntryType(self):
-        try:
-            return self.BgentrytypeEnum(self.bgEntryTypeRaw)
-        except ValueError as e:
-            logger.error("Invalid bgEntryTypeRaw in Bgentrytype for "+str(self))
             logger.error(e)
             return None
 
@@ -927,45 +1010,27 @@ class LidBgReadingTaken(BaseEvent):
             logger.error(e)
             return None
 
-    CgmcalibrationMap = {
-        "0": "No, it was not used to Calibrate.",
-        "1": "Yes, it was used to calibrate."
-    }
-
-    class CgmcalibrationEnum(Enum):
-        No = 0
-        Yes = 1
-
-    @property
-    def cgmCalibration(self):
-        try:
-            return self.CgmcalibrationEnum(self.cgmCalibrationRaw)
-        except ValueError as e:
-            logger.error("Invalid cgmCalibrationRaw in Cgmcalibration for "+str(self))
-            logger.error(e)
-            return None
-
     @staticmethod
     def build(raw):
-        selectedIob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
         bg, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        cgmCalibration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         bgEntryType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         targetBg, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
         isf, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
+        selectedIob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
         bgSourceType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
-        cgmCalibration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
 
         return LidBgReadingTaken(
             raw = RawEvent.build(raw),
-            selectedIobRaw = selectedIob,
             bg = bg,
+            cgmCalibrationRaw = cgmCalibration,
             bgEntryTypeRaw = bgEntryType,
             iob = iob,
             targetBg = targetBg,
             isf = isf,
+            selectedIobRaw = selectedIob,
             bgSourceTypeRaw = bgSourceType,
-            cgmCalibrationRaw = cgmCalibration,
         )
 
     @staticmethod
@@ -973,14 +1038,14 @@ class LidBgReadingTaken(BaseEvent):
         props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
         return LidBgReadingTaken(
             raw = RawEvent.build_from_json(event),
-            selectedIobRaw = props.get("selectediob", None),
             bg = props.get("bg", None),
+            cgmCalibrationRaw = props.get("cgmcalibration", None),
             bgEntryTypeRaw = props.get("bgentrytype", None),
             iob = props.get("iob", None),
             targetBg = props.get("targetbg", None),
             isf = props.get("isf", None),
+            selectedIobRaw = props.get("selectediob", None),
             bgSourceTypeRaw = props.get("bgsourcetype", None),
-            cgmCalibrationRaw = props.get("cgmcalibration", None),
         )
 
     @property
@@ -1001,14 +1066,14 @@ class LidBgReadingTaken(BaseEvent):
             name=self.NAME,
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
-            selectedIobRaw=self.selectedIobRaw,
             bg=self.bg,
+            cgmCalibrationRaw=self.cgmCalibrationRaw,
             bgEntryTypeRaw=self.bgEntryTypeRaw,
             iob=self.iob,
             targetBg=self.targetBg,
             isf=self.isf,
+            selectedIobRaw=self.selectedIobRaw,
             bgSourceTypeRaw=self.bgSourceTypeRaw,
-            cgmCalibrationRaw=self.cgmCalibrationRaw,
         )
 
 
@@ -1019,11 +1084,11 @@ class LidBolusCompleted(BaseEvent):
     NAME = "LID_BOLUS_COMPLETED"
 
     raw: RawEvent
-    completionStatusRaw: int
+    completionStatusRaw: int # enum
     bolusId: int
+    iob: float # units
     insulinDelivered: float # units
     insulinRequested: float # units
-    iob: float # units
 
     CompletionstatusMap = {
         "0": "User Aborted",
@@ -1058,17 +1123,17 @@ class LidBolusCompleted(BaseEvent):
     def build(raw):
         completionStatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
         bolusId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
+        iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         insulinDelivered, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
         insulinRequested, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
-        iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
 
         return LidBolusCompleted(
             raw = RawEvent.build(raw),
             completionStatusRaw = completionStatus,
             bolusId = bolusId,
+            iob = iob,
             insulinDelivered = insulinDelivered,
             insulinRequested = insulinRequested,
-            iob = iob,
         )
 
     @staticmethod
@@ -1078,9 +1143,9 @@ class LidBolusCompleted(BaseEvent):
             raw = RawEvent.build_from_json(event),
             completionStatusRaw = props.get("completionstatus", None),
             bolusId = props.get("bolusid", None),
+            iob = props.get("iob", None),
             insulinDelivered = props.get("insulindelivered", None),
             insulinRequested = props.get("insulinrequested", None),
-            iob = props.get("iob", None),
         )
 
     @property
@@ -1103,9 +1168,9 @@ class LidBolusCompleted(BaseEvent):
             eventTimestamp=str(self.eventTimestamp),
             completionStatusRaw=self.completionStatusRaw,
             bolusId=self.bolusId,
+            iob=self.iob,
             insulinDelivered=self.insulinDelivered,
             insulinRequested=self.insulinRequested,
-            iob=self.iob,
         )
 
 
@@ -1116,11 +1181,11 @@ class LidBolexCompleted(BaseEvent):
     NAME = "LID_BOLEX_COMPLETED"
 
     raw: RawEvent
-    completionStatusRaw: int
+    completionStatusRaw: int # enum
     bolusId: int
+    iob: float # units
     insulinDelivered: float # units
     insulinRequested: float # units
-    iob: float # units
 
     CompletionstatusMap = {
         "0": "User Aborted",
@@ -1155,17 +1220,17 @@ class LidBolexCompleted(BaseEvent):
     def build(raw):
         completionStatus, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
         bolusId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
+        iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         insulinDelivered, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
         insulinRequested, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
-        iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
 
         return LidBolexCompleted(
             raw = RawEvent.build(raw),
             completionStatusRaw = completionStatus,
             bolusId = bolusId,
+            iob = iob,
             insulinDelivered = insulinDelivered,
             insulinRequested = insulinRequested,
-            iob = iob,
         )
 
     @staticmethod
@@ -1175,9 +1240,9 @@ class LidBolexCompleted(BaseEvent):
             raw = RawEvent.build_from_json(event),
             completionStatusRaw = props.get("completionstatus", None),
             bolusId = props.get("bolusid", None),
+            iob = props.get("iob", None),
             insulinDelivered = props.get("insulindelivered", None),
             insulinRequested = props.get("insulinrequested", None),
-            iob = props.get("iob", None),
         )
 
     @property
@@ -1200,9 +1265,9 @@ class LidBolexCompleted(BaseEvent):
             eventTimestamp=str(self.eventTimestamp),
             completionStatusRaw=self.completionStatusRaw,
             bolusId=self.bolusId,
+            iob=self.iob,
             insulinDelivered=self.insulinDelivered,
             insulinRequested=self.insulinRequested,
-            iob=self.iob,
         )
 
 
@@ -1213,7 +1278,7 @@ class LidAlertCleared(BaseEvent):
     NAME = "LID_ALERT_CLEARED"
 
     raw: RawEvent
-    alertIdRaw: int
+    alertIdRaw: int # enum
     faultLocatorData: int
 
     AlertidMap = {
@@ -1406,7 +1471,7 @@ class LidAlarmCleared(BaseEvent):
     NAME = "LID_ALARM_CLEARED"
 
     raw: RawEvent
-    alarmIdRaw: int
+    alarmIdRaw: int # enum
 
     AlarmidMap = {
         "0": "CARTRIDGE_ALARM",
@@ -1724,19 +1789,19 @@ class LidBolusActivated(BaseEvent):
     NAME = "LID_BOLUS_ACTIVATED"
 
     raw: RawEvent
-    selectedIobRaw: int
     bolusId: int
+    selectedIobRaw: int # enum
     iob: float # units
     bolusSize: float # units
 
     SelectediobMap = {
         "0": "Mudaliar IOB",
-        "1": "Swan IOB Meal"
+        "1": "Algorithm IOB"
     }
 
     class SelectediobEnum(Enum):
         MudaliarIob = 0
-        SwanIobMeal = 1
+        AlgorithmIob = 1
 
     @property
     def selectedIob(self):
@@ -1749,15 +1814,15 @@ class LidBolusActivated(BaseEvent):
 
     @staticmethod
     def build(raw):
-        selectedIob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         bolusId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        selectedIob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         bolusSize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
 
         return LidBolusActivated(
             raw = RawEvent.build(raw),
-            selectedIobRaw = selectedIob,
             bolusId = bolusId,
+            selectedIobRaw = selectedIob,
             iob = iob,
             bolusSize = bolusSize,
         )
@@ -1767,8 +1832,8 @@ class LidBolusActivated(BaseEvent):
         props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
         return LidBolusActivated(
             raw = RawEvent.build_from_json(event),
-            selectedIobRaw = props.get("selectediob", None),
             bolusId = props.get("bolusid", None),
+            selectedIobRaw = props.get("selectediob", None),
             iob = props.get("iob", None),
             bolusSize = props.get("bolussize", None),
         )
@@ -1791,10 +1856,130 @@ class LidBolusActivated(BaseEvent):
             name=self.NAME,
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
-            selectedIobRaw=self.selectedIobRaw,
             bolusId=self.bolusId,
+            selectedIobRaw=self.selectedIobRaw,
             iob=self.iob,
             bolusSize=self.bolusSize,
+        )
+
+
+@dataclass
+class LidIdpMsg2(BaseEvent):
+    """57: LID_IDP_MSG2"""
+    ID = 57
+    NAME = "LID_IDP_MSG2"
+
+    raw: RawEvent
+    idp: int
+    name8Raw: int # ASCII
+    name9Raw: int # ASCII
+    name10Raw: int # ASCII
+    name11Raw: int # ASCII
+    name12Raw: int # ASCII
+    name13Raw: int # ASCII
+    name14Raw: int # ASCII
+    name15Raw: int # ASCII
+
+    @property
+    def name8(self):
+        return chr(self.name8Raw) if self.name8Raw else ''
+
+    @property
+    def name9(self):
+        return chr(self.name9Raw) if self.name9Raw else ''
+
+    @property
+    def name10(self):
+        return chr(self.name10Raw) if self.name10Raw else ''
+
+    @property
+    def name11(self):
+        return chr(self.name11Raw) if self.name11Raw else ''
+
+    @property
+    def name12(self):
+        return chr(self.name12Raw) if self.name12Raw else ''
+
+    @property
+    def name13(self):
+        return chr(self.name13Raw) if self.name13Raw else ''
+
+    @property
+    def name14(self):
+        return chr(self.name14Raw) if self.name14Raw else ''
+
+    @property
+    def name15(self):
+        return chr(self.name15Raw) if self.name15Raw else ''
+
+    @staticmethod
+    def build(raw):
+        idp, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        name8, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        name9, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
+        name10, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 19)
+        name11, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 18)
+        name12, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        name13, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        name14, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        name15, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
+
+        return LidIdpMsg2(
+            raw = RawEvent.build(raw),
+            idp = idp,
+            name8Raw = name8,
+            name9Raw = name9,
+            name10Raw = name10,
+            name11Raw = name11,
+            name12Raw = name12,
+            name13Raw = name13,
+            name14Raw = name14,
+            name15Raw = name15,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidIdpMsg2(
+            raw = RawEvent.build_from_json(event),
+            idp = props.get("idp", None),
+            name8Raw = props.get("name8", None),
+            name9Raw = props.get("name9", None),
+            name10Raw = props.get("name10", None),
+            name11Raw = props.get("name11", None),
+            name12Raw = props.get("name12", None),
+            name13Raw = props.get("name13", None),
+            name14Raw = props.get("name14", None),
+            name15Raw = props.get("name15", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            idp=self.idp,
+            name8Raw=self.name8Raw,
+            name9Raw=self.name9Raw,
+            name10Raw=self.name10Raw,
+            name11Raw=self.name11Raw,
+            name12Raw=self.name12Raw,
+            name13Raw=self.name13Raw,
+            name14Raw=self.name14Raw,
+            name15Raw=self.name15Raw,
         )
 
 
@@ -1805,8 +1990,8 @@ class LidBolexActivated(BaseEvent):
     NAME = "LID_BOLEX_ACTIVATED"
 
     raw: RawEvent
-    selectedIobRaw: int
     bolusId: int
+    selectedIobRaw: int # enum
     iob: float # units
     bolexSize: float # units
 
@@ -1830,15 +2015,15 @@ class LidBolexActivated(BaseEvent):
 
     @staticmethod
     def build(raw):
-        selectedIob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         bolusId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        selectedIob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         bolexSize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
 
         return LidBolexActivated(
             raw = RawEvent.build(raw),
-            selectedIobRaw = selectedIob,
             bolusId = bolusId,
+            selectedIobRaw = selectedIob,
             iob = iob,
             bolexSize = bolexSize,
         )
@@ -1848,8 +2033,8 @@ class LidBolexActivated(BaseEvent):
         props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
         return LidBolexActivated(
             raw = RawEvent.build_from_json(event),
-            selectedIobRaw = props.get("selectediob", None),
             bolusId = props.get("bolusid", None),
+            selectedIobRaw = props.get("selectediob", None),
             iob = props.get("iob", None),
             bolexSize = props.get("bolexsize", None),
         )
@@ -1872,8 +2057,8 @@ class LidBolexActivated(BaseEvent):
             name=self.NAME,
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
-            selectedIobRaw=self.selectedIobRaw,
             bolusId=self.bolusId,
+            selectedIobRaw=self.selectedIobRaw,
             iob=self.iob,
             bolexSize=self.bolexSize,
         )
@@ -1887,8 +2072,37 @@ class LidDataLogCorruption(BaseEvent):
 
     raw: RawEvent
     block: int
-    reason: int
+    reasonRaw: int # enum
 
+    ReasonMap = {
+        "0": "Invalid Header Id",
+        "1": "Bad Integrity",
+        "2": "Invalid Block",
+        "3": "Spare Deactivation Failed",
+        "4": "Invalid Sequence Number",
+        "5": "Pattern Mismatch",
+        "6": "Bad First Block",
+        "7": "Discovery Bad Sequence Number Increment"
+    }
+
+    class ReasonEnum(Enum):
+        InvalidHeaderId = 0
+        BadIntegrity = 1
+        InvalidBlock = 2
+        SpareDeactivationFailed = 3
+        InvalidSequenceNumber = 4
+        PatternMismatch = 5
+        BadFirstBlock = 6
+        DiscoveryBadSequenceNumberIncrement = 7
+
+    @property
+    def reason(self):
+        try:
+            return self.ReasonEnum(self.reasonRaw)
+        except ValueError as e:
+            logger.error("Invalid reasonRaw in Reason for "+str(self))
+            logger.error(e)
+            return None
 
     @staticmethod
     def build(raw):
@@ -1898,7 +2112,7 @@ class LidDataLogCorruption(BaseEvent):
         return LidDataLogCorruption(
             raw = RawEvent.build(raw),
             block = block,
-            reason = reason,
+            reasonRaw = reason,
         )
 
     @staticmethod
@@ -1907,7 +2121,7 @@ class LidDataLogCorruption(BaseEvent):
         return LidDataLogCorruption(
             raw = RawEvent.build_from_json(event),
             block = props.get("block", None),
-            reason = props.get("reason", None),
+            reasonRaw = props.get("reason", None),
         )
 
     @property
@@ -1929,7 +2143,7 @@ class LidDataLogCorruption(BaseEvent):
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
             block=self.block,
-            reason=self.reason,
+            reasonRaw=self.reasonRaw,
         )
 
 
@@ -1941,17 +2155,18 @@ class LidCannulaFilled(BaseEvent):
 
     raw: RawEvent
     primeSize: float # units
-    completionStatusRaw: int
+    completionStatusRaw: int # enum
+    infusionSetTypeRaw: int # enum
 
     CompletionstatusMap = {
-        "0": "User Aborted",
+        "0": "User Aborted (Does not apply to Mobi)",
         "1": "Terminated by Alarm",
         "2": "Terminated by Malfunction",
         "3": "Completed"
     }
 
     class CompletionstatusEnum(Enum):
-        UserAborted = 0
+        UserAbortedDoesNotApplyToMobi = 0
         TerminatedByAlarm = 1
         TerminatedByMalfunction = 2
         Completed = 3
@@ -1965,15 +2180,37 @@ class LidCannulaFilled(BaseEvent):
             logger.error(e)
             return None
 
+    InfusionsettypeMap = {
+        "0": "Default (tubed)",
+        "1": "Tubed",
+        "2": "Tubeless"
+    }
+
+    class InfusionsettypeEnum(Enum):
+        DefaultTubed = 0
+        Tubed = 1
+        Tubeless = 2
+
+    @property
+    def infusionSetType(self):
+        try:
+            return self.InfusionsettypeEnum(self.infusionSetTypeRaw)
+        except ValueError as e:
+            logger.error("Invalid infusionSetTypeRaw in Infusionsettype for "+str(self))
+            logger.error(e)
+            return None
+
     @staticmethod
     def build(raw):
         primeSize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
         completionStatus, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+        infusionSetType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
 
         return LidCannulaFilled(
             raw = RawEvent.build(raw),
             primeSize = primeSize,
             completionStatusRaw = completionStatus,
+            infusionSetTypeRaw = infusionSetType,
         )
 
     @staticmethod
@@ -1983,6 +2220,7 @@ class LidCannulaFilled(BaseEvent):
             raw = RawEvent.build_from_json(event),
             primeSize = props.get("primesize", None),
             completionStatusRaw = props.get("completionstatus", None),
+            infusionSetTypeRaw = props.get("infusionsettype", None),
         )
 
     @property
@@ -2005,6 +2243,7 @@ class LidCannulaFilled(BaseEvent):
             eventTimestamp=str(self.eventTimestamp),
             primeSize=self.primeSize,
             completionStatusRaw=self.completionStatusRaw,
+            infusionSetTypeRaw=self.infusionSetTypeRaw,
         )
 
 
@@ -2016,7 +2255,7 @@ class LidTubingFilled(BaseEvent):
 
     raw: RawEvent
     primeSize: float # units
-    completionStatusRaw: int
+    completionStatusRaw: int # enum
     position: int # counts
 
     CompletionstatusMap = {
@@ -2096,12 +2335,12 @@ class LidBolusRequestedMsg1(BaseEvent):
 
     raw: RawEvent
     bolusId: int
-    bolusTypeRaw: int
-    correctionBolusIncludedRaw: int
+    bolusTypeRaw: int # enum
+    correctionBolusIncludedRaw: int # enum
     carbAmount: int # grams
     bg: int # mg/dL
-    carbRatioRaw: int # g/u
     iob: float # units
+    carbRatioRaw: int # 1ct = 0.001 g/u
 
     BolustypeMap = {
         "0": "Insulin",
@@ -2126,13 +2365,13 @@ class LidBolusRequestedMsg1(BaseEvent):
             return None
 
     CorrectionbolusincludedMap = {
-        "0": "No",
-        "1": "Yes"
+        "0": "False",
+        "1": "True"
     }
 
     class CorrectionbolusincludedEnum(Enum):
-        No = 0
-        Yes = 1
+        FalseVal = 0
+        TrueVal = 1
 
     @property
     def correctionBolusIncluded(self):
@@ -2154,8 +2393,8 @@ class LidBolusRequestedMsg1(BaseEvent):
         correctionBolusIncluded, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
         carbAmount, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
         bg, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
-        carbRatio, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
+        carbRatio, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
 
         return LidBolusRequestedMsg1(
             raw = RawEvent.build(raw),
@@ -2164,8 +2403,8 @@ class LidBolusRequestedMsg1(BaseEvent):
             correctionBolusIncludedRaw = correctionBolusIncluded,
             carbAmount = carbAmount,
             bg = bg,
-            carbRatioRaw = carbRatio,
             iob = iob,
+            carbRatioRaw = carbRatio,
         )
 
     @staticmethod
@@ -2178,8 +2417,8 @@ class LidBolusRequestedMsg1(BaseEvent):
             correctionBolusIncludedRaw = props.get("correctionbolusincluded", None),
             carbAmount = props.get("carbamount", None),
             bg = props.get("bg", None),
-            carbRatioRaw = props.get("carbratio", None),
             iob = props.get("iob", None),
+            carbRatioRaw = props.get("carbratio", None),
         )
 
     @property
@@ -2205,8 +2444,8 @@ class LidBolusRequestedMsg1(BaseEvent):
             correctionBolusIncludedRaw=self.correctionBolusIncludedRaw,
             carbAmount=self.carbAmount,
             bg=self.bg,
-            carbRatioRaw=self.carbRatioRaw,
             iob=self.iob,
+            carbRatioRaw=self.carbRatioRaw,
         )
 
 
@@ -2217,15 +2456,83 @@ class LidBolusRequestedMsg2(BaseEvent):
     NAME = "LID_BOLUS_REQUESTED_MSG2"
 
     raw: RawEvent
-    selectedIobRaw: int
     bolusId: int
-    optionsRaw: int
+    optionsRaw: int # enum
     standardPercent: int # %
     duration: int # minutes
     isf: int # (mg/dL)/unit
     targetBg: int # mg/dL
-    userOverrideRaw: int
-    declinedCorrectionRaw: int
+    userOverrideRaw: int # enum
+    declinedCorrectionRaw: int # enum
+    selectedIobRaw: int # enum
+
+    OptionsMap = {
+        "0": "Standard Bolus",
+        "1": "Extended Bolus",
+        "2": "Quick Bolus",
+        "3": "Automatic Bolus",
+        "4": "BLE Standard Bolus",
+        "5": "BLE Extended Bolus",
+        "6": "Eating Soon Automatic Bolus",
+        "7": "Late Bolus",
+        "8": "BLE with AID Recommendation Bolus"
+    }
+
+    class OptionsEnum(Enum):
+        StandardBolus = 0
+        ExtendedBolus = 1
+        QuickBolus = 2
+        AutomaticBolus = 3
+        BleStandardBolus = 4
+        BleExtendedBolus = 5
+        EatingSoonAutomaticBolus = 6
+        LateBolus = 7
+        BleWithAidRecommendationBolus = 8
+
+    @property
+    def options(self):
+        try:
+            return self.OptionsEnum(self.optionsRaw)
+        except ValueError as e:
+            logger.error("Invalid optionsRaw in Options for "+str(self))
+            logger.error(e)
+            return None
+
+    UseroverrideMap = {
+        "0": "No, user did not override the bolus size",
+        "1": "Yes, user did override the bolus size"
+    }
+
+    class UseroverrideEnum(Enum):
+        No = 0
+        Yes = 1
+
+    @property
+    def userOverride(self):
+        try:
+            return self.UseroverrideEnum(self.userOverrideRaw)
+        except ValueError as e:
+            logger.error("Invalid userOverrideRaw in Useroverride for "+str(self))
+            logger.error(e)
+            return None
+
+    DeclinedcorrectionMap = {
+        "0": "No, user did not decline the recommended correction",
+        "1": "Yes, user declined the recommended correction"
+    }
+
+    class DeclinedcorrectionEnum(Enum):
+        No = 0
+        Yes = 1
+
+    @property
+    def declinedCorrection(self):
+        try:
+            return self.DeclinedcorrectionEnum(self.declinedCorrectionRaw)
+        except ValueError as e:
+            logger.error("Invalid declinedCorrectionRaw in Declinedcorrection for "+str(self))
+            logger.error(e)
+            return None
 
     SelectediobMap = {
         "0": "Mudaliar IOB",
@@ -2245,75 +2552,8 @@ class LidBolusRequestedMsg2(BaseEvent):
             logger.error(e)
             return None
 
-    OptionsMap = {
-        "0": "Standard Bolus",
-        "1": "Extended Bolus",
-        "2": "Quick Bolus",
-        "3": "Automatic Bolus",
-        "4": "BLE Standard Bolus",
-        "5": "BLE Extended Bolus",
-        "6": "Eating Soon Automatic Bolus",
-        "7": "Late Bolus"
-    }
-
-    class OptionsEnum(Enum):
-        StandardBolus = 0
-        ExtendedBolus = 1
-        QuickBolus = 2
-        AutomaticBolus = 3
-        BleStandardBolus = 4
-        BleExtendedBolus = 5
-        EatingSoonAutomaticBolus = 6
-        LateBolus = 7
-
-    @property
-    def options(self):
-        try:
-            return self.OptionsEnum(self.optionsRaw)
-        except ValueError as e:
-            logger.error("Invalid optionsRaw in Options for "+str(self))
-            logger.error(e)
-            return None
-
-    UseroverrideMap = {
-        "0": "\"No\", user did not override the bolus size",
-        "1": "\"Yes\", user did override the bolus size"
-    }
-
-    class UseroverrideEnum(Enum):
-        No = 0
-        Yes = 1
-
-    @property
-    def userOverride(self):
-        try:
-            return self.UseroverrideEnum(self.userOverrideRaw)
-        except ValueError as e:
-            logger.error("Invalid userOverrideRaw in Useroverride for "+str(self))
-            logger.error(e)
-            return None
-
-    DeclinedcorrectionMap = {
-        "0": "\"No\", user did not decline the recommended correction",
-        "1": "\"Yes\", user declined the recommended correction"
-    }
-
-    class DeclinedcorrectionEnum(Enum):
-        No = 0
-        Yes = 1
-
-    @property
-    def declinedCorrection(self):
-        try:
-            return self.DeclinedcorrectionEnum(self.declinedCorrectionRaw)
-        except ValueError as e:
-            logger.error("Invalid declinedCorrectionRaw in Declinedcorrection for "+str(self))
-            logger.error(e)
-            return None
-
     @staticmethod
     def build(raw):
-        selectedIob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
         bolusId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
         options, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         standardPercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
@@ -2322,10 +2562,10 @@ class LidBolusRequestedMsg2(BaseEvent):
         targetBg, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
         userOverride, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
         declinedCorrection, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        selectedIob, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
 
         return LidBolusRequestedMsg2(
             raw = RawEvent.build(raw),
-            selectedIobRaw = selectedIob,
             bolusId = bolusId,
             optionsRaw = options,
             standardPercent = standardPercent,
@@ -2334,6 +2574,7 @@ class LidBolusRequestedMsg2(BaseEvent):
             targetBg = targetBg,
             userOverrideRaw = userOverride,
             declinedCorrectionRaw = declinedCorrection,
+            selectedIobRaw = selectedIob,
         )
 
     @staticmethod
@@ -2341,7 +2582,6 @@ class LidBolusRequestedMsg2(BaseEvent):
         props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
         return LidBolusRequestedMsg2(
             raw = RawEvent.build_from_json(event),
-            selectedIobRaw = props.get("selectediob", None),
             bolusId = props.get("bolusid", None),
             optionsRaw = props.get("options", None),
             standardPercent = props.get("standardpercent", None),
@@ -2350,6 +2590,7 @@ class LidBolusRequestedMsg2(BaseEvent):
             targetBg = props.get("targetbg", None),
             userOverrideRaw = props.get("useroverride", None),
             declinedCorrectionRaw = props.get("declinedcorrection", None),
+            selectedIobRaw = props.get("selectediob", None),
         )
 
     @property
@@ -2370,7 +2611,6 @@ class LidBolusRequestedMsg2(BaseEvent):
             name=self.NAME,
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
-            selectedIobRaw=self.selectedIobRaw,
             bolusId=self.bolusId,
             optionsRaw=self.optionsRaw,
             standardPercent=self.standardPercent,
@@ -2379,6 +2619,7 @@ class LidBolusRequestedMsg2(BaseEvent):
             targetBg=self.targetBg,
             userOverrideRaw=self.userOverrideRaw,
             declinedCorrectionRaw=self.declinedCorrectionRaw,
+            selectedIobRaw=self.selectedIobRaw,
         )
 
 
@@ -2390,6 +2631,7 @@ class LidBolusRequestedMsg3(BaseEvent):
 
     raw: RawEvent
     bolusId: int
+    queued: int # Boolean
     foodBolusSize: float # units
     correctionBolusSize: float # units
     totalBolusSize: float # units
@@ -2398,6 +2640,7 @@ class LidBolusRequestedMsg3(BaseEvent):
     @staticmethod
     def build(raw):
         bolusId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        queued, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         foodBolusSize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         correctionBolusSize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
         totalBolusSize, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
@@ -2405,6 +2648,7 @@ class LidBolusRequestedMsg3(BaseEvent):
         return LidBolusRequestedMsg3(
             raw = RawEvent.build(raw),
             bolusId = bolusId,
+            queued = queued,
             foodBolusSize = foodBolusSize,
             correctionBolusSize = correctionBolusSize,
             totalBolusSize = totalBolusSize,
@@ -2416,6 +2660,7 @@ class LidBolusRequestedMsg3(BaseEvent):
         return LidBolusRequestedMsg3(
             raw = RawEvent.build_from_json(event),
             bolusId = props.get("bolusid", None),
+            queued = props.get("queued", None),
             foodBolusSize = props.get("foodbolussize", None),
             correctionBolusSize = props.get("correctionbolussize", None),
             totalBolusSize = props.get("totalbolussize", None),
@@ -2440,9 +2685,164 @@ class LidBolusRequestedMsg3(BaseEvent):
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
             bolusId=self.bolusId,
+            queued=self.queued,
             foodBolusSize=self.foodBolusSize,
             correctionBolusSize=self.correctionBolusSize,
             totalBolusSize=self.totalBolusSize,
+        )
+
+
+@dataclass
+class LidIdp(BaseEvent):
+    """69: LID_IDP"""
+    ID = 69
+    NAME = "LID_IDP"
+
+    raw: RawEvent
+    idp: int
+    statusRaw: int # enum
+    sourceIdp: int
+    name0Raw: int # ASCII
+    name1Raw: int # ASCII
+    name2Raw: int # ASCII
+    name3Raw: int # ASCII
+    name4Raw: int # ASCII
+    name5Raw: int # ASCII
+    name6Raw: int # ASCII
+    name7Raw: int # ASCII
+
+    StatusMap = {
+        "0": "new",
+        "1": "copy",
+        "2": "delete",
+        "3": "activate",
+        "4": "rename"
+    }
+
+    class StatusEnum(Enum):
+        New = 0
+        Copy = 1
+        Delete = 2
+        Activate = 3
+        Rename = 4
+
+    @property
+    def status(self):
+        try:
+            return self.StatusEnum(self.statusRaw)
+        except ValueError as e:
+            logger.error("Invalid statusRaw in Status for "+str(self))
+            logger.error(e)
+            return None
+
+    @property
+    def name0(self):
+        return chr(self.name0Raw) if self.name0Raw else ''
+
+    @property
+    def name1(self):
+        return chr(self.name1Raw) if self.name1Raw else ''
+
+    @property
+    def name2(self):
+        return chr(self.name2Raw) if self.name2Raw else ''
+
+    @property
+    def name3(self):
+        return chr(self.name3Raw) if self.name3Raw else ''
+
+    @property
+    def name4(self):
+        return chr(self.name4Raw) if self.name4Raw else ''
+
+    @property
+    def name5(self):
+        return chr(self.name5Raw) if self.name5Raw else ''
+
+    @property
+    def name6(self):
+        return chr(self.name6Raw) if self.name6Raw else ''
+
+    @property
+    def name7(self):
+        return chr(self.name7Raw) if self.name7Raw else ''
+
+    @staticmethod
+    def build(raw):
+        idp, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        status, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        sourceIdp, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        name0, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        name1, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
+        name2, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 19)
+        name3, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 18)
+        name4, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        name5, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        name6, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        name7, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
+
+        return LidIdp(
+            raw = RawEvent.build(raw),
+            idp = idp,
+            statusRaw = status,
+            sourceIdp = sourceIdp,
+            name0Raw = name0,
+            name1Raw = name1,
+            name2Raw = name2,
+            name3Raw = name3,
+            name4Raw = name4,
+            name5Raw = name5,
+            name6Raw = name6,
+            name7Raw = name7,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidIdp(
+            raw = RawEvent.build_from_json(event),
+            idp = props.get("idp", None),
+            statusRaw = props.get("status", None),
+            sourceIdp = props.get("sourceidp", None),
+            name0Raw = props.get("name0", None),
+            name1Raw = props.get("name1", None),
+            name2Raw = props.get("name2", None),
+            name3Raw = props.get("name3", None),
+            name4Raw = props.get("name4", None),
+            name5Raw = props.get("name5", None),
+            name6Raw = props.get("name6", None),
+            name7Raw = props.get("name7", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            idp=self.idp,
+            statusRaw=self.statusRaw,
+            sourceIdp=self.sourceIdp,
+            name0Raw=self.name0Raw,
+            name1Raw=self.name1Raw,
+            name2Raw=self.name2Raw,
+            name3Raw=self.name3Raw,
+            name4Raw=self.name4Raw,
+            name5Raw=self.name5Raw,
+            name6Raw=self.name6Raw,
+            name7Raw=self.name7Raw,
         )
 
 
@@ -2454,8 +2854,8 @@ class LidNewDay(BaseEvent):
 
     raw: RawEvent
     commandedBasalRate: float # units/hour
-    featuresBitmask: int
-    featureBitmaskIndex: int
+    featuresBitmask: int # Bitmask
+    featureBitmaskIndex: int # Bitmask
 
 
     @staticmethod
@@ -2513,8 +2913,8 @@ class LidArmInit(BaseEvent):
 
     raw: RawEvent
     version: int
-    configABits: int
-    configBBits: int
+    configABits: int # Bitmask
+    configBBits: int # Bitmask
     numLogEntries: int
 
 
@@ -2579,11 +2979,11 @@ class LidPlgsPeriodic(BaseEvent):
     timestamp: int # sec
     fmr: int # mg/dL
     pgv: int # mg/dL
-    fmrStatusRaw: int
-    pgvValidRaw: int
-    ruleStateRaw: int
-    hoMinStateRaw: int
-    statusRaw: int
+    fmrStatusRaw: int # enum
+    pgvValid: int # Boolean
+    ruleStateRaw: int # Bitmask
+    hoMinStateRaw: int # enum
+    statusRaw: int # Bitmask
 
     FmrstatusMap = {
         "0": "No FMR",
@@ -2613,24 +3013,6 @@ class LidPlgsPeriodic(BaseEvent):
             logger.error(e)
             return None
 
-    PgvvalidMap = {
-        "0": "FALSE",
-        "1": "TRUE"
-    }
-
-    class PgvvalidEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
-
-    @property
-    def pgvValid(self):
-        try:
-            return self.PgvvalidEnum(self.pgvValidRaw)
-        except ValueError as e:
-            logger.error("Invalid pgvValidRaw in Pgvvalid for "+str(self))
-            logger.error(e)
-            return None
-
     RulestateMap = {
         "0": "HO_SUSPEND_RULE",
         "1": "HO_RECOVERY_RULE",
@@ -2654,14 +3036,14 @@ class LidPlgsPeriodic(BaseEvent):
     HominstateMap = {
         "0": "On and available",
         "1": "On and suspended",
-        "2": "Off",
+        "2": "False",
         "3": "On and not available"
     }
 
     class HominstateEnum(Enum):
         OnAndAvailable = 0
         OnAndSuspended = 1
-        Off = 2
+        FalseVal = 2
         OnAndNotAvailable = 3
 
     @property
@@ -2729,7 +3111,7 @@ class LidPlgsPeriodic(BaseEvent):
             fmr = fmr,
             pgv = pgv,
             fmrStatusRaw = fmrStatus,
-            pgvValidRaw = pgvValid,
+            pgvValid = pgvValid,
             ruleStateRaw = ruleState,
             hoMinStateRaw = hoMinState,
             statusRaw = status,
@@ -2744,7 +3126,7 @@ class LidPlgsPeriodic(BaseEvent):
             fmr = props.get("fmr", None),
             pgv = props.get("pgv", None),
             fmrStatusRaw = props.get("fmrstatus", None),
-            pgvValidRaw = props.get("pgvvalid", None),
+            pgvValid = props.get("pgvvalid", None),
             ruleStateRaw = _bitmask_arr_to_int(props.get("rulestate", 0)),
             hoMinStateRaw = props.get("hominstate", None),
             statusRaw = _bitmask_arr_to_int(props.get("status", 0)),
@@ -2772,7 +3154,7 @@ class LidPlgsPeriodic(BaseEvent):
             fmr=self.fmr,
             pgv=self.pgv,
             fmrStatusRaw=self.fmrStatusRaw,
-            pgvValidRaw=self.pgvValidRaw,
+            pgvValid=self.pgvValid,
             ruleStateRaw=self.ruleStateRaw,
             hoMinStateRaw=self.hoMinStateRaw,
             statusRaw=self.statusRaw,
@@ -2786,7 +3168,7 @@ class LidCgmAlertActivated(BaseEvent):
     NAME = "LID_CGM_ALERT_ACTIVATED"
 
     raw: RawEvent
-    dalertIdRaw: int
+    dalertIdRaw: int # enum
     faultLocatorData: int
     param1: int
     param2: float
@@ -2899,7 +3281,7 @@ class LidCgmAlertCleared(BaseEvent):
     NAME = "LID_CGM_ALERT_CLEARED"
 
     raw: RawEvent
-    dalertIdRaw: int
+    dalertIdRaw: int # enum
 
     DalertidMap = {
         "1": "CGM Fixed Low",
@@ -2998,8 +3380,8 @@ class LidVersionInfo(BaseEvent):
 
     raw: RawEvent
     version: int
-    configABits: int
-    configBBits: int
+    configABits: int # Bitmask
+    configBBits: int # Bitmask
     armCrc: int
 
 
@@ -3061,29 +3443,195 @@ class LidUpdateStatus(BaseEvent):
     NAME = "LID_UPDATE_STATUS"
 
     raw: RawEvent
-    swUpdateStatus: int
-    metadataAndVersionStatus: int
-    fullDlAndCrcStatus: int
-    fileDlAndSideloadStatus: int
-    externalFlashStatus: int
-    updateSuccessfulRaw: int
+    swUpdateStatusRaw: int # Bitmask
+    metadataAndVersionStatusRaw: int # Bitmask
+    fullDlAndCrcStatusRaw: int # Bitmask
+    fileDlAndSideloadStatusRaw: int # Bitmask
+    externalFlashStatus: int # Bitmask
+    updateSuccessful: int # Boolean
     swPartNum: int
 
-    UpdatesuccessfulMap = {
-        "0": "Update Not Successful",
-        "1": "Update Successful"
+    SwupdatestatusMap = {
+        "0": "ARM update success",
+        "1": "MSP update success",
+        "2": "Radio processor update success",
+        "3": "Alphamasks (GUI images) update success",
+        "4": "Raster (GUI images) update success",
+        "5": "Radio application update success",
+        "6": "Radio bootloader update success",
+        "7": "Radio stack update success",
+        "8": "ARM update failed",
+        "9": "MSP update failed",
+        "10": "Radio processor update failed",
+        "11": "Alphamasks (GUI images) update failed",
+        "12": "Raster (GUI images) update failed",
+        "13": "Radio application update failed",
+        "14": "Radio bootloader update failed",
+        "15": "Radio stack update failed"
     }
 
-    class UpdatesuccessfulEnum(Enum):
-        UpdateNotSuccessful = 0
-        UpdateSuccessful = 1
+    class SwupdatestatusBitmask(IntFlag):
+        ArmUpdateSuccess = 2**0
+        MspUpdateSuccess = 2**1
+        RadioProcessorUpdateSuccess = 2**2
+        AlphamasksGuiImagesUpdateSuccess = 2**3
+        RasterGuiImagesUpdateSuccess = 2**4
+        RadioApplicationUpdateSuccess = 2**5
+        RadioBootloaderUpdateSuccess = 2**6
+        RadioStackUpdateSuccess = 2**7
+        ArmUpdateFailed = 2**8
+        MspUpdateFailed = 2**9
+        RadioProcessorUpdateFailed = 2**10
+        AlphamasksGuiImagesUpdateFailed = 2**11
+        RasterGuiImagesUpdateFailed = 2**12
+        RadioApplicationUpdateFailed = 2**13
+        RadioBootloaderUpdateFailed = 2**14
+        RadioStackUpdateFailed = 2**15
 
     @property
-    def updateSuccessful(self):
+    def swUpdateStatus(self):
         try:
-            return self.UpdatesuccessfulEnum(self.updateSuccessfulRaw)
+            return self.SwupdatestatusBitmask(self.swUpdateStatusRaw)
         except ValueError as e:
-            logger.error("Invalid updateSuccessfulRaw in Updatesuccessful for "+str(self))
+            logger.error("Invalid swUpdateStatusRaw in SwupdatestatusBitmask for "+str(self))
+            logger.error(e)
+            return None
+
+    MetadataandversionstatusMap = {
+        "0": "ARM metadata CRC failed",
+        "1": "MSP metadata CRC failed",
+        "2": "Radio processor metadata CRC failed",
+        "3": "Alphamasks (GUI images) metadata CRC failed",
+        "4": "Raster (GUI images) metadata CRC failed",
+        "5": "Radio application metadata CRC failed",
+        "6": "Radio bootloader metadata CRC failed",
+        "7": "Radio stack metadata CRC failed",
+        "8": "ARM version failed",
+        "9": "MSP version failed",
+        "10": "Radio processor version failed",
+        "11": "Alphamasks (GUI images) version failed",
+        "12": " Raster (GUI images) version failed",
+        "13": "Radio application version failed",
+        "14": "Radio bootloader version failed",
+        "15": "Radio stack version failed"
+    }
+
+    class MetadataandversionstatusBitmask(IntFlag):
+        ArmMetadataCrcFailed = 2**0
+        MspMetadataCrcFailed = 2**1
+        RadioProcessorMetadataCrcFailed = 2**2
+        AlphamasksGuiImagesMetadataCrcFailed = 2**3
+        RasterGuiImagesMetadataCrcFailed = 2**4
+        RadioApplicationMetadataCrcFailed = 2**5
+        RadioBootloaderMetadataCrcFailed = 2**6
+        RadioStackMetadataCrcFailed = 2**7
+        ArmVersionFailed = 2**8
+        MspVersionFailed = 2**9
+        RadioProcessorVersionFailed = 2**10
+        AlphamasksGuiImagesVersionFailed = 2**11
+        RasterGuiImagesVersionFailed = 2**12
+        RadioApplicationVersionFailed = 2**13
+        RadioBootloaderVersionFailed = 2**14
+        RadioStackVersionFailed = 2**15
+
+    @property
+    def metadataAndVersionStatus(self):
+        try:
+            return self.MetadataandversionstatusBitmask(self.metadataAndVersionStatusRaw)
+        except ValueError as e:
+            logger.error("Invalid metadataAndVersionStatusRaw in MetadataandversionstatusBitmask for "+str(self))
+            logger.error(e)
+            return None
+
+    FulldlandcrcstatusMap = {
+        "0": "ARM full download failed",
+        "1": "MSP full download failed",
+        "2": "Radio processor full download failed",
+        "3": "Alphamasks (GUI images) full download failed",
+        "4": "Raster (GUI images) full download failed",
+        "5": "Radio application full download failed",
+        "6": "Radio bootloader full download failed",
+        "7": "Radio stack full download failed",
+        "8": "ARM CRC failed",
+        "9": "MSP CRC failed",
+        "10": "Radio processor CRC failed",
+        "11": "Alphamasks (GUI images) CRC failed",
+        "12": "Raster (GUI images) CRC failed",
+        "13": "Radio application CRC failed",
+        "14": "Radio bootloader CRC failed",
+        "15": "Radio stack CRC failed"
+    }
+
+    class FulldlandcrcstatusBitmask(IntFlag):
+        ArmFullDownloadFailed = 2**0
+        MspFullDownloadFailed = 2**1
+        RadioProcessorFullDownloadFailed = 2**2
+        AlphamasksGuiImagesFullDownloadFailed = 2**3
+        RasterGuiImagesFullDownloadFailed = 2**4
+        RadioApplicationFullDownloadFailed = 2**5
+        RadioBootloaderFullDownloadFailed = 2**6
+        RadioStackFullDownloadFailed = 2**7
+        ArmCrcFailed = 2**8
+        MspCrcFailed = 2**9
+        RadioProcessorCrcFailed = 2**10
+        AlphamasksGuiImagesCrcFailed = 2**11
+        RasterGuiImagesCrcFailed = 2**12
+        RadioApplicationCrcFailed = 2**13
+        RadioBootloaderCrcFailed = 2**14
+        RadioStackCrcFailed = 2**15
+
+    @property
+    def fullDlAndCrcStatus(self):
+        try:
+            return self.FulldlandcrcstatusBitmask(self.fullDlAndCrcStatusRaw)
+        except ValueError as e:
+            logger.error("Invalid fullDlAndCrcStatusRaw in FulldlandcrcstatusBitmask for "+str(self))
+            logger.error(e)
+            return None
+
+    FiledlandsideloadstatusMap = {
+        "0": "ARM file downloaded",
+        "1": "MSP file downloaded",
+        "2": "Radio file downloaded",
+        "3": "Alphamasks (GUI images) file downloaded",
+        "4": "Raster (GUI images) file downloaded",
+        "5": "Radio application file downloaded",
+        "6": "Radio bootloader file downloaded",
+        "7": "Radio stack file downloaded",
+        "8": "ARM sideload started",
+        "9": "MSP sideload started",
+        "10": "Radio sideload started",
+        "11": "Alphamasks (GUI images) sideload started",
+        "12": "Raster (GUI images) sideload started",
+        "13": "Radio application sideload started",
+        "14": "Radio bootloader sideload started",
+        "15": "Radio stack sideload started"
+    }
+
+    class FiledlandsideloadstatusBitmask(IntFlag):
+        ArmFileDownloaded = 2**0
+        MspFileDownloaded = 2**1
+        RadioFileDownloaded = 2**2
+        AlphamasksGuiImagesFileDownloaded = 2**3
+        RasterGuiImagesFileDownloaded = 2**4
+        RadioApplicationFileDownloaded = 2**5
+        RadioBootloaderFileDownloaded = 2**6
+        RadioStackFileDownloaded = 2**7
+        ArmSideloadStarted = 2**8
+        MspSideloadStarted = 2**9
+        RadioSideloadStarted = 2**10
+        AlphamasksGuiImagesSideloadStarted = 2**11
+        RasterGuiImagesSideloadStarted = 2**12
+        RadioApplicationSideloadStarted = 2**13
+        RadioBootloaderSideloadStarted = 2**14
+        RadioStackSideloadStarted = 2**15
+
+    @property
+    def fileDlAndSideloadStatus(self):
+        try:
+            return self.FiledlandsideloadstatusBitmask(self.fileDlAndSideloadStatusRaw)
+        except ValueError as e:
+            logger.error("Invalid fileDlAndSideloadStatusRaw in FiledlandsideloadstatusBitmask for "+str(self))
             logger.error(e)
             return None
 
@@ -3099,12 +3647,12 @@ class LidUpdateStatus(BaseEvent):
 
         return LidUpdateStatus(
             raw = RawEvent.build(raw),
-            swUpdateStatus = swUpdateStatus,
-            metadataAndVersionStatus = metadataAndVersionStatus,
-            fullDlAndCrcStatus = fullDlAndCrcStatus,
-            fileDlAndSideloadStatus = fileDlAndSideloadStatus,
+            swUpdateStatusRaw = swUpdateStatus,
+            metadataAndVersionStatusRaw = metadataAndVersionStatus,
+            fullDlAndCrcStatusRaw = fullDlAndCrcStatus,
+            fileDlAndSideloadStatusRaw = fileDlAndSideloadStatus,
             externalFlashStatus = externalFlashStatus,
-            updateSuccessfulRaw = updateSuccessful,
+            updateSuccessful = updateSuccessful,
             swPartNum = swPartNum,
         )
 
@@ -3113,12 +3661,12 @@ class LidUpdateStatus(BaseEvent):
         props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
         return LidUpdateStatus(
             raw = RawEvent.build_from_json(event),
-            swUpdateStatus = props.get("swupdatestatus", None),
-            metadataAndVersionStatus = props.get("metadataandversionstatus", None),
-            fullDlAndCrcStatus = props.get("fulldlandcrcstatus", None),
-            fileDlAndSideloadStatus = props.get("filedlandsideloadstatus", None),
+            swUpdateStatusRaw = _bitmask_arr_to_int(props.get("swupdatestatus", 0)),
+            metadataAndVersionStatusRaw = _bitmask_arr_to_int(props.get("metadataandversionstatus", 0)),
+            fullDlAndCrcStatusRaw = _bitmask_arr_to_int(props.get("fulldlandcrcstatus", 0)),
+            fileDlAndSideloadStatusRaw = _bitmask_arr_to_int(props.get("filedlandsideloadstatus", 0)),
             externalFlashStatus = props.get("externalflashstatus", None),
-            updateSuccessfulRaw = props.get("updatesuccessful", None),
+            updateSuccessful = props.get("updatesuccessful", None),
             swPartNum = props.get("swpartnum", None),
         )
 
@@ -3140,12 +3688,12 @@ class LidUpdateStatus(BaseEvent):
             name=self.NAME,
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
-            swUpdateStatus=self.swUpdateStatus,
-            metadataAndVersionStatus=self.metadataAndVersionStatus,
-            fullDlAndCrcStatus=self.fullDlAndCrcStatus,
-            fileDlAndSideloadStatus=self.fileDlAndSideloadStatus,
+            swUpdateStatusRaw=self.swUpdateStatusRaw,
+            metadataAndVersionStatusRaw=self.metadataAndVersionStatusRaw,
+            fullDlAndCrcStatusRaw=self.fullDlAndCrcStatusRaw,
+            fileDlAndSideloadStatusRaw=self.fileDlAndSideloadStatusRaw,
             externalFlashStatus=self.externalFlashStatus,
-            updateSuccessfulRaw=self.updateSuccessfulRaw,
+            updateSuccessful=self.updateSuccessful,
             swPartNum=self.swPartNum,
         )
 
@@ -3160,19 +3708,65 @@ class LidCgmStartSessionGx(BaseEvent):
     currentTransmitterTime: int # sec
     sessionStartTime: int # sec
     sessionDuration: int # days
+    sessionStartReasonRaw: int # Enum
 
+    SessionstartreasonMap = {
+        "0": "DEXBLES_REASON_USER",
+        "1": "DEXBLES_REASON_UNKNOWN",
+        "2": "Reserved",
+        "3": "DEXBLES_REASON_TX_END_OF_LIFE",
+        "4": "DEXBLES_REASON_TRANSMITTER_ERROR",
+        "5": "DEXBLES_REASON_SESSION_STOP_SUCCESS",
+        "6": "DEXBLES_REASON_TRANSMITTER_NOT_IN_SESSION",
+        "7": "Reserved",
+        "8": "DEXBLES_REASON_NEW_SESSION_STARTED_SUCCESS",
+        "9": "DEXBLES_REASON_SESSION_STARTED_IN_PROGRESS",
+        "10": "DEXBLES_REASON_TRANSMITTER_IN_SESSION",
+        "11": "DEXBLES_REASON_BLESTACK_INVALID",
+        "12": "DEXBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS",
+        "13": "DEXBLES_REASON_AUTOCAL_SESSION_IN_PROGRESS",
+        "21": "DEXBLES_REASON_STALE_START_CMD",
+        "22": "DEXBLES_REASON_STALE_STOP_CMD"
+    }
+
+    class SessionstartreasonEnum(Enum):
+        DexblesReasonUser = 0
+        DexblesReasonUnknown = 1
+        DexblesReasonTxEndOfLife = 3
+        DexblesReasonTransmitterError = 4
+        DexblesReasonSessionStopSuccess = 5
+        DexblesReasonTransmitterNotInSession = 6
+        DexblesReasonNewSessionStartedSuccess = 8
+        DexblesReasonSessionStartedInProgress = 9
+        DexblesReasonTransmitterInSession = 10
+        DexblesReasonBlestackInvalid = 11
+        DexblesReasonNewAutocalSessionStartedSuccess = 12
+        DexblesReasonAutocalSessionInProgress = 13
+        DexblesReasonStaleStartCmd = 21
+        DexblesReasonStaleStopCmd = 22
+
+    @property
+    def sessionStartReason(self):
+        try:
+            return self.SessionstartreasonEnum(self.sessionStartReasonRaw)
+        except ValueError as e:
+            logger.error("Invalid sessionStartReasonRaw in Sessionstartreason for "+str(self))
+            logger.error(e)
+            return None
 
     @staticmethod
     def build(raw):
         currentTransmitterTime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
         sessionStartTime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
         sessionDuration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        sessionStartReason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
 
         return LidCgmStartSessionGx(
             raw = RawEvent.build(raw),
             currentTransmitterTime = currentTransmitterTime,
             sessionStartTime = sessionStartTime,
             sessionDuration = sessionDuration,
+            sessionStartReasonRaw = sessionStartReason,
         )
 
     @staticmethod
@@ -3183,6 +3777,7 @@ class LidCgmStartSessionGx(BaseEvent):
             currentTransmitterTime = props.get("currenttransmittertime", None),
             sessionStartTime = props.get("sessionstarttime", None),
             sessionDuration = props.get("sessionduration", None),
+            sessionStartReasonRaw = props.get("sessionstartreason", None),
         )
 
     @property
@@ -3206,6 +3801,7 @@ class LidCgmStartSessionGx(BaseEvent):
             currentTransmitterTime=self.currentTransmitterTime,
             sessionStartTime=self.sessionStartTime,
             sessionDuration=self.sessionDuration,
+            sessionStartReasonRaw=self.sessionStartReasonRaw,
         )
 
 
@@ -3219,23 +3815,25 @@ class LidCgmJoinSessionGx(BaseEvent):
     currentTransmitterTime: int # sec
     sessionStartTime: int # sec
     sessionDuration: int # days
-    sessionJoinReasonRaw: int
+    sessionJoinReasonRaw: int # Enum
 
     SessionjoinreasonMap = {
-        "0": "DEXBLES_REASON_USER,",
-        "1": "DEXBLES_REASON_UNKNOWN,",
-        "2": "Reserved,",
-        "3": "DEXBLES_REASON_TX_END_OF_LIFE,",
-        "4": "DEXBLES_REASON_TRANSMITTER_ERROR,",
-        "5": "DEXBLES_REASON_SESSION_STOP_SUCCESS,",
-        "6": "DEXBLES_REASON_TRANSMITTER_NOT_IN_SESSION,",
+        "0": "DEXBLES_REASON_USER",
+        "1": "DEXBLES_REASON_UNKNOWN",
+        "2": "Reserved",
+        "3": "DEXBLES_REASON_TX_END_OF_LIFE",
+        "4": "DEXBLES_REASON_TRANSMITTER_ERROR",
+        "5": "DEXBLES_REASON_SESSION_STOP_SUCCESS",
+        "6": "DEXBLES_REASON_TRANSMITTER_NOT_IN_SESSION",
         "7": "Reserved",
-        "8": "DEXBLES_REASON_NEW_SESSION_STARTED_SUCCESS,",
-        "9": "DEXBLES_REASON_SESSION_STARTED_IN_PROGRESS,",
-        "10": "DEXBLES_REASON_TRANSMITTER_IN_SESSION,",
-        "11": "DEXBLES_REASON_BLESTACK_INVALID,",
-        "12": "DEXBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS,",
-        "13": "DEXBLES_REASON_NO_AUTOCAL_SESSION_IN_PROGRESS"
+        "8": "DEXBLES_REASON_NEW_SESSION_STARTED_SUCCESS",
+        "9": "DEXBLES_REASON_SESSION_STARTED_IN_PROGRESS",
+        "10": "DEXBLES_REASON_TRANSMITTER_IN_SESSION",
+        "11": "DEXBLES_REASON_BLESTACK_INVALID",
+        "12": "DEXBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS",
+        "13": "DEXBLES_REASON_AUTOCAL_SESSION_IN_PROGRESS",
+        "21": "DEXBLES_REASON_STALE_START_CMD",
+        "22": "DEXBLES_REASON_STALE_STOP_CMD"
     }
 
     class SessionjoinreasonEnum(Enum):
@@ -3250,7 +3848,9 @@ class LidCgmJoinSessionGx(BaseEvent):
         DexblesReasonTransmitterInSession = 10
         DexblesReasonBlestackInvalid = 11
         DexblesReasonNewAutocalSessionStartedSuccess = 12
-        DexblesReasonNoAutocalSessionInProgress = 13
+        DexblesReasonAutocalSessionInProgress = 13
+        DexblesReasonStaleStartCmd = 21
+        DexblesReasonStaleStopCmd = 22
 
     @property
     def sessionJoinReason(self):
@@ -3323,38 +3923,48 @@ class LidCgmStopSessionGx(BaseEvent):
     sessionStartTime: int # sec
     sessionStopTime: int # sec
     sessionDuration: int # days
-    sessionStopReasonRaw: int
+    sessionStopReasonRaw: int # Enum
 
     SessionstopreasonMap = {
-        "0": "DEXBLES_REASON_USER,",
-        "1": "DEXBLES_REASON_UNKNOWN,",
-        "2": "Reserved,",
-        "3": "DEXBLES_REASON_TX_END_OF_LIFE,",
-        "4": "DEXBLES_REASON_TRANSMITTER_ERROR,",
-        "5": "DEXBLES_REASON_SESSION_STOP_SUCCESS,",
-        "6": "DEXBLES_REASON_TRANSMITTER_NOT_IN_SESSION,",
+        "0": "CGMBLES_REASON_USER",
+        "1": "CGMBLES_REASON_UNKNOWN",
+        "2": "Reserved",
+        "3": "CGMBLES_REASON_TX_END_OF_LIFE",
+        "4": "CGMBLES_REASON_TRANSMITTER_ERROR",
+        "5": "CGMBLES_REASON_SESSION_STOP_SUCCESS",
+        "6": "CGMBLES_REASON_TRANSMITTER_NOT_IN_SESSION",
         "7": "Reserved",
-        "8": "DEXBLES_REASON_NEW_SESSION_STARTED_SUCCESS,",
-        "9": "DEXBLES_REASON_SESSION_STARTED_IN_PROGRESS,",
-        "10": "DEXBLES_REASON_TRANSMITTER_IN_SESSION,",
-        "11": "DEXBLES_REASON_BLESTACK_INVALID,",
-        "12": "DEXBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS,",
-        "13": "DEXBLES_REASON_NO_AUTOCAL_SESSION_IN_PROGRESS"
+        "8": "CGMBLES_REASON_NEW_SESSION_STARTED_SUCCESS",
+        "9": "CGMBLES_REASON_SESSION_STARTED_IN_PROGRESS",
+        "10": "CGMBLES_REASON_TRANSMITTER_IN_SESSION",
+        "11": "CGMBLES_REASON_BLESTACK_INVALID",
+        "12": "CGMBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS",
+        "13": "CGMBLES_REASON_AUTOCAL_SESSION_IN_PROGRESS",
+        "15": "CGMBLES_REASON_SENSOR_ERROR",
+        "21": "CGMBLES_REASON_STALE_START_CMD",
+        "22": "CGMBLES_REASON_STALE_STOP_CMD",
+        "23": "CGMBLES_REASON_USER_CHANGED_SENSOR_TYPE",
+        "24": "CGMBLES_REASON_INVALID_START_SESSION"
     }
 
     class SessionstopreasonEnum(Enum):
-        DexblesReasonUser = 0
-        DexblesReasonUnknown = 1
-        DexblesReasonTxEndOfLife = 3
-        DexblesReasonTransmitterError = 4
-        DexblesReasonSessionStopSuccess = 5
-        DexblesReasonTransmitterNotInSession = 6
-        DexblesReasonNewSessionStartedSuccess = 8
-        DexblesReasonSessionStartedInProgress = 9
-        DexblesReasonTransmitterInSession = 10
-        DexblesReasonBlestackInvalid = 11
-        DexblesReasonNewAutocalSessionStartedSuccess = 12
-        DexblesReasonNoAutocalSessionInProgress = 13
+        CgmblesReasonUser = 0
+        CgmblesReasonUnknown = 1
+        CgmblesReasonTxEndOfLife = 3
+        CgmblesReasonTransmitterError = 4
+        CgmblesReasonSessionStopSuccess = 5
+        CgmblesReasonTransmitterNotInSession = 6
+        CgmblesReasonNewSessionStartedSuccess = 8
+        CgmblesReasonSessionStartedInProgress = 9
+        CgmblesReasonTransmitterInSession = 10
+        CgmblesReasonBlestackInvalid = 11
+        CgmblesReasonNewAutocalSessionStartedSuccess = 12
+        CgmblesReasonAutocalSessionInProgress = 13
+        CgmblesReasonSensorError = 15
+        CgmblesReasonStaleStartCmd = 21
+        CgmblesReasonStaleStopCmd = 22
+        CgmblesReasonUserChangedSensorType = 23
+        CgmblesReasonInvalidStartSession = 24
 
     @property
     def sessionStopReason(self):
@@ -3427,33 +4037,15 @@ class LidAaUserModeChange(BaseEvent):
     NAME = "LID_AA_USER_MODE_CHANGE"
 
     raw: RawEvent
-    exerciseChoiceRaw: int
+    currentUserModeRaw: int # Enum
+    previousUserModeRaw: int # Enum
+    requestedActionRaw: int # Enum
+    sleepStartedByGui: int # Boolean
+    activeSleepScheduleRaw: int # Bitmask
+    exerciseStoppedByTimer: int # Boolean
+    exerciseChoiceRaw: int # Enum
     exerciseTime: int # minutes
-    currentUserModeRaw: int
-    previousUserModeRaw: int
-    requestedActionRaw: int
-    sleepStartedByGuiRaw: int
-    exerciseStoppedByTimerRaw: int
-    activeSleepScheduleRaw: int
-    eatingSoonStoppedByTimerRaw: int
-
-    ExercisechoiceMap = {
-        "0": "Continuous",
-        "1": "Timed"
-    }
-
-    class ExercisechoiceEnum(Enum):
-        Continuous = 0
-        Timed = 1
-
-    @property
-    def exerciseChoice(self):
-        try:
-            return self.ExercisechoiceEnum(self.exerciseChoiceRaw)
-        except ValueError as e:
-            logger.error("Invalid exerciseChoiceRaw in Exercisechoice for "+str(self))
-            logger.error(e)
-            return None
+    eatingSoonStoppedByTimer: int # Boolean
 
     CurrentusermodeMap = {
         "0": "Normal",
@@ -3529,42 +4121,6 @@ class LidAaUserModeChange(BaseEvent):
             logger.error(e)
             return None
 
-    SleepstartedbyguiMap = {
-        "0": "FALSE",
-        "1": "TRUE"
-    }
-
-    class SleepstartedbyguiEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
-
-    @property
-    def sleepStartedByGui(self):
-        try:
-            return self.SleepstartedbyguiEnum(self.sleepStartedByGuiRaw)
-        except ValueError as e:
-            logger.error("Invalid sleepStartedByGuiRaw in Sleepstartedbygui for "+str(self))
-            logger.error(e)
-            return None
-
-    ExercisestoppedbytimerMap = {
-        "0": "False",
-        "1": "True"
-    }
-
-    class ExercisestoppedbytimerEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
-
-    @property
-    def exerciseStoppedByTimer(self):
-        try:
-            return self.ExercisestoppedbytimerEnum(self.exerciseStoppedByTimerRaw)
-        except ValueError as e:
-            logger.error("Invalid exerciseStoppedByTimerRaw in Exercisestoppedbytimer for "+str(self))
-            logger.error(e)
-            return None
-
     ActivesleepscheduleMap = {
         "0": "Sleep Schedule 1 is Active",
         "1": "Sleep Schedule 2 is Active",
@@ -3587,47 +4143,47 @@ class LidAaUserModeChange(BaseEvent):
             logger.error(e)
             return None
 
-    EatingsoonstoppedbytimerMap = {
-        "0": "False",
-        "1": "True"
+    ExercisechoiceMap = {
+        "0": "Continuous",
+        "1": "Timed"
     }
 
-    class EatingsoonstoppedbytimerEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
+    class ExercisechoiceEnum(Enum):
+        Continuous = 0
+        Timed = 1
 
     @property
-    def eatingSoonStoppedByTimer(self):
+    def exerciseChoice(self):
         try:
-            return self.EatingsoonstoppedbytimerEnum(self.eatingSoonStoppedByTimerRaw)
+            return self.ExercisechoiceEnum(self.exerciseChoiceRaw)
         except ValueError as e:
-            logger.error("Invalid eatingSoonStoppedByTimerRaw in Eatingsoonstoppedbytimer for "+str(self))
+            logger.error("Invalid exerciseChoiceRaw in Exercisechoice for "+str(self))
             logger.error(e)
             return None
 
     @staticmethod
     def build(raw):
-        exerciseChoice, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
-        exerciseTime, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
         currentUserMode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
         previousUserMode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
         requestedAction, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         sleepStartedByGui, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 17)
-        exerciseStoppedByTimer, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
         activeSleepSchedule, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 16)
+        exerciseStoppedByTimer, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        exerciseChoice, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
+        exerciseTime, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
         eatingSoonStoppedByTimer, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
 
         return LidAaUserModeChange(
             raw = RawEvent.build(raw),
-            exerciseChoiceRaw = exerciseChoice,
-            exerciseTime = exerciseTime,
             currentUserModeRaw = currentUserMode,
             previousUserModeRaw = previousUserMode,
             requestedActionRaw = requestedAction,
-            sleepStartedByGuiRaw = sleepStartedByGui,
-            exerciseStoppedByTimerRaw = exerciseStoppedByTimer,
+            sleepStartedByGui = sleepStartedByGui,
             activeSleepScheduleRaw = activeSleepSchedule,
-            eatingSoonStoppedByTimerRaw = eatingSoonStoppedByTimer,
+            exerciseStoppedByTimer = exerciseStoppedByTimer,
+            exerciseChoiceRaw = exerciseChoice,
+            exerciseTime = exerciseTime,
+            eatingSoonStoppedByTimer = eatingSoonStoppedByTimer,
         )
 
     @staticmethod
@@ -3635,15 +4191,15 @@ class LidAaUserModeChange(BaseEvent):
         props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
         return LidAaUserModeChange(
             raw = RawEvent.build_from_json(event),
-            exerciseChoiceRaw = props.get("exercisechoice", None),
-            exerciseTime = props.get("exercisetime", None),
             currentUserModeRaw = props.get("currentusermode", None),
             previousUserModeRaw = props.get("previoususermode", None),
             requestedActionRaw = props.get("requestedaction", None),
-            sleepStartedByGuiRaw = props.get("sleepstartedbygui", None),
-            exerciseStoppedByTimerRaw = props.get("exercisestoppedbytimer", None),
+            sleepStartedByGui = props.get("sleepstartedbygui", None),
             activeSleepScheduleRaw = _bitmask_arr_to_int(props.get("activesleepschedule", 0)),
-            eatingSoonStoppedByTimerRaw = props.get("eatingsoonstoppedbytimer", None),
+            exerciseStoppedByTimer = props.get("exercisestoppedbytimer", None),
+            exerciseChoiceRaw = props.get("exercisechoice", None),
+            exerciseTime = props.get("exercisetime", None),
+            eatingSoonStoppedByTimer = props.get("eatingsoonstoppedbytimer", None),
         )
 
     @property
@@ -3664,15 +4220,15 @@ class LidAaUserModeChange(BaseEvent):
             name=self.NAME,
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
-            exerciseChoiceRaw=self.exerciseChoiceRaw,
-            exerciseTime=self.exerciseTime,
             currentUserModeRaw=self.currentUserModeRaw,
             previousUserModeRaw=self.previousUserModeRaw,
             requestedActionRaw=self.requestedActionRaw,
-            sleepStartedByGuiRaw=self.sleepStartedByGuiRaw,
-            exerciseStoppedByTimerRaw=self.exerciseStoppedByTimerRaw,
+            sleepStartedByGui=self.sleepStartedByGui,
             activeSleepScheduleRaw=self.activeSleepScheduleRaw,
-            eatingSoonStoppedByTimerRaw=self.eatingSoonStoppedByTimerRaw,
+            exerciseStoppedByTimer=self.exerciseStoppedByTimer,
+            exerciseChoiceRaw=self.exerciseChoiceRaw,
+            exerciseTime=self.exerciseTime,
+            eatingSoonStoppedByTimer=self.eatingSoonStoppedByTimer,
         )
 
 
@@ -3683,13 +4239,13 @@ class LidAaPcmChange(BaseEvent):
     NAME = "LID_AA_PCM_CHANGE"
 
     raw: RawEvent
-    currentPcmRaw: int
-    previousPcmRaw: int
-    pumpSuspendedRaw: int
-    calculationAvailableRaw: int
-    cgmAvailableRaw: int
-    closedLoopPreferredRaw: int
-    sufficientClosedLoopParamsRaw: int
+    currentPcmRaw: int # Enum
+    previousPcmRaw: int # Enum
+    pumpSuspended: int # Boolean
+    calculationAvailable: int # Boolean
+    cgmAvailable: int # Boolean
+    closedLoopPreferred: int # Boolean
+    sufficientClosedLoopParams: int # Boolean
 
     CurrentpcmMap = {
         "0": "No Control",
@@ -3735,96 +4291,6 @@ class LidAaPcmChange(BaseEvent):
             logger.error(e)
             return None
 
-    PumpsuspendedMap = {
-        "0": "FALSE",
-        "1": "TRUE"
-    }
-
-    class PumpsuspendedEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
-
-    @property
-    def pumpSuspended(self):
-        try:
-            return self.PumpsuspendedEnum(self.pumpSuspendedRaw)
-        except ValueError as e:
-            logger.error("Invalid pumpSuspendedRaw in Pumpsuspended for "+str(self))
-            logger.error(e)
-            return None
-
-    CalculationavailableMap = {
-        "0": "FALSE",
-        "1": "TRUE"
-    }
-
-    class CalculationavailableEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
-
-    @property
-    def calculationAvailable(self):
-        try:
-            return self.CalculationavailableEnum(self.calculationAvailableRaw)
-        except ValueError as e:
-            logger.error("Invalid calculationAvailableRaw in Calculationavailable for "+str(self))
-            logger.error(e)
-            return None
-
-    CgmavailableMap = {
-        "0": "FALSE",
-        "1": "TRUE"
-    }
-
-    class CgmavailableEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
-
-    @property
-    def cgmAvailable(self):
-        try:
-            return self.CgmavailableEnum(self.cgmAvailableRaw)
-        except ValueError as e:
-            logger.error("Invalid cgmAvailableRaw in Cgmavailable for "+str(self))
-            logger.error(e)
-            return None
-
-    ClosedlooppreferredMap = {
-        "0": "FALSE",
-        "1": "TRUE"
-    }
-
-    class ClosedlooppreferredEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
-
-    @property
-    def closedLoopPreferred(self):
-        try:
-            return self.ClosedlooppreferredEnum(self.closedLoopPreferredRaw)
-        except ValueError as e:
-            logger.error("Invalid closedLoopPreferredRaw in Closedlooppreferred for "+str(self))
-            logger.error(e)
-            return None
-
-    SufficientclosedloopparamsMap = {
-        "0": "FALSE",
-        "1": "TRUE"
-    }
-
-    class SufficientclosedloopparamsEnum(Enum):
-        FalseVal = 0
-        TrueVal = 1
-
-    @property
-    def sufficientClosedLoopParams(self):
-        try:
-            return self.SufficientclosedloopparamsEnum(self.sufficientClosedLoopParamsRaw)
-        except ValueError as e:
-            logger.error("Invalid sufficientClosedLoopParamsRaw in Sufficientclosedloopparams for "+str(self))
-            logger.error(e)
-            return None
-
     @staticmethod
     def build(raw):
         currentPcm, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
@@ -3839,11 +4305,11 @@ class LidAaPcmChange(BaseEvent):
             raw = RawEvent.build(raw),
             currentPcmRaw = currentPcm,
             previousPcmRaw = previousPcm,
-            pumpSuspendedRaw = pumpSuspended,
-            calculationAvailableRaw = calculationAvailable,
-            cgmAvailableRaw = cgmAvailable,
-            closedLoopPreferredRaw = closedLoopPreferred,
-            sufficientClosedLoopParamsRaw = sufficientClosedLoopParams,
+            pumpSuspended = pumpSuspended,
+            calculationAvailable = calculationAvailable,
+            cgmAvailable = cgmAvailable,
+            closedLoopPreferred = closedLoopPreferred,
+            sufficientClosedLoopParams = sufficientClosedLoopParams,
         )
 
     @staticmethod
@@ -3853,11 +4319,11 @@ class LidAaPcmChange(BaseEvent):
             raw = RawEvent.build_from_json(event),
             currentPcmRaw = props.get("currentpcm", None),
             previousPcmRaw = props.get("previouspcm", None),
-            pumpSuspendedRaw = props.get("pumpsuspended", None),
-            calculationAvailableRaw = props.get("calculationavailable", None),
-            cgmAvailableRaw = props.get("cgmavailable", None),
-            closedLoopPreferredRaw = props.get("closedlooppreferred", None),
-            sufficientClosedLoopParamsRaw = props.get("sufficientclosedloopparams", None),
+            pumpSuspended = props.get("pumpsuspended", None),
+            calculationAvailable = props.get("calculationavailable", None),
+            cgmAvailable = props.get("cgmavailable", None),
+            closedLoopPreferred = props.get("closedlooppreferred", None),
+            sufficientClosedLoopParams = props.get("sufficientclosedloopparams", None),
         )
 
     @property
@@ -3880,11 +4346,11 @@ class LidAaPcmChange(BaseEvent):
             eventTimestamp=str(self.eventTimestamp),
             currentPcmRaw=self.currentPcmRaw,
             previousPcmRaw=self.previousPcmRaw,
-            pumpSuspendedRaw=self.pumpSuspendedRaw,
-            calculationAvailableRaw=self.calculationAvailableRaw,
-            cgmAvailableRaw=self.cgmAvailableRaw,
-            closedLoopPreferredRaw=self.closedLoopPreferredRaw,
-            sufficientClosedLoopParamsRaw=self.sufficientClosedLoopParamsRaw,
+            pumpSuspended=self.pumpSuspended,
+            calculationAvailable=self.calculationAvailable,
+            cgmAvailable=self.cgmAvailable,
+            closedLoopPreferred=self.closedLoopPreferred,
+            sufficientClosedLoopParams=self.sufficientClosedLoopParams,
         )
 
 
@@ -3895,20 +4361,21 @@ class LidCgmDataGxb(BaseEvent):
     NAME = "LID_CGM_DATA_GXB"
 
     raw: RawEvent
-    glucoseValueStatusRaw: int
-    cgmDataTypeRaw: int
-    rateRaw: int # mg/dL/min
-    algorithmState: int
+    glucoseValueStatusRaw: int # Enum
+    cgmDataTypeRaw: int # Bitmask
+    rate: int # mg/dL/min
+    algorithmState: int # Enum
     rssi: int # dBm
     currentGlucoseDisplayValue: int # mg/dL
     egvTimeStamp: int # sec
-    egvInfoBitmaskRaw: int
+    egvInfoBitmaskRaw: int # Bitmask
     interval: int
+    reservedD15: int
 
     GlucosevaluestatusMap = {
-        "0": "\"currentGlucoseDisplayValue\" contains the glucose reading",
-        "1": "The glucose reading is \"high\", \"currentGlucoseDisplayValue\" set to 0",
-        "2": "The glucose reading is \"low\", \"currentGlucoseDisplayValue\" set to 0"
+        "0": "currentGlucoseDisplayValue contains the glucose reading",
+        "1": "The glucose reading is high, currentGlucoseDisplayValue set to 0",
+        "2": "The glucose reading is low, currentGlucoseDisplayValue set to 0"
     }
 
     class GlucosevaluestatusEnum(Enum):
@@ -3949,10 +4416,6 @@ class LidCgmDataGxb(BaseEvent):
             logger.error(e)
             return None
 
-    @property
-    def rate(self):
-        return self.rateRaw * 0.1
-
     EgvinfobitmaskMap = {
         "0": "Five Minute Reading (FMR)",
         "1": "Backfill",
@@ -3962,7 +4425,10 @@ class LidCgmDataGxb(BaseEvent):
         "5": "Valid timestamp",
         "6": "Valid EGV (valid range)",
         "7": "Valid algState (algState is 6, 7, or 14)",
-        "8": "EGV was successfully added to CGM subsystem array (e.g.,"
+        "8": "EGV was successfully added to CGM subsystem array (e.g.",
+        "11": "Sensor Type (this should be 1 for this G6 log)*",
+        "12": "Sensor Type (this should be 1 for this G6 log)*",
+        "13": "Sensor Type (this should be 1 for this G6 log)*"
     }
 
     class EgvinfobitmaskBitmask(IntFlag):
@@ -3975,6 +4441,9 @@ class LidCgmDataGxb(BaseEvent):
         ValidEgvValidRange = 2**6
         ValidAlgstateAlgstateIs6 = 2**7
         EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
+        SensorTypeThisShouldBe1ForThisG6Log_11 = 2**11
+        SensorTypeThisShouldBe1ForThisG6Log_12 = 2**12
+        SensorTypeThisShouldBe1ForThisG6Log_13 = 2**13
 
     @property
     def egvInfoBitmask(self):
@@ -3996,18 +4465,20 @@ class LidCgmDataGxb(BaseEvent):
         egvTimeStamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
         egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
         interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        reservedD15, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
 
         return LidCgmDataGxb(
             raw = RawEvent.build(raw),
             glucoseValueStatusRaw = glucoseValueStatus,
             cgmDataTypeRaw = cgmDataType,
-            rateRaw = rate,
+            rate = rate,
             algorithmState = algorithmState,
             rssi = rssi,
             currentGlucoseDisplayValue = currentGlucoseDisplayValue,
             egvTimeStamp = egvTimeStamp,
             egvInfoBitmaskRaw = egvInfoBitmask,
             interval = interval,
+            reservedD15 = reservedD15,
         )
 
     @staticmethod
@@ -4017,13 +4488,14 @@ class LidCgmDataGxb(BaseEvent):
             raw = RawEvent.build_from_json(event),
             glucoseValueStatusRaw = props.get("glucosevaluestatus", None),
             cgmDataTypeRaw = _bitmask_arr_to_int(props.get("cgmdatatype", 0)),
-            rateRaw = props.get("rate", None),
+            rate = props.get("rate", None),
             algorithmState = props.get("algorithmstate", None),
             rssi = props.get("rssi", None),
             currentGlucoseDisplayValue = props.get("currentglucosedisplayvalue", None),
             egvTimeStamp = props.get("egvtimestamp", None),
             egvInfoBitmaskRaw = _bitmask_arr_to_int(props.get("egvinfobitmask", 0)),
             interval = props.get("interval", None),
+            reservedD15 = props.get("reservedd15", None),
         )
 
     @property
@@ -4046,13 +4518,14 @@ class LidCgmDataGxb(BaseEvent):
             eventTimestamp=str(self.eventTimestamp),
             glucoseValueStatusRaw=self.glucoseValueStatusRaw,
             cgmDataTypeRaw=self.cgmDataTypeRaw,
-            rateRaw=self.rateRaw,
+            rate=self.rate,
             algorithmState=self.algorithmState,
             rssi=self.rssi,
             currentGlucoseDisplayValue=self.currentGlucoseDisplayValue,
             egvTimeStamp=self.egvTimeStamp,
             egvInfoBitmaskRaw=self.egvInfoBitmaskRaw,
             interval=self.interval,
+            reservedD15=self.reservedD15,
         )
 
 
@@ -4063,7 +4536,8 @@ class LidBasalDelivery(BaseEvent):
     NAME = "LID_BASAL_DELIVERY"
 
     raw: RawEvent
-    commandedRateSourceRaw: int
+    commandedRateSourceRaw: int # Enum
+    reservedA2: int
     commandedRate: int # milliunits/hr
     profileBasalRate: int # milliunits/hr
     algorithmRate: int # milliunits/hr
@@ -4096,6 +4570,7 @@ class LidBasalDelivery(BaseEvent):
     @staticmethod
     def build(raw):
         commandedRateSource, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        reservedA2, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
         commandedRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
         profileBasalRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
         algorithmRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
@@ -4104,6 +4579,7 @@ class LidBasalDelivery(BaseEvent):
         return LidBasalDelivery(
             raw = RawEvent.build(raw),
             commandedRateSourceRaw = commandedRateSource,
+            reservedA2 = reservedA2,
             commandedRate = commandedRate,
             profileBasalRate = profileBasalRate,
             algorithmRate = algorithmRate,
@@ -4116,6 +4592,7 @@ class LidBasalDelivery(BaseEvent):
         return LidBasalDelivery(
             raw = RawEvent.build_from_json(event),
             commandedRateSourceRaw = props.get("commandedratesource", None),
+            reservedA2 = props.get("reserveda2", None),
             commandedRate = props.get("commandedrate", None),
             profileBasalRate = props.get("profilebasalrate", None),
             algorithmRate = props.get("algorithmrate", None),
@@ -4141,6 +4618,7 @@ class LidBasalDelivery(BaseEvent):
             seqNum=self.seqNum,
             eventTimestamp=str(self.eventTimestamp),
             commandedRateSourceRaw=self.commandedRateSourceRaw,
+            reservedA2=self.reservedA2,
             commandedRate=self.commandedRate,
             profileBasalRate=self.profileBasalRate,
             algorithmRate=self.algorithmRate,
@@ -4156,15 +4634,15 @@ class LidBolusDelivery(BaseEvent):
 
     raw: RawEvent
     bolusId: int
-    bolusDeliveryStatusRaw: int
-    bolusTypeRaw: int
-    bolusSourceRaw: int
+    bolusDeliveryStatusRaw: int # Enum
+    bolusTypeRaw: int # Bitmask
+    bolusSourceRaw: int # Enum
     remoteId: int
     requestedNow: int # milliunits
     requestedLater: int # milliunits
+    correction: int # milliunits
     extendedDurationRequested: int # minutes
     deliveredTotal: int # milliunits
-    correction: int # milliunits
 
     BolusdeliverystatusMap = {
         "0": "Bolus Completed",
@@ -4190,7 +4668,8 @@ class LidBolusDelivery(BaseEvent):
         "2": "Override",
         "3": "Correction",
         "4": "Carb",
-        "5": "Eating Soon Mode"
+        "5": "Eating Soon Mode",
+        "6": "Queued"
     }
 
     class BolustypeBitmask(IntFlag):
@@ -4200,6 +4679,7 @@ class LidBolusDelivery(BaseEvent):
         Correction = 2**3
         Carb = 2**4
         EatingSoonMode = 2**5
+        Queued = 2**6
 
     @property
     def bolusType(self):
@@ -4220,7 +4700,9 @@ class LidBolusDelivery(BaseEvent):
         "6": "Reserved",
         "7": "Algorithm",
         "8": "BLE",
-        "9": "Eating Soon Bolus"
+        "9": "Eating Soon Bolus",
+        "10": "Reserved",
+        "11": "BLE with AID Recommendation"
     }
 
     class BolussourceEnum(Enum):
@@ -4230,6 +4712,7 @@ class LidBolusDelivery(BaseEvent):
         Algorithm = 7
         Ble = 8
         EatingSoonBolus = 9
+        BleWithAidRecommendation = 11
 
     @property
     def bolusSource(self):
@@ -4249,9 +4732,9 @@ class LidBolusDelivery(BaseEvent):
         remoteId, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 16)
         requestedNow, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
         requestedLater, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        correction, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
         extendedDurationRequested, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
         deliveredTotal, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
-        correction, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
 
         return LidBolusDelivery(
             raw = RawEvent.build(raw),
@@ -4262,9 +4745,9 @@ class LidBolusDelivery(BaseEvent):
             remoteId = remoteId,
             requestedNow = requestedNow,
             requestedLater = requestedLater,
+            correction = correction,
             extendedDurationRequested = extendedDurationRequested,
             deliveredTotal = deliveredTotal,
-            correction = correction,
         )
 
     @staticmethod
@@ -4279,9 +4762,9 @@ class LidBolusDelivery(BaseEvent):
             remoteId = props.get("remoteid", None),
             requestedNow = props.get("requestednow", None),
             requestedLater = props.get("requestedlater", None),
+            correction = props.get("correction", None),
             extendedDurationRequested = props.get("extendeddurationrequested", None),
             deliveredTotal = props.get("deliveredtotal", None),
-            correction = props.get("correction", None),
         )
 
     @property
@@ -4309,9 +4792,9 @@ class LidBolusDelivery(BaseEvent):
             remoteId=self.remoteId,
             requestedNow=self.requestedNow,
             requestedLater=self.requestedLater,
+            correction=self.correction,
             extendedDurationRequested=self.extendedDurationRequested,
             deliveredTotal=self.deliveredTotal,
-            correction=self.correction,
         )
 
 
@@ -4386,9 +4869,12 @@ class LidAaDailyStatus(BaseEvent):
     NAME = "LID_AA_DAILY_STATUS"
 
     raw: RawEvent
-    pumpControlStateRaw: int
-    usermodeRaw: int
-    sensorTypeRaw: int
+    pumpControlStateRaw: int # enum
+    usermodeRaw: int # enum
+    sensorTypeRaw: int # enum
+    weightUnitRaw: int # Enum
+    weight: int # lbs or kg
+    currentTdIpop: int # units
 
     PumpcontrolstateMap = {
         "0": "PCM No Control (No cartridge installed)",
@@ -4436,7 +4922,8 @@ class LidAaDailyStatus(BaseEvent):
         "0": "CGM_TYPE_NONE",
         "1": "CGM_TYPE_DEXCOM_G6",
         "2": "CGM_TYPE_LIBRE2",
-        "3": "CGM_TYPE_DEXCOM_G7"
+        "3": "CGM_TYPE_DEXCOM_G7",
+        "4": "CGM_TYPE_LIBRE3"
     }
 
     class SensortypeEnum(Enum):
@@ -4444,6 +4931,7 @@ class LidAaDailyStatus(BaseEvent):
         CgmTypeDexcomG6 = 1
         CgmTypeLibre2 = 2
         CgmTypeDexcomG7 = 3
+        CgmTypeLibre3 = 4
 
     @property
     def sensorType(self):
@@ -4454,17 +4942,43 @@ class LidAaDailyStatus(BaseEvent):
             logger.error(e)
             return None
 
+    WeightunitMap = {
+        "0": "Weight Unit Not Set",
+        "1": "Weight is in Pounds (lbs)",
+        "2": "Weight is in Kilograms (kg)"
+    }
+
+    class WeightunitEnum(Enum):
+        WeightUnitNotSet = 0
+        WeightIsInPoundsLbs = 1
+        WeightIsInKilogramsKg = 2
+
+    @property
+    def weightUnit(self):
+        try:
+            return self.WeightunitEnum(self.weightUnitRaw)
+        except ValueError as e:
+            logger.error("Invalid weightUnitRaw in Weightunit for "+str(self))
+            logger.error(e)
+            return None
+
     @staticmethod
     def build(raw):
         pumpControlState, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
         usermode, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
         sensorType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        weightUnit, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        weight, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        currentTdIpop, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 15)
 
         return LidAaDailyStatus(
             raw = RawEvent.build(raw),
             pumpControlStateRaw = pumpControlState,
             usermodeRaw = usermode,
             sensorTypeRaw = sensorType,
+            weightUnitRaw = weightUnit,
+            weight = weight,
+            currentTdIpop = currentTdIpop,
         )
 
     @staticmethod
@@ -4475,6 +4989,9 @@ class LidAaDailyStatus(BaseEvent):
             pumpControlStateRaw = props.get("pumpcontrolstate", None),
             usermodeRaw = props.get("usermode", None),
             sensorTypeRaw = props.get("sensortype", None),
+            weightUnitRaw = props.get("weightunit", None),
+            weight = props.get("weight", None),
+            currentTdIpop = props.get("currenttdipop", None),
         )
 
     @property
@@ -4498,6 +5015,9 @@ class LidAaDailyStatus(BaseEvent):
             pumpControlStateRaw=self.pumpControlStateRaw,
             usermodeRaw=self.usermodeRaw,
             sensorTypeRaw=self.sensorTypeRaw,
+            weightUnitRaw=self.weightUnitRaw,
+            weight=self.weight,
+            currentTdIpop=self.currentTdIpop,
         )
 
 
@@ -4508,8 +5028,8 @@ class LidCgmAlertActivatedDex(BaseEvent):
     NAME = "LID_CGM_ALERT_ACTIVATED_DEX"
 
     raw: RawEvent
-    dalertIdRaw: int
-    sensorTypeRaw: int
+    dalertIdRaw: int # enum
+    sensorTypeRaw: int # enum
     faultLocatorData: int
     param1: int
     param2: float
@@ -4646,8 +5166,8 @@ class LidCgmAlertClearedDex(BaseEvent):
     NAME = "LID_CGM_ALERT_CLEARED_DEX"
 
     raw: RawEvent
-    dalertIdRaw: int
-    sensorTypeRaw: int
+    dalertIdRaw: int # enum
+    sensorTypeRaw: int # enum
 
     DalertidMap = {
         "1": "CGM Fixed Low",
@@ -4769,9 +5289,9 @@ class LidCgmAlertAckDex(BaseEvent):
     NAME = "LID_CGM_ALERT_ACK_DEX"
 
     raw: RawEvent
-    dalertIdRaw: int
-    sensorTypeRaw: int
-    ackSourceRaw: int
+    dalertIdRaw: int # enum
+    sensorTypeRaw: int # enum
+    ackSourceRaw: int # enum
 
     DalertidMap = {
         "1": "CGM Fixed Low",
@@ -4915,15 +5435,16 @@ class LidCgmDataFsl2(BaseEvent):
     NAME = "LID_CGM_DATA_FSL2"
 
     raw: RawEvent
-    glucoseValueStatusRaw: int
-    cgmDataTypeRaw: int
-    rateRaw: int # mg/dL/min
-    algorithmStateRaw: int
+    glucoseValueStatusRaw: int # Enum
+    cgmDataTypeRaw: int # Bitmask
+    rate: int # mg/dL/min
+    algorithmStateRaw: int # Enum
     rssi: int # dBm
     currentGlucoseDisplayValue: int # mg/dL
     egvTimeStamp: int # Seconds
-    egvInfoBitmaskRaw: int
+    egvInfoBitmaskRaw: int # Bitmask
     interval: int
+    reservedD15: int
 
     GlucosevaluestatusMap = {
         "0": "Precise Value",
@@ -4949,8 +5470,7 @@ class LidCgmDataFsl2(BaseEvent):
         "0": "Five Minute Reading (FMR)",
         "1": "Backfill",
         "4": "None",
-        "5": "One Minute Reading (OMR)",
-        "6": "Real Time Reading"
+        "5": "One Minute Reading (OMR)"
     }
 
     class CgmdatatypeBitmask(IntFlag):
@@ -4958,7 +5478,6 @@ class LidCgmDataFsl2(BaseEvent):
         Backfill = 2**1
         NoneVal = 2**4
         OneMinuteReadingOmr = 2**5
-        RealTimeReading = 2**6
 
     @property
     def cgmDataType(self):
@@ -4969,10 +5488,6 @@ class LidCgmDataFsl2(BaseEvent):
             logger.error(e)
             return None
 
-    @property
-    def rate(self):
-        return self.rateRaw * 0.1
-
     AlgorithmstateMap = {
         "2": "Warmup",
         "100": "OK State",
@@ -4981,7 +5496,8 @@ class LidCgmDataFsl2(BaseEvent):
         "103": "Temp High State",
         "104": "Temp Low State",
         "105": "Invalid Data State",
-        "106": "Other State"
+        "106": "Other DQ State",
+        "107": "EGV Unusable Condition"
     }
 
     class AlgorithmstateEnum(Enum):
@@ -4992,7 +5508,8 @@ class LidCgmDataFsl2(BaseEvent):
         TempHighState = 103
         TempLowState = 104
         InvalidDataState = 105
-        OtherState = 106
+        OtherDqState = 106
+        EgvUnusableCondition = 107
 
     @property
     def algorithmState(self):
@@ -5006,29 +5523,29 @@ class LidCgmDataFsl2(BaseEvent):
     EgvinfobitmaskMap = {
         "0": "Five Minute Reading (FMR)",
         "1": "Backfill",
-        "2": "Immediate match value",
-        "3": "CRR (EGV is result of calibration, bit:14 was set to 1)",
         "4": "NO_EGV message",
         "5": "Valid timestamp",
         "6": "Valid EGV (valid range)",
         "7": "Valid algState (algState is 100)",
         "8": "EGV was successfully added to CGM subsystem array (e.g., not a duplicate)",
         "9": "OMR reading type",
-        "10": "Real Time Reading from NFC scan"
+        "11": "Sensor Type (this should be 2 for this FSL2 log)",
+        "12": "Sensor Type (this should be 2 for this FSL2 log)",
+        "13": "Sensor Type (this should be 2 for this FSL2 log)"
     }
 
     class EgvinfobitmaskBitmask(IntFlag):
         FiveMinuteReadingFmr = 2**0
         Backfill = 2**1
-        ImmediateMatchValue = 2**2
-        CrrEgvIsResultOfCalibration = 2**3
         NoEgvMessage = 2**4
         ValidTimestamp = 2**5
         ValidEgvValidRange = 2**6
         ValidAlgstateAlgstateIs100 = 2**7
         EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
         OmrReadingType = 2**9
-        RealTimeReadingFromNfcScan = 2**10
+        SensorTypeThisShouldBe2ForThisFsl2Log_11 = 2**11
+        SensorTypeThisShouldBe2ForThisFsl2Log_12 = 2**12
+        SensorTypeThisShouldBe2ForThisFsl2Log_13 = 2**13
 
     @property
     def egvInfoBitmask(self):
@@ -5050,18 +5567,20 @@ class LidCgmDataFsl2(BaseEvent):
         egvTimeStamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
         egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
         interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        reservedD15, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
 
         return LidCgmDataFsl2(
             raw = RawEvent.build(raw),
             glucoseValueStatusRaw = glucoseValueStatus,
             cgmDataTypeRaw = cgmDataType,
-            rateRaw = rate,
+            rate = rate,
             algorithmStateRaw = algorithmState,
             rssi = rssi,
             currentGlucoseDisplayValue = currentGlucoseDisplayValue,
             egvTimeStamp = egvTimeStamp,
             egvInfoBitmaskRaw = egvInfoBitmask,
             interval = interval,
+            reservedD15 = reservedD15,
         )
 
     @staticmethod
@@ -5071,13 +5590,14 @@ class LidCgmDataFsl2(BaseEvent):
             raw = RawEvent.build_from_json(event),
             glucoseValueStatusRaw = props.get("glucosevaluestatus", None),
             cgmDataTypeRaw = _bitmask_arr_to_int(props.get("cgmdatatype", 0)),
-            rateRaw = props.get("rate", None),
+            rate = props.get("rate", None),
             algorithmStateRaw = props.get("algorithmstate", None),
             rssi = props.get("rssi", None),
             currentGlucoseDisplayValue = props.get("currentglucosedisplayvalue", None),
             egvTimeStamp = props.get("egvtimestamp", None),
             egvInfoBitmaskRaw = _bitmask_arr_to_int(props.get("egvinfobitmask", 0)),
             interval = props.get("interval", None),
+            reservedD15 = props.get("reservedd15", None),
         )
 
     @property
@@ -5100,13 +5620,14 @@ class LidCgmDataFsl2(BaseEvent):
             eventTimestamp=str(self.eventTimestamp),
             glucoseValueStatusRaw=self.glucoseValueStatusRaw,
             cgmDataTypeRaw=self.cgmDataTypeRaw,
-            rateRaw=self.rateRaw,
+            rate=self.rate,
             algorithmStateRaw=self.algorithmStateRaw,
             rssi=self.rssi,
             currentGlucoseDisplayValue=self.currentGlucoseDisplayValue,
             egvTimeStamp=self.egvTimeStamp,
             egvInfoBitmaskRaw=self.egvInfoBitmaskRaw,
             interval=self.interval,
+            reservedD15=self.reservedD15,
         )
 
 
@@ -5171,21 +5692,22 @@ class LidCgmDataG7(BaseEvent):
     NAME = "LID_CGM_DATA_G7"
 
     raw: RawEvent
-    glucoseValueStatusRaw: int
-    cgmDataTypeRaw: int
-    rateRaw: int # mg/dL/min/10
-    algorithmStateRaw: int
+    glucoseValueStatusRaw: int # Enum
+    cgmDataTypeRaw: int # Bitmask
+    rate: int # mg/dL/min
+    algorithmStateRaw: int # Enum
     rssi: int # dBm
     currentGlucoseDisplayValue: int # mg/dL
     egvTimeStamp: int # sec
-    egvInfoBitmaskRaw: int
+    egvInfoBitmaskRaw: int # Bitmask
     interval: int
+    reservedD15: int
 
     GlucosevaluestatusMap = {
         "0": "Precise Value",
         "1": "Special High",
         "2": "Special Low",
-        "6": "Do Not Show"
+        "6": "Do Not Show, Do Not Store"
     }
 
     class GlucosevaluestatusEnum(Enum):
@@ -5226,10 +5748,6 @@ class LidCgmDataG7(BaseEvent):
             logger.error("Invalid cgmDataTypeRaw in CgmdatatypeBitmask for "+str(self))
             logger.error(e)
             return None
-
-    @property
-    def rate(self):
-        return self.rateRaw * 0.1
 
     AlgorithmstateMap = {
         "2": "Warmup",
@@ -5276,9 +5794,12 @@ class LidCgmDataG7(BaseEvent):
         "5": "Valid timestamp",
         "6": "Valid EGV (valid range)",
         "7": "Valid algState (algState is 32)",
-        "8": "EGV was successfully added to CGM subsystem array (e.g.,",
+        "8": "EGV was successfully added to CGM subsystem array (e.g.",
         "9": "Reserved",
-        "10": "Reserved"
+        "10": "Reserved",
+        "11": "Sensor Type (this should be 3 for this G7 log)",
+        "12": "Sensor Type (this should be 3 for this G7 log)",
+        "13": "Sensor Type (this should be 3 for this G7 log)"
     }
 
     class EgvinfobitmaskBitmask(IntFlag):
@@ -5291,6 +5812,9 @@ class LidCgmDataG7(BaseEvent):
         ValidEgvValidRange = 2**6
         ValidAlgstateAlgstateIs32 = 2**7
         EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
+        SensorTypeThisShouldBe3ForThisG7Log_11 = 2**11
+        SensorTypeThisShouldBe3ForThisG7Log_12 = 2**12
+        SensorTypeThisShouldBe3ForThisG7Log_13 = 2**13
 
     @property
     def egvInfoBitmask(self):
@@ -5312,18 +5836,20 @@ class LidCgmDataG7(BaseEvent):
         egvTimeStamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
         egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
         interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        reservedD15, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
 
         return LidCgmDataG7(
             raw = RawEvent.build(raw),
             glucoseValueStatusRaw = glucoseValueStatus,
             cgmDataTypeRaw = cgmDataType,
-            rateRaw = rate,
+            rate = rate,
             algorithmStateRaw = algorithmState,
             rssi = rssi,
             currentGlucoseDisplayValue = currentGlucoseDisplayValue,
             egvTimeStamp = egvTimeStamp,
             egvInfoBitmaskRaw = egvInfoBitmask,
             interval = interval,
+            reservedD15 = reservedD15,
         )
 
     @staticmethod
@@ -5333,13 +5859,14 @@ class LidCgmDataG7(BaseEvent):
             raw = RawEvent.build_from_json(event),
             glucoseValueStatusRaw = props.get("glucosevaluestatus", None),
             cgmDataTypeRaw = _bitmask_arr_to_int(props.get("cgmdatatype", 0)),
-            rateRaw = props.get("rate", None),
+            rate = props.get("rate", None),
             algorithmStateRaw = props.get("algorithmstate", None),
             rssi = props.get("rssi", None),
             currentGlucoseDisplayValue = props.get("currentglucosedisplayvalue", None),
             egvTimeStamp = props.get("egvtimestamp", None),
             egvInfoBitmaskRaw = _bitmask_arr_to_int(props.get("egvinfobitmask", 0)),
             interval = props.get("interval", None),
+            reservedD15 = props.get("reservedd15", None),
         )
 
     @property
@@ -5362,13 +5889,14 @@ class LidCgmDataG7(BaseEvent):
             eventTimestamp=str(self.eventTimestamp),
             glucoseValueStatusRaw=self.glucoseValueStatusRaw,
             cgmDataTypeRaw=self.cgmDataTypeRaw,
-            rateRaw=self.rateRaw,
+            rate=self.rate,
             algorithmStateRaw=self.algorithmStateRaw,
             rssi=self.rssi,
             currentGlucoseDisplayValue=self.currentGlucoseDisplayValue,
             egvTimeStamp=self.egvTimeStamp,
             egvInfoBitmaskRaw=self.egvInfoBitmaskRaw,
             interval=self.interval,
+            reservedD15=self.reservedD15,
         )
 
 
@@ -5436,7 +5964,7 @@ class LidCgmStopSessionFsl2(BaseEvent):
     sessionStartTime: int # sec
     sessionStopTime: int # sec
     sessionDuration: int # days
-    sessionStopReason: int
+    sessionStopReason: int # enum
 
 
     @staticmethod
@@ -5500,7 +6028,7 @@ class LidCgmJoinSessionFsl2(BaseEvent):
     sessionStartTime: int # sec
     sessionJoinTime: int # sec
     sessionDuration: int # days
-    sessionJoinReason: int
+    sessionJoinReason: int # enum
 
 
     @staticmethod
@@ -5565,8 +6093,8 @@ class LidCgmStopSessionG7(BaseEvent):
     sessionStartTime: int # sec
     sessionStopTime: int # sec
     sessionDuration: int # days
-    sessionStopReason: int
-    stopSessionCode: int
+    sessionStopReason: int # enum
+    stopSessionCode: int # enum
 
 
     @staticmethod
@@ -5629,14 +6157,14 @@ class LidCgmStopSessionG7(BaseEvent):
 
 
 @dataclass
-class LidCgmAlertActivatedFsl2(BaseEvent):
-    """460: LID_CGM_ALERT_ACTIVATED_FSL2"""
+class LidCgmAlertActivatedAbt(BaseEvent):
+    """460: LID_CGM_ALERT_ACTIVATED_ABT"""
     ID = 460
-    NAME = "LID_CGM_ALERT_ACTIVATED_FSL2"
+    NAME = "LID_CGM_ALERT_ACTIVATED_ABT"
 
     raw: RawEvent
-    dalertIdRaw: int
-    sensorTypeRaw: int
+    dalertIdRaw: int # enum
+    sensorTypeRaw: int # enum
     faultLocatorData: int
     param1: int
     param2: float
@@ -5693,12 +6221,14 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
 
     SensortypeMap = {
         "0": "Invalid",
-        "2": "CGM_TYPE_LIBRE2"
+        "2": "CGM_TYPE_LIBRE2",
+        "4": "CGM_TYPE_LIBRE3"
     }
 
     class SensortypeEnum(Enum):
         Invalid = 0
         CgmTypeLibre2 = 2
+        CgmTypeLibre3 = 4
 
     @property
     def sensorType(self):
@@ -5717,7 +6247,7 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
         param1, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
         param2, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
 
-        return LidCgmAlertActivatedFsl2(
+        return LidCgmAlertActivatedAbt(
             raw = RawEvent.build(raw),
             dalertIdRaw = dalertId,
             sensorTypeRaw = sensorType,
@@ -5729,7 +6259,7 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
     @staticmethod
     def build_from_json(event):
         props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
-        return LidCgmAlertActivatedFsl2(
+        return LidCgmAlertActivatedAbt(
             raw = RawEvent.build_from_json(event),
             dalertIdRaw = props.get("dalertid", None),
             sensorTypeRaw = props.get("sensortype", None),
@@ -5765,14 +6295,14 @@ class LidCgmAlertActivatedFsl2(BaseEvent):
 
 
 @dataclass
-class LidCgmAlertClearedFsl2(BaseEvent):
-    """461: LID_CGM_ALERT_CLEARED_FSL2"""
+class LidCgmAlertClearedAbt(BaseEvent):
+    """461: LID_CGM_ALERT_CLEARED_ABT"""
     ID = 461
-    NAME = "LID_CGM_ALERT_CLEARED_FSL2"
+    NAME = "LID_CGM_ALERT_CLEARED_ABT"
 
     raw: RawEvent
-    dalertIdRaw: int
-    sensorTypeRaw: int
+    dalertIdRaw: int # enum
+    sensorTypeRaw: int # enum
 
     DalertidMap = {
         "1": "CGM Fixed Low",
@@ -5826,12 +6356,14 @@ class LidCgmAlertClearedFsl2(BaseEvent):
 
     SensortypeMap = {
         "0": "Invalid",
-        "2": "CGM_TYPE_LIBRE2"
+        "2": "CGM_TYPE_LIBRE2",
+        "4": "CGM_TYPE_LIBRE3"
     }
 
     class SensortypeEnum(Enum):
         Invalid = 0
         CgmTypeLibre2 = 2
+        CgmTypeLibre3 = 4
 
     @property
     def sensorType(self):
@@ -5847,7 +6379,7 @@ class LidCgmAlertClearedFsl2(BaseEvent):
         dalertId, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
         sensorType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
 
-        return LidCgmAlertClearedFsl2(
+        return LidCgmAlertClearedAbt(
             raw = RawEvent.build(raw),
             dalertIdRaw = dalertId,
             sensorTypeRaw = sensorType,
@@ -5856,7 +6388,7 @@ class LidCgmAlertClearedFsl2(BaseEvent):
     @staticmethod
     def build_from_json(event):
         props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
-        return LidCgmAlertClearedFsl2(
+        return LidCgmAlertClearedAbt(
             raw = RawEvent.build_from_json(event),
             dalertIdRaw = props.get("dalertid", None),
             sensorTypeRaw = props.get("sensortype", None),
@@ -5895,15 +6427,17 @@ class LidCgmJoinSessionFsl3(BaseEvent):
     sessionStartTime: int # Seconds
     sessionJoinTime: int # Seconds
     sessionDuration: int # Days
-    sessionJoinReason: int
+    sessionJoinReason: int # Enum
+    sessionDurationSecs: int # Seconds
 
 
     @staticmethod
     def build(raw):
         sessionStartTime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
         sessionJoinTime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
-        sessionDuration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 18)
-        sessionJoinReason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 19)
+        sessionDuration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        sessionJoinReason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
+        sessionDurationSecs, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 22)
 
         return LidCgmJoinSessionFsl3(
             raw = RawEvent.build(raw),
@@ -5911,6 +6445,7 @@ class LidCgmJoinSessionFsl3(BaseEvent):
             sessionJoinTime = sessionJoinTime,
             sessionDuration = sessionDuration,
             sessionJoinReason = sessionJoinReason,
+            sessionDurationSecs = sessionDurationSecs,
         )
 
     @staticmethod
@@ -5922,6 +6457,7 @@ class LidCgmJoinSessionFsl3(BaseEvent):
             sessionJoinTime = props.get("sessionjointime", None),
             sessionDuration = props.get("sessionduration", None),
             sessionJoinReason = props.get("sessionjoinreason", None),
+            sessionDurationSecs = props.get("sessiondurationsecs", None),
         )
 
     @property
@@ -5946,6 +6482,7 @@ class LidCgmJoinSessionFsl3(BaseEvent):
             sessionJoinTime=self.sessionJoinTime,
             sessionDuration=self.sessionDuration,
             sessionJoinReason=self.sessionJoinReason,
+            sessionDurationSecs=self.sessionDurationSecs,
         )
 
 
@@ -5956,15 +6493,16 @@ class LidCgmDataFsl3(BaseEvent):
     NAME = "LID_CGM_DATA_FSL3"
 
     raw: RawEvent
-    glucoseValueStatusRaw: int
-    cgmDataTypeRaw: int
-    rateRaw: int # mg/dL/min
-    algorithmStateRaw: int
+    glucoseValueStatusRaw: int # Enum
+    cgmDataTypeRaw: int # Bitmask
+    rate: int # mg/dL/min
+    algorithmStateRaw: int # Enum
     rssi: int # dBm
     currentGlucoseDisplayValue: int # mg/dL
     egvTimeStamp: int # Seconds
-    egvInfoBitmaskRaw: int
+    egvInfoBitmaskRaw: int # Bitmask
     interval: int
+    reservedD15: int
 
     GlucosevaluestatusMap = {
         "0": "Precise Value",
@@ -6008,10 +6546,6 @@ class LidCgmDataFsl3(BaseEvent):
             logger.error(e)
             return None
 
-    @property
-    def rate(self):
-        return self.rateRaw * 0.1
-
     AlgorithmstateMap = {
         "100": "OK State"
     }
@@ -6037,9 +6571,9 @@ class LidCgmDataFsl3(BaseEvent):
         "7": "Valid algState (algState is 100)",
         "8": "EGV was successfully added to CGM subsystem array (e.g., not a duplicate)",
         "9": "OMR reading type",
-        "11": "Sensor Type (see CGMTxType enum)",
-        "12": "Sensor Type (see CGMTxType enum)",
-        "13": "Sensor Type (see CGMTxType enum)"
+        "11": "Sensor Type (this should be 4 for this FSL3 log)",
+        "12": "Sensor Type (this should be 4 for this FSL3 log)",
+        "13": "Sensor Type (this should be 4 for this FSL3 log)"
     }
 
     class EgvinfobitmaskBitmask(IntFlag):
@@ -6051,9 +6585,9 @@ class LidCgmDataFsl3(BaseEvent):
         ValidAlgstateAlgstateIs100 = 2**7
         EgvWasSuccessfullyAddedToCgmSubsystemArrayE = 2**8
         OmrReadingType = 2**9
-        SensorTypeSeeCgmtxtypeEnum_11 = 2**11
-        SensorTypeSeeCgmtxtypeEnum_12 = 2**12
-        SensorTypeSeeCgmtxtypeEnum_13 = 2**13
+        SensorTypeThisShouldBe4ForThisFsl3Log_11 = 2**11
+        SensorTypeThisShouldBe4ForThisFsl3Log_12 = 2**12
+        SensorTypeThisShouldBe4ForThisFsl3Log_13 = 2**13
 
     @property
     def egvInfoBitmask(self):
@@ -6075,18 +6609,20 @@ class LidCgmDataFsl3(BaseEvent):
         egvTimeStamp, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
         egvInfoBitmask, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
         interval, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        reservedD15, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
 
         return LidCgmDataFsl3(
             raw = RawEvent.build(raw),
             glucoseValueStatusRaw = glucoseValueStatus,
             cgmDataTypeRaw = cgmDataType,
-            rateRaw = rate,
+            rate = rate,
             algorithmStateRaw = algorithmState,
             rssi = rssi,
             currentGlucoseDisplayValue = currentGlucoseDisplayValue,
             egvTimeStamp = egvTimeStamp,
             egvInfoBitmaskRaw = egvInfoBitmask,
             interval = interval,
+            reservedD15 = reservedD15,
         )
 
     @staticmethod
@@ -6096,13 +6632,14 @@ class LidCgmDataFsl3(BaseEvent):
             raw = RawEvent.build_from_json(event),
             glucoseValueStatusRaw = props.get("glucosevaluestatus", None),
             cgmDataTypeRaw = _bitmask_arr_to_int(props.get("cgmdatatype", 0)),
-            rateRaw = props.get("rate", None),
+            rate = props.get("rate", None),
             algorithmStateRaw = props.get("algorithmstate", None),
             rssi = props.get("rssi", None),
             currentGlucoseDisplayValue = props.get("currentglucosedisplayvalue", None),
             egvTimeStamp = props.get("egvtimestamp", None),
             egvInfoBitmaskRaw = _bitmask_arr_to_int(props.get("egvinfobitmask", 0)),
             interval = props.get("interval", None),
+            reservedD15 = props.get("reservedd15", None),
         )
 
     @property
@@ -6125,13 +6662,14 @@ class LidCgmDataFsl3(BaseEvent):
             eventTimestamp=str(self.eventTimestamp),
             glucoseValueStatusRaw=self.glucoseValueStatusRaw,
             cgmDataTypeRaw=self.cgmDataTypeRaw,
-            rateRaw=self.rateRaw,
+            rate=self.rate,
             algorithmStateRaw=self.algorithmStateRaw,
             rssi=self.rssi,
             currentGlucoseDisplayValue=self.currentGlucoseDisplayValue,
             egvTimeStamp=self.egvTimeStamp,
             egvInfoBitmaskRaw=self.egvInfoBitmaskRaw,
             interval=self.interval,
+            reservedD15=self.reservedD15,
         )
 
 
@@ -6145,15 +6683,15 @@ class LidCgmStopSessionFsl3(BaseEvent):
     sessionStartTime: int # sec
     sessionStopTime: int # sec
     sessionDuration: int # days
-    sessionStopReason: int
+    sessionStopReason: int # enum
 
 
     @staticmethod
     def build(raw):
         sessionStartTime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 10)
         sessionStopTime, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
-        sessionDuration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 18)
-        sessionStopReason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 19)
+        sessionDuration, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        sessionStopReason, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
 
         return LidCgmStopSessionFsl3(
             raw = RawEvent.build(raw),
@@ -6200,6 +6738,915 @@ class LidCgmStopSessionFsl3(BaseEvent):
 
 
 @dataclass
+class LidSyncDoseStart(BaseEvent):
+    """558: LID_SYNC_DOSE_START"""
+    ID = 558
+    NAME = "LID_SYNC_DOSE_START"
+
+    raw: RawEvent
+    doseId: int
+    doseSourceRaw: int # Enum
+    tempAdjustmentPercent: int # % (100.0 = 100%)
+    syncDoseSizeRequested: float # units
+    currentBasalRate: int # milliunits/hr
+    profileBasalRate: int # milliunits/hr
+    activeInsulin: float # units
+
+    DosesourceMap = {
+        "0": "Suspended 1 = Profile 2 = Profile + Temporary Basal Rate 3 = Algorithm 4 = Algorithm + Temporary Control Rate"
+    }
+
+    class DosesourceEnum(Enum):
+        Suspended1Profile2ProfileTemporaryBasalRate3Algorithm4AlgorithmTemporaryControlRate = 0
+
+    @property
+    def doseSource(self):
+        try:
+            return self.DosesourceEnum(self.doseSourceRaw)
+        except ValueError as e:
+            logger.error("Invalid doseSourceRaw in Dosesource for "+str(self))
+            logger.error(e)
+            return None
+
+    @staticmethod
+    def build(raw):
+        doseId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        doseSource, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        tempAdjustmentPercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        syncDoseSizeRequested, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
+        currentBasalRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        profileBasalRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
+        activeInsulin, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
+
+        return LidSyncDoseStart(
+            raw = RawEvent.build(raw),
+            doseId = doseId,
+            doseSourceRaw = doseSource,
+            tempAdjustmentPercent = tempAdjustmentPercent,
+            syncDoseSizeRequested = syncDoseSizeRequested,
+            currentBasalRate = currentBasalRate,
+            profileBasalRate = profileBasalRate,
+            activeInsulin = activeInsulin,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidSyncDoseStart(
+            raw = RawEvent.build_from_json(event),
+            doseId = props.get("doseid", None),
+            doseSourceRaw = props.get("dosesource", None),
+            tempAdjustmentPercent = props.get("tempadjustmentpercent", None),
+            syncDoseSizeRequested = props.get("syncdosesizerequested", None),
+            currentBasalRate = props.get("currentbasalrate", None),
+            profileBasalRate = props.get("profilebasalrate", None),
+            activeInsulin = props.get("activeinsulin", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            doseId=self.doseId,
+            doseSourceRaw=self.doseSourceRaw,
+            tempAdjustmentPercent=self.tempAdjustmentPercent,
+            syncDoseSizeRequested=self.syncDoseSizeRequested,
+            currentBasalRate=self.currentBasalRate,
+            profileBasalRate=self.profileBasalRate,
+            activeInsulin=self.activeInsulin,
+        )
+
+
+@dataclass
+class LidSyncDoseComplete(BaseEvent):
+    """559: LID_SYNC_DOSE_COMPLETE"""
+    ID = 559
+    NAME = "LID_SYNC_DOSE_COMPLETE"
+
+    raw: RawEvent
+    doseId: int
+    doseSourceRaw: int # Enum
+    tempAdjustmentPercent: int # percent
+    syncDoseSizeRequested: int
+    syncDoseSizeDelivered: float # units
+    currentBasalRate: int # milliunits/hr
+    activeInsulin: float # units
+
+    DosesourceMap = {
+        "0": "Suspended 1 = Profile 2 = Profile + Temporary Basal Rate 3 = Algorithm 4 = Algorithm + Temporary Control Rate"
+    }
+
+    class DosesourceEnum(Enum):
+        Suspended1Profile2ProfileTemporaryBasalRate3Algorithm4AlgorithmTemporaryControlRate = 0
+
+    @property
+    def doseSource(self):
+        try:
+            return self.DosesourceEnum(self.doseSourceRaw)
+        except ValueError as e:
+            logger.error("Invalid doseSourceRaw in Dosesource for "+str(self))
+            logger.error(e)
+            return None
+
+    @staticmethod
+    def build(raw):
+        doseId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        doseSource, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        tempAdjustmentPercent, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        syncDoseSizeRequested, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        syncDoseSizeDelivered, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
+        currentBasalRate, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        activeInsulin, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 22)
+
+        return LidSyncDoseComplete(
+            raw = RawEvent.build(raw),
+            doseId = doseId,
+            doseSourceRaw = doseSource,
+            tempAdjustmentPercent = tempAdjustmentPercent,
+            syncDoseSizeRequested = syncDoseSizeRequested,
+            syncDoseSizeDelivered = syncDoseSizeDelivered,
+            currentBasalRate = currentBasalRate,
+            activeInsulin = activeInsulin,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidSyncDoseComplete(
+            raw = RawEvent.build_from_json(event),
+            doseId = props.get("doseid", None),
+            doseSourceRaw = props.get("dosesource", None),
+            tempAdjustmentPercent = props.get("tempadjustmentpercent", None),
+            syncDoseSizeRequested = props.get("syncdosesizerequested", None),
+            syncDoseSizeDelivered = props.get("syncdosesizedelivered", None),
+            currentBasalRate = props.get("currentbasalrate", None),
+            activeInsulin = props.get("activeinsulin", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            doseId=self.doseId,
+            doseSourceRaw=self.doseSourceRaw,
+            tempAdjustmentPercent=self.tempAdjustmentPercent,
+            syncDoseSizeRequested=self.syncDoseSizeRequested,
+            syncDoseSizeDelivered=self.syncDoseSizeDelivered,
+            currentBasalRate=self.currentBasalRate,
+            activeInsulin=self.activeInsulin,
+        )
+
+
+@dataclass
+class LidAntDailyStatus1(BaseEvent):
+    """562: LID_ANT_DAILY_STATUS1"""
+    ID = 562
+    NAME = "LID_ANT_DAILY_STATUS1"
+
+    raw: RawEvent
+    closedLoopPreferred: int # Boolean
+    totalDailyInsulinUnits: int # units
+    glycemicGoalRaw: int # enum
+    priorTherapyRaw: int # enum
+    sleepEatSegmentStartTime0: int # minutes
+    sleepEatSegmentStartTime1: int # minutes
+    sleepEatSegmentStartTime2: int # minutes
+    sleepEatSegmentStartTime3: int # minutes
+    sleepEatSegmentType0Raw: int # enum
+    sleepEatSegmentType1Raw: int # enum
+    sleepEatSegmentType2Raw: int # enum
+    sleepEatSegmentType3Raw: int # enum
+
+    GlycemicgoalMap = {
+        "0": "Relaxed",
+        "1": "Balanced",
+        "2": "Tightest"
+    }
+
+    class GlycemicgoalEnum(Enum):
+        Relaxed = 0
+        Balanced = 1
+        Tightest = 2
+
+    @property
+    def glycemicGoal(self):
+        try:
+            return self.GlycemicgoalEnum(self.glycemicGoalRaw)
+        except ValueError as e:
+            logger.error("Invalid glycemicGoalRaw in Glycemicgoal for "+str(self))
+            logger.error(e)
+            return None
+
+    PriortherapyMap = {
+        "0": "Previous Pumping Experience",
+        "1": "Multiple Daily Injections",
+        "2": "Prior Therapy Not Set"
+    }
+
+    class PriortherapyEnum(Enum):
+        PreviousPumpingExperience = 0
+        MultipleDailyInjections = 1
+        PriorTherapyNotSet = 2
+
+    @property
+    def priorTherapy(self):
+        try:
+            return self.PriortherapyEnum(self.priorTherapyRaw)
+        except ValueError as e:
+            logger.error("Invalid priorTherapyRaw in Priortherapy for "+str(self))
+            logger.error(e)
+            return None
+
+    Sleepeatsegmenttype0Map = {
+        "0": "None",
+        "1": "Less",
+        "2": "Standard",
+        "3": "More",
+        "4": "Max",
+        "5": "Sleep",
+        "6": "Not Defined"
+    }
+
+    class Sleepeatsegmenttype0Enum(Enum):
+        NoneVal = 0
+        Less = 1
+        Standard = 2
+        More = 3
+        Max = 4
+        Sleep = 5
+        NotDefined = 6
+
+    @property
+    def sleepEatSegmentType0(self):
+        try:
+            return self.Sleepeatsegmenttype0Enum(self.sleepEatSegmentType0Raw)
+        except ValueError as e:
+            logger.error("Invalid sleepEatSegmentType0Raw in Sleepeatsegmenttype0 for "+str(self))
+            logger.error(e)
+            return None
+
+    Sleepeatsegmenttype1Map = {
+        "0": "None",
+        "1": "Less",
+        "2": "Standard",
+        "3": "More",
+        "4": "Max",
+        "5": "Sleep",
+        "6": "Not Defined"
+    }
+
+    class Sleepeatsegmenttype1Enum(Enum):
+        NoneVal = 0
+        Less = 1
+        Standard = 2
+        More = 3
+        Max = 4
+        Sleep = 5
+        NotDefined = 6
+
+    @property
+    def sleepEatSegmentType1(self):
+        try:
+            return self.Sleepeatsegmenttype1Enum(self.sleepEatSegmentType1Raw)
+        except ValueError as e:
+            logger.error("Invalid sleepEatSegmentType1Raw in Sleepeatsegmenttype1 for "+str(self))
+            logger.error(e)
+            return None
+
+    Sleepeatsegmenttype2Map = {
+        "0": "None",
+        "1": "Less",
+        "2": "Standard",
+        "3": "More",
+        "4": "Max",
+        "5": "Sleep",
+        "6": "Not Defined"
+    }
+
+    class Sleepeatsegmenttype2Enum(Enum):
+        NoneVal = 0
+        Less = 1
+        Standard = 2
+        More = 3
+        Max = 4
+        Sleep = 5
+        NotDefined = 6
+
+    @property
+    def sleepEatSegmentType2(self):
+        try:
+            return self.Sleepeatsegmenttype2Enum(self.sleepEatSegmentType2Raw)
+        except ValueError as e:
+            logger.error("Invalid sleepEatSegmentType2Raw in Sleepeatsegmenttype2 for "+str(self))
+            logger.error(e)
+            return None
+
+    Sleepeatsegmenttype3Map = {
+        "0": "None",
+        "1": "Less",
+        "2": "Standard",
+        "3": "More",
+        "4": "Max",
+        "5": "Sleep",
+        "6": "Not Defined"
+    }
+
+    class Sleepeatsegmenttype3Enum(Enum):
+        NoneVal = 0
+        Less = 1
+        Standard = 2
+        More = 3
+        Max = 4
+        Sleep = 5
+        NotDefined = 6
+
+    @property
+    def sleepEatSegmentType3(self):
+        try:
+            return self.Sleepeatsegmenttype3Enum(self.sleepEatSegmentType3Raw)
+        except ValueError as e:
+            logger.error("Invalid sleepEatSegmentType3Raw in Sleepeatsegmenttype3 for "+str(self))
+            logger.error(e)
+            return None
+
+    @staticmethod
+    def build(raw):
+        closedLoopPreferred, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        totalDailyInsulinUnits, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+        glycemicGoal, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 11)
+        priorTherapy, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 10)
+        sleepEatSegmentStartTime0, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        sleepEatSegmentStartTime1, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        sleepEatSegmentStartTime2, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 20)
+        sleepEatSegmentStartTime3, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 18)
+        sleepEatSegmentType0, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        sleepEatSegmentType1, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        sleepEatSegmentType2, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 23)
+        sleepEatSegmentType3, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 22)
+
+        return LidAntDailyStatus1(
+            raw = RawEvent.build(raw),
+            closedLoopPreferred = closedLoopPreferred,
+            totalDailyInsulinUnits = totalDailyInsulinUnits,
+            glycemicGoalRaw = glycemicGoal,
+            priorTherapyRaw = priorTherapy,
+            sleepEatSegmentStartTime0 = sleepEatSegmentStartTime0,
+            sleepEatSegmentStartTime1 = sleepEatSegmentStartTime1,
+            sleepEatSegmentStartTime2 = sleepEatSegmentStartTime2,
+            sleepEatSegmentStartTime3 = sleepEatSegmentStartTime3,
+            sleepEatSegmentType0Raw = sleepEatSegmentType0,
+            sleepEatSegmentType1Raw = sleepEatSegmentType1,
+            sleepEatSegmentType2Raw = sleepEatSegmentType2,
+            sleepEatSegmentType3Raw = sleepEatSegmentType3,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidAntDailyStatus1(
+            raw = RawEvent.build_from_json(event),
+            closedLoopPreferred = props.get("closedlooppreferred", None),
+            totalDailyInsulinUnits = props.get("totaldailyinsulinunits", None),
+            glycemicGoalRaw = props.get("glycemicgoal", None),
+            priorTherapyRaw = props.get("priortherapy", None),
+            sleepEatSegmentStartTime0 = props.get("sleepeatsegmentstarttime0", None),
+            sleepEatSegmentStartTime1 = props.get("sleepeatsegmentstarttime1", None),
+            sleepEatSegmentStartTime2 = props.get("sleepeatsegmentstarttime2", None),
+            sleepEatSegmentStartTime3 = props.get("sleepeatsegmentstarttime3", None),
+            sleepEatSegmentType0Raw = props.get("sleepeatsegmenttype0", None),
+            sleepEatSegmentType1Raw = props.get("sleepeatsegmenttype1", None),
+            sleepEatSegmentType2Raw = props.get("sleepeatsegmenttype2", None),
+            sleepEatSegmentType3Raw = props.get("sleepeatsegmenttype3", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            closedLoopPreferred=self.closedLoopPreferred,
+            totalDailyInsulinUnits=self.totalDailyInsulinUnits,
+            glycemicGoalRaw=self.glycemicGoalRaw,
+            priorTherapyRaw=self.priorTherapyRaw,
+            sleepEatSegmentStartTime0=self.sleepEatSegmentStartTime0,
+            sleepEatSegmentStartTime1=self.sleepEatSegmentStartTime1,
+            sleepEatSegmentStartTime2=self.sleepEatSegmentStartTime2,
+            sleepEatSegmentStartTime3=self.sleepEatSegmentStartTime3,
+            sleepEatSegmentType0Raw=self.sleepEatSegmentType0Raw,
+            sleepEatSegmentType1Raw=self.sleepEatSegmentType1Raw,
+            sleepEatSegmentType2Raw=self.sleepEatSegmentType2Raw,
+            sleepEatSegmentType3Raw=self.sleepEatSegmentType3Raw,
+        )
+
+
+@dataclass
+class LidAntDailyStatus2(BaseEvent):
+    """563: LID_ANT_DAILY_STATUS2"""
+    ID = 563
+    NAME = "LID_ANT_DAILY_STATUS2"
+
+    raw: RawEvent
+    pumpControlStateRaw: int # enum
+    sensorTypeRaw: int # enum
+
+    PumpcontrolstateMap = {
+        "0": "PCM No Control (No cartridge installed)",
+        "1": "PCM Open Loop",
+        "2": "PCM Pining",
+        "3": "PCM Closed Loop"
+    }
+
+    class PumpcontrolstateEnum(Enum):
+        PcmNoControlNoCartridgeInstalled = 0
+        PcmOpenLoop = 1
+        PcmPining = 2
+        PcmClosedLoop = 3
+
+    @property
+    def pumpControlState(self):
+        try:
+            return self.PumpcontrolstateEnum(self.pumpControlStateRaw)
+        except ValueError as e:
+            logger.error("Invalid pumpControlStateRaw in Pumpcontrolstate for "+str(self))
+            logger.error(e)
+            return None
+
+    SensortypeMap = {
+        "0": "CGM_TYPE_NONE",
+        "1": "CGM_TYPE_DEXCOM_G6",
+        "3": "CGM_TYPE_DEXCOM_G7",
+        "4": "CGM_TYPE_LIBRE3"
+    }
+
+    class SensortypeEnum(Enum):
+        CgmTypeNone = 0
+        CgmTypeDexcomG6 = 1
+        CgmTypeDexcomG7 = 3
+        CgmTypeLibre3 = 4
+
+    @property
+    def sensorType(self):
+        try:
+            return self.SensortypeEnum(self.sensorTypeRaw)
+        except ValueError as e:
+            logger.error("Invalid sensorTypeRaw in Sensortype for "+str(self))
+            logger.error(e)
+            return None
+
+    @staticmethod
+    def build(raw):
+        pumpControlState, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 13)
+        sensorType, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 12)
+
+        return LidAntDailyStatus2(
+            raw = RawEvent.build(raw),
+            pumpControlStateRaw = pumpControlState,
+            sensorTypeRaw = sensorType,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidAntDailyStatus2(
+            raw = RawEvent.build_from_json(event),
+            pumpControlStateRaw = props.get("pumpcontrolstate", None),
+            sensorTypeRaw = props.get("sensortype", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            pumpControlStateRaw=self.pumpControlStateRaw,
+            sensorTypeRaw=self.sensorTypeRaw,
+        )
+
+
+@dataclass
+class LidTempAdjustmentCompleted(BaseEvent):
+    """564: LID_TEMP_ADJUSTMENT_COMPLETED"""
+    ID = 564
+    NAME = "LID_TEMP_ADJUSTMENT_COMPLETED"
+
+    raw: RawEvent
+    stopReasonRaw: int # enum
+    tempRateId: int
+    timeLeft: int # ms
+
+    StopreasonMap = {
+        "0": "User Aborted",
+        "1": "Terminated by Alarm",
+        "3": "Completed",
+        "8": "User aborted ble",
+        "10": "Terminated by pump control mode change (unable to convert)",
+        "11": "Terminated by closed loop preferred change"
+    }
+
+    class StopreasonEnum(Enum):
+        UserAborted = 0
+        TerminatedByAlarm = 1
+        Completed = 3
+        UserAbortedBle = 8
+        TerminatedByPumpControlModeChangeUnableToConvert = 10
+        TerminatedByClosedLoopPreferredChange = 11
+
+    @property
+    def stopReason(self):
+        try:
+            return self.StopreasonEnum(self.stopReasonRaw)
+        except ValueError as e:
+            logger.error("Invalid stopReasonRaw in Stopreason for "+str(self))
+            logger.error(e)
+            return None
+
+    @staticmethod
+    def build(raw):
+        stopReason, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        tempRateId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
+        timeLeft, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 14)
+
+        return LidTempAdjustmentCompleted(
+            raw = RawEvent.build(raw),
+            stopReasonRaw = stopReason,
+            tempRateId = tempRateId,
+            timeLeft = timeLeft,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidTempAdjustmentCompleted(
+            raw = RawEvent.build_from_json(event),
+            stopReasonRaw = props.get("stopreason", None),
+            tempRateId = props.get("temprateid", None),
+            timeLeft = props.get("timeleft", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            stopReasonRaw=self.stopReasonRaw,
+            tempRateId=self.tempRateId,
+            timeLeft=self.timeLeft,
+        )
+
+
+@dataclass
+class LidTempAdjustmentActivated(BaseEvent):
+    """565: LID_TEMP_ADJUSTMENT_ACTIVATED"""
+    ID = 565
+    NAME = "LID_TEMP_ADJUSTMENT_ACTIVATED"
+
+    raw: RawEvent
+    requestedPercent: int # %
+    tempBasalPercent: int # %
+    duration: int # ms
+    requestedAdjustmentTypeRaw: int # enum
+    tempRateId: int
+
+    RequestedadjustmenttypeMap = {
+        "0": "Temporary Basal Rate (from GUI)",
+        "1": "Unused (OBE)",
+        "2": "Temporary Basal Rate (from BLE)",
+        "3": "Temporary Control Rate (from BLE)"
+    }
+
+    class RequestedadjustmenttypeEnum(Enum):
+        TemporaryBasalRateFromGui = 0
+        UnusedObe = 1
+        TemporaryBasalRateFromBle = 2
+        TemporaryControlRateFromBle = 3
+
+    @property
+    def requestedAdjustmentType(self):
+        try:
+            return self.RequestedadjustmenttypeEnum(self.requestedAdjustmentTypeRaw)
+        except ValueError as e:
+            logger.error("Invalid requestedAdjustmentTypeRaw in Requestedadjustmenttype for "+str(self))
+            logger.error(e)
+            return None
+
+    @staticmethod
+    def build(raw):
+        requestedPercent, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        tempBasalPercent, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
+        duration, = struct.unpack_from(UINT32, raw[:EVENT_LEN], 18)
+        requestedAdjustmentType, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 24)
+        tempRateId, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
+
+        return LidTempAdjustmentActivated(
+            raw = RawEvent.build(raw),
+            requestedPercent = requestedPercent,
+            tempBasalPercent = tempBasalPercent,
+            duration = duration,
+            requestedAdjustmentTypeRaw = requestedAdjustmentType,
+            tempRateId = tempRateId,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidTempAdjustmentActivated(
+            raw = RawEvent.build_from_json(event),
+            requestedPercent = props.get("requestedpercent", None),
+            tempBasalPercent = props.get("tempbasalpercent", None),
+            duration = props.get("duration", None),
+            requestedAdjustmentTypeRaw = props.get("requestedadjustmenttype", None),
+            tempRateId = props.get("temprateid", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            requestedPercent=self.requestedPercent,
+            tempBasalPercent=self.tempBasalPercent,
+            duration=self.duration,
+            requestedAdjustmentTypeRaw=self.requestedAdjustmentTypeRaw,
+            tempRateId=self.tempRateId,
+        )
+
+
+@dataclass
+class LidAntSleepEatSchedSettingChange(BaseEvent):
+    """566: LID_ANT_SLEEP_EAT_SCHED_SETTING_CHANGE"""
+    ID = 566
+    NAME = "LID_ANT_SLEEP_EAT_SCHED_SETTING_CHANGE"
+
+    raw: RawEvent
+    sleepEatSegmentStartTime0: int # minutes
+    sleepEatSegmentStartTime1: int # minutes
+    sleepEatSegmentStartTime2: int # minutes
+    sleepEatSegmentStartTime3: int # minutes
+    sleepEatSegmentType0Raw: int # enum
+    sleepEatSegmentType1Raw: int # enum
+    sleepEatSegmentType2Raw: int # enum
+    sleepEatSegmentType3Raw: int # enum
+
+    Sleepeatsegmenttype0Map = {
+        "0": "None",
+        "1": "Less",
+        "2": "Standard",
+        "3": "More",
+        "4": "Max",
+        "5": "Sleep",
+        "6": "Not Defined"
+    }
+
+    class Sleepeatsegmenttype0Enum(Enum):
+        NoneVal = 0
+        Less = 1
+        Standard = 2
+        More = 3
+        Max = 4
+        Sleep = 5
+        NotDefined = 6
+
+    @property
+    def sleepEatSegmentType0(self):
+        try:
+            return self.Sleepeatsegmenttype0Enum(self.sleepEatSegmentType0Raw)
+        except ValueError as e:
+            logger.error("Invalid sleepEatSegmentType0Raw in Sleepeatsegmenttype0 for "+str(self))
+            logger.error(e)
+            return None
+
+    Sleepeatsegmenttype1Map = {
+        "0": "None",
+        "1": "Less",
+        "2": "Standard",
+        "3": "More",
+        "4": "Max",
+        "5": "Sleep",
+        "6": "Not Defined"
+    }
+
+    class Sleepeatsegmenttype1Enum(Enum):
+        NoneVal = 0
+        Less = 1
+        Standard = 2
+        More = 3
+        Max = 4
+        Sleep = 5
+        NotDefined = 6
+
+    @property
+    def sleepEatSegmentType1(self):
+        try:
+            return self.Sleepeatsegmenttype1Enum(self.sleepEatSegmentType1Raw)
+        except ValueError as e:
+            logger.error("Invalid sleepEatSegmentType1Raw in Sleepeatsegmenttype1 for "+str(self))
+            logger.error(e)
+            return None
+
+    Sleepeatsegmenttype2Map = {
+        "0": "None",
+        "1": "Less",
+        "2": "Standard",
+        "3": "More",
+        "4": "Max",
+        "5": "Sleep",
+        "6": "Not Defined"
+    }
+
+    class Sleepeatsegmenttype2Enum(Enum):
+        NoneVal = 0
+        Less = 1
+        Standard = 2
+        More = 3
+        Max = 4
+        Sleep = 5
+        NotDefined = 6
+
+    @property
+    def sleepEatSegmentType2(self):
+        try:
+            return self.Sleepeatsegmenttype2Enum(self.sleepEatSegmentType2Raw)
+        except ValueError as e:
+            logger.error("Invalid sleepEatSegmentType2Raw in Sleepeatsegmenttype2 for "+str(self))
+            logger.error(e)
+            return None
+
+    Sleepeatsegmenttype3Map = {
+        "0": "None",
+        "1": "Less",
+        "2": "Standard",
+        "3": "More",
+        "4": "Max",
+        "5": "Sleep",
+        "6": "Not Defined"
+    }
+
+    class Sleepeatsegmenttype3Enum(Enum):
+        NoneVal = 0
+        Less = 1
+        Standard = 2
+        More = 3
+        Max = 4
+        Sleep = 5
+        NotDefined = 6
+
+    @property
+    def sleepEatSegmentType3(self):
+        try:
+            return self.Sleepeatsegmenttype3Enum(self.sleepEatSegmentType3Raw)
+        except ValueError as e:
+            logger.error("Invalid sleepEatSegmentType3Raw in Sleepeatsegmenttype3 for "+str(self))
+            logger.error(e)
+            return None
+
+    @staticmethod
+    def build(raw):
+        sleepEatSegmentStartTime0, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 12)
+        sleepEatSegmentStartTime1, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 10)
+        sleepEatSegmentStartTime2, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 16)
+        sleepEatSegmentStartTime3, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 14)
+        sleepEatSegmentType0, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 21)
+        sleepEatSegmentType1, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 20)
+        sleepEatSegmentType2, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 19)
+        sleepEatSegmentType3, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 18)
+
+        return LidAntSleepEatSchedSettingChange(
+            raw = RawEvent.build(raw),
+            sleepEatSegmentStartTime0 = sleepEatSegmentStartTime0,
+            sleepEatSegmentStartTime1 = sleepEatSegmentStartTime1,
+            sleepEatSegmentStartTime2 = sleepEatSegmentStartTime2,
+            sleepEatSegmentStartTime3 = sleepEatSegmentStartTime3,
+            sleepEatSegmentType0Raw = sleepEatSegmentType0,
+            sleepEatSegmentType1Raw = sleepEatSegmentType1,
+            sleepEatSegmentType2Raw = sleepEatSegmentType2,
+            sleepEatSegmentType3Raw = sleepEatSegmentType3,
+        )
+
+    @staticmethod
+    def build_from_json(event):
+        props = {_norm(k): v for k, v in event.get("eventProperties", {}).items()}
+        return LidAntSleepEatSchedSettingChange(
+            raw = RawEvent.build_from_json(event),
+            sleepEatSegmentStartTime0 = props.get("sleepeatsegmentstarttime0", None),
+            sleepEatSegmentStartTime1 = props.get("sleepeatsegmentstarttime1", None),
+            sleepEatSegmentStartTime2 = props.get("sleepeatsegmentstarttime2", None),
+            sleepEatSegmentStartTime3 = props.get("sleepeatsegmentstarttime3", None),
+            sleepEatSegmentType0Raw = props.get("sleepeatsegmenttype0", None),
+            sleepEatSegmentType1Raw = props.get("sleepeatsegmenttype1", None),
+            sleepEatSegmentType2Raw = props.get("sleepeatsegmenttype2", None),
+            sleepEatSegmentType3Raw = props.get("sleepeatsegmenttype3", None),
+        )
+
+    @property
+    def eventTimestamp(self):
+        return self.raw.timestamp
+
+    @property
+    def seqNum(self):
+        return self.raw.seqNum
+
+    @property
+    def eventId(self):
+        return self.ID
+
+    def todict(self):
+        return dict(
+            id=self.ID,
+            name=self.NAME,
+            seqNum=self.seqNum,
+            eventTimestamp=str(self.eventTimestamp),
+            sleepEatSegmentStartTime0=self.sleepEatSegmentStartTime0,
+            sleepEatSegmentStartTime1=self.sleepEatSegmentStartTime1,
+            sleepEatSegmentStartTime2=self.sleepEatSegmentStartTime2,
+            sleepEatSegmentStartTime3=self.sleepEatSegmentStartTime3,
+            sleepEatSegmentType0Raw=self.sleepEatSegmentType0Raw,
+            sleepEatSegmentType1Raw=self.sleepEatSegmentType1Raw,
+            sleepEatSegmentType2Raw=self.sleepEatSegmentType2Raw,
+            sleepEatSegmentType3Raw=self.sleepEatSegmentType3Raw,
+        )
+
+
+@dataclass
 class LidDailyBasal(BaseEvent):
     """81: LID_DAILY_BASAL"""
     ID = 81
@@ -6209,9 +7656,9 @@ class LidDailyBasal(BaseEvent):
     dailyTotalBasal: float # units
     lastBasalRate: float # units/hour
     iob: float # units
-    liPoMV: int # millivolts
-    abc: int # percent
     displayInHistory: int
+    abc: int # percent
+    liPoMV: int # millivolts
 
 
     @staticmethod
@@ -6219,18 +7666,18 @@ class LidDailyBasal(BaseEvent):
         dailyTotalBasal, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 10)
         lastBasalRate, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 14)
         iob, = struct.unpack_from(FLOAT32, raw[:EVENT_LEN], 18)
-        liPoMV, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
-        abc, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
         displayInHistory, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 25)
+        abc, = struct.unpack_from(UINT8, raw[:EVENT_LEN], 24)
+        liPoMV, = struct.unpack_from(UINT16, raw[:EVENT_LEN], 22)
 
         return LidDailyBasal(
             raw = RawEvent.build(raw),
             dailyTotalBasal = dailyTotalBasal,
             lastBasalRate = lastBasalRate,
             iob = iob,
-            liPoMV = liPoMV,
-            abc = abc,
             displayInHistory = displayInHistory,
+            abc = abc,
+            liPoMV = liPoMV,
         )
 
     @staticmethod
@@ -6241,9 +7688,9 @@ class LidDailyBasal(BaseEvent):
             dailyTotalBasal = props.get("dailytotalbasal", None),
             lastBasalRate = props.get("lastbasalrate", None),
             iob = props.get("iob", None),
-            liPoMV = props.get("lipomv", None),
-            abc = props.get("abc", None),
             displayInHistory = props.get("displayinhistory", None),
+            abc = props.get("abc", None),
+            liPoMV = props.get("lipomv", None),
         )
 
     @property
@@ -6267,9 +7714,9 @@ class LidDailyBasal(BaseEvent):
             dailyTotalBasal=self.dailyTotalBasal,
             lastBasalRate=self.lastBasalRate,
             iob=self.iob,
-            liPoMV=self.liPoMV,
-            abc=self.abc,
             displayInHistory=self.displayInHistory,
+            abc=self.abc,
+            liPoMV=self.liPoMV,
         )
 
 
@@ -6436,6 +7883,7 @@ EVENT_IDS = {
     33: LidCartridgeFilled,
     53: LidShelfMode,
     55: LidBolusActivated,
+    57: LidIdpMsg2,
     59: LidBolexActivated,
     60: LidDataLogCorruption,
     61: LidCannulaFilled,
@@ -6443,6 +7891,7 @@ EVENT_IDS = {
     64: LidBolusRequestedMsg1,
     65: LidBolusRequestedMsg2,
     66: LidBolusRequestedMsg3,
+    69: LidIdp,
     90: LidNewDay,
     99: LidArmInit,
     140: LidPlgsPeriodic,
@@ -6470,11 +7919,18 @@ EVENT_IDS = {
     405: LidCgmStopSessionFsl2,
     406: LidCgmJoinSessionFsl2,
     447: LidCgmStopSessionG7,
-    460: LidCgmAlertActivatedFsl2,
-    461: LidCgmAlertClearedFsl2,
+    460: LidCgmAlertActivatedAbt,
+    461: LidCgmAlertClearedAbt,
     477: LidCgmJoinSessionFsl3,
     480: LidCgmDataFsl3,
     486: LidCgmStopSessionFsl3,
+    558: LidSyncDoseStart,
+    559: LidSyncDoseComplete,
+    562: LidAntDailyStatus1,
+    563: LidAntDailyStatus2,
+    564: LidTempAdjustmentCompleted,
+    565: LidTempAdjustmentActivated,
+    566: LidAntSleepEatSchedSettingChange,
     81: LidDailyBasal,
     48: LidCarbsEntered,
     36: LidUsbConnected,
@@ -6498,6 +7954,7 @@ EVENT_NAMES = {
     "LID_CARTRIDGE_FILLED": LidCartridgeFilled,
     "LID_SHELF_MODE": LidShelfMode,
     "LID_BOLUS_ACTIVATED": LidBolusActivated,
+    "LID_IDP_MSG2": LidIdpMsg2,
     "LID_BOLEX_ACTIVATED": LidBolexActivated,
     "LID_DATA_LOG_CORRUPTION": LidDataLogCorruption,
     "LID_CANNULA_FILLED": LidCannulaFilled,
@@ -6505,6 +7962,7 @@ EVENT_NAMES = {
     "LID_BOLUS_REQUESTED_MSG1": LidBolusRequestedMsg1,
     "LID_BOLUS_REQUESTED_MSG2": LidBolusRequestedMsg2,
     "LID_BOLUS_REQUESTED_MSG3": LidBolusRequestedMsg3,
+    "LID_IDP": LidIdp,
     "LID_NEW_DAY": LidNewDay,
     "LID_ARM_INIT": LidArmInit,
     "LID_PLGS_PERIODIC": LidPlgsPeriodic,
@@ -6532,11 +7990,18 @@ EVENT_NAMES = {
     "LID_CGM_STOP_SESSION_FSL2": LidCgmStopSessionFsl2,
     "LID_CGM_JOIN_SESSION_FSL2": LidCgmJoinSessionFsl2,
     "LID_CGM_STOP_SESSION_G7": LidCgmStopSessionG7,
-    "LID_CGM_ALERT_ACTIVATED_FSL2": LidCgmAlertActivatedFsl2,
-    "LID_CGM_ALERT_CLEARED_FSL2": LidCgmAlertClearedFsl2,
+    "LID_CGM_ALERT_ACTIVATED_ABT": LidCgmAlertActivatedAbt,
+    "LID_CGM_ALERT_CLEARED_ABT": LidCgmAlertClearedAbt,
     "LID_CGM_JOIN_SESSION_FSL3": LidCgmJoinSessionFsl3,
     "LID_CGM_DATA_FSL3": LidCgmDataFsl3,
     "LID_CGM_STOP_SESSION_FSL3": LidCgmStopSessionFsl3,
+    "LID_SYNC_DOSE_START": LidSyncDoseStart,
+    "LID_SYNC_DOSE_COMPLETE": LidSyncDoseComplete,
+    "LID_ANT_DAILY_STATUS1": LidAntDailyStatus1,
+    "LID_ANT_DAILY_STATUS2": LidAntDailyStatus2,
+    "LID_TEMP_ADJUSTMENT_COMPLETED": LidTempAdjustmentCompleted,
+    "LID_TEMP_ADJUSTMENT_ACTIVATED": LidTempAdjustmentActivated,
+    "LID_ANT_SLEEP_EAT_SCHED_SETTING_CHANGE": LidAntSleepEatSchedSettingChange,
     "LID_DAILY_BASAL": LidDailyBasal,
     "LID_CARBS_ENTERED": LidCarbsEntered,
     "LID_USB_CONNECTED": LidUsbConnected,

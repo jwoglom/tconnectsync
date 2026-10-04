@@ -1,4 +1,5 @@
 import json
+import re
 try:
     from static_dicts import ALERTS_DICT, ALARMS_DICT, CGM_ALERTS_DICT
 except ImportError:
@@ -36,6 +37,13 @@ def enumNameFormat(text):
     if t.lower() == 'unavailable' and rem:
         suffix = enumNameFormat(rem)
         t += f'{suffix[0].lower()}{suffix[1:]}'
+
+    # Drop anything else that can't appear in a Python identifier.
+    t = re.sub(r'[^0-9A-Za-z_]', '', t)
+    if not t:
+        return None
+    if t[0].isdigit():
+        t = f'V{t}'
 
     return f'{t[0].upper()}{t[1:]}'
 
@@ -98,7 +106,7 @@ def transform_dictionary(event_def, name, name_fmt, field, tx):
 
     if tx == 'dalerts':
         return transform_enum(event_def, name, name_fmt, field, CGM_ALERTS_DICT)
-    return [f'# Dictionary unknown: {tx}']
+    return []
 
 def transform_bitmask(event_def, name, name_fmt, field, tx):
     out = []
@@ -137,9 +145,21 @@ def transform_ratio(event_def, name, name_fmt, field, tx):
 
     return out
 
+def transform_bytes2str(event_def, name, name_fmt, field, tx):
+    out = []
+    out += [
+        '@property',
+        f'def {name_fmt}(self):',
+        f'    return chr(self.{name_fmt}Raw) if self.{name_fmt}Raw else \'\'',
+        ''
+    ]
+
+    return out
+
 TRANSFORMS = {
     'enum': transform_enum,
     'dictionary': transform_dictionary,
     'bitmask': transform_bitmask,
     'ratio': transform_ratio,
+    'bytes2str': transform_bytes2str,
 }

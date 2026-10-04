@@ -84,12 +84,12 @@ class TestLidBgReadingTaken(unittest.TestCase):
             ev.bgEntryType,
             eventtypes.LidBgReadingTaken.BgentrytypeEnum.ManualEntryByTheUserViaNumpad)
 
-        # bgEntryType:1 -> AutoPopulatedBgUsingDexcomEgv
+        # bgEntryType:1 -> AutoPopulatedBgUsingCgm
         ev2 = Event(self.fixtureAutoPopulated)
         self.assertEqual(ev2.bgEntryTypeRaw, 1)
         self.assertEqual(
             ev2.bgEntryType,
-            eventtypes.LidBgReadingTaken.BgentrytypeEnum.AutoPopulatedBgUsingDexcomEgv)
+            eventtypes.LidBgReadingTaken.BgentrytypeEnum.AutoPopulatedBgUsingCgm)
 
     def test_bgsourcetype_enum_resolves(self):
         # bgSourceType:1 -> RemoteEntry

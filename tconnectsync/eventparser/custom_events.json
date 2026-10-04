@@ -18,19 +18,19 @@
           "offset": 8,
           "uom": "units"
         },
-        "liPoMV": {
-          "type": "uint16",
-          "offset": 12,
-          "uom": "millivolts"
+        "displayInHistory": {
+          "type": "uint8",
+          "offset": 12
         },
         "abc": {
           "type": "uint8",
-          "offset": 14,
+          "offset": 13,
           "uom": "percent"
         },
-        "displayInHistory": {
-          "type": "uint8",
-          "offset": 15
+        "liPoMV": {
+          "type": "uint16",
+          "offset": 14,
+          "uom": "millivolts"
         }
       }
     },

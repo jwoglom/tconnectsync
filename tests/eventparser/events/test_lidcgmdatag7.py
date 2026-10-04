@@ -138,19 +138,16 @@ class TestLidCgmDataG7(unittest.TestCase):
                          sum(1 << i for i in [1, 5, 6, 7, 8, 11, 12]))
         self.assertEqual(bf.egvInfoBitmaskRaw, 6626)
 
-    def test_rate_ratio_scales(self):
-        # rateRaw ×0.1 mg/dL/min
+    def test_rate_is_unscaled(self):
+        # rate is in tenths of mg/dL/min; the schema no longer scales it
         rising = Event(self.fixtureRising)
-        self.assertEqual(rising.rateRaw, 52)
-        self.assertAlmostEqual(rising.rate, 5.2)
+        self.assertEqual(rising.rate, 52)
 
         falling = Event(self.fixtureFalling)
-        self.assertEqual(falling.rateRaw, -39)
-        self.assertAlmostEqual(falling.rate, -3.9)
+        self.assertEqual(falling.rate, -39)
 
         flat = Event(self.fixtureBackfill)
-        self.assertEqual(flat.rateRaw, 0)
-        self.assertAlmostEqual(flat.rate, 0.0)
+        self.assertEqual(flat.rate, 0)
 
     def test_egv_timestamp_is_raw_seconds(self):
         # egvTimeStamp (camelCase) normalizes onto egvTimestamp, kept as raw seconds int.

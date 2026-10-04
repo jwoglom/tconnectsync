@@ -20,23 +20,22 @@
         },
         "idp": {
           "type": "uint16",
-          "offset": 14
+          "offset": 12
         },
         "changeType": {
           "type": "uint8",
-          "offset": 13,
+          "offset": 14,
+          "uom": "bitmask",
           "transform": [
             [
               "bitmask",
               {
-                "0": "\"timed segment\" - change by timed segment (because either the segment advanced based on time, the user changed the pump time, the user changed the active segment or changed by an AID algorithm.)",
-                "1": "\"new profile\" - change by activation of new profile",
-                "2": "\"temp rate start\"",
-                "3": "\"temp rate end\"",
-                "4": "\"pump suspended\"",
-                "5": "\"pump resumed\"",
-                "6": "“pump shut down”",
-                "7": "“basal limit”"
+                "0": "timed segment",
+                "1": "new profile",
+                "2": "temp rate start",
+                "3": "temp rate end",
+                "4": "pump suspended",
+                "5": "pump resumed"
               }
             ]
           ]
@@ -49,10 +48,81 @@
         "alertId": {
           "type": "uint32",
           "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "alerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "oaAlert_LIQ_LOW",
+                "1": "oaAlert_USB_INSUFF_CURRENT",
+                "2": "aaAlert_LIPO_LOW",
+                "3": "aaAlert_LIPO_VERY_LOW",
+                "4": "oaAlert_NVM",
+                "5": "oaAlert_AUTO_OFF",
+                "6": "oaAlert_BASAL_RATE_LIMIT",
+                "7": "oaAlert_LIPO_CANT_CHARGE",
+                "8": "oaAlert_BASAL_RATE_TOO_LOW",
+                "9": "aaAlert_USB_NOT_RECOGNIZED",
+                "10": "aaAlert_BAD_PC_COM",
+                "11": "oaAlert_INCOMPLETE_BOLUS",
+                "12": "oaAlert_INCOMPLETE_TEMP_RATE",
+                "13": "oaAlert_INCOMPLETE_CARTRIDGE",
+                "14": "oaAlert_INCOMPLETE_TUBING",
+                "15": "oaAlert_INCOMPLETE_CANNULA",
+                "16": "oaAlert_INCOMPLETE_SETTING",
+                "17": "oaAlert_LIQ_VERY_LOW",
+                "18": "oaAlert_ABS_MAX_BASAL_LIMIT",
+                "19": "aaAlert_STUCK_BUTTON",
+                "20": "aaAlert_CGM_SUPPORT_PACKAGE_ERROR",
+                "21": "aaAlert_FSL2_SUPPORT_PACKAGE_ERROR",
+                "22": "aaAlert_STK_CSP_REQ",
+                "23": "oaAlert_USB_SHUTDOWN",
+                "24": "aaAlert_CGM_MANY_SENSORS",
+                "25": "aaAlert_CGM_GRAPH_REMOVAL",
+                "26": "oaAlert_BASAL_RATE_LOW",
+                "27": "aaAlert_CGM_INCOMPLETE_CAL",
+                "28": "aaAlert_CGM_CAL_TIMEOUT",
+                "29": "aaAlert_CGM_INVALID_TX_ID",
+                "30": "aaAlert_DEBUG_INFO_DECLARED",
+                "31": "oaAlert_UNUSED_1",
+                "32": "oaAlert_OPEN_SESAME",
+                "33": "aaAlert_QUICK_BOLUS_ABORT",
+                "34": "aaAlert_MANY_FAILED_QUICK_BOLUS",
+                "35": "Alert_AP_ALERT",
+                "36": "aaAlert_STK_EXCHANGE_REQ",
+                "37": "aaAlert_STK_ODYSSEY_REQ",
+                "38": "aaAlert_STK_INVALID",
+                "39": "aaAlert_CGM_TX_EOL",
+                "40": "aaAlert_CGM_BLE_SD",
+                "41": "aaAlert_CGM_BLE_HW_WATCHDOG",
+                "42": "aaAlert_CGM_BLE_HW_TIMEOUT",
+                "43": "aaAlert_CGM_INCOMPATIBLE",
+                "44": "aaAlert_CGM_TX_EXPIRING_SOON_1",
+                "45": "aaAlert_CGM_TX_EXPIRING_SOON_2",
+                "46": "aaAlert_CGM_TX_EXPIRING_STARTUP",
+                "47": "oaAlert_TZ_INCOMPLETE_SETTING",
+                "48": "aaAlert_CGM_NO_READINGS",
+                "49": "aaAlert_PRIME_LIMIT",
+                "50": "aaAlert_TZ_HYPER_LIGHT",
+                "51": "aaAlert_TZ_HYPO_LIGHT",
+                "52": "aaAlert_TZ_IIDM",
+                "53": "aaAlert_BLE_CRASH_DUMP",
+                "54": "aaAlert_MH_PAIRED",
+                "55": "aaAlert_BLE_HW_ERROR",
+                "56": "aaAlert_USER_SET_MAX_BASAL",
+                "57": "aaAlert_SENSOR",
+                "58": "aaAlert_COM_LOG_ERROR_LOGGED",
+                "59": "alert_FCL_AUTOMATION_OFF",
+                "60": "oaAlert_CONTROLLER_CONNECTION_LOST",
+                "61": "aaAlert_LIPO_SUPER_LOW",
+                "62": "aaAlert_LIPO_INSUFF_POWER",
+                "63": "oaAlert_BTLE_PAIRING_TIMEOUT",
+                "64": "NUM_ALERTS"
+              }
             ]
           ]
         },
@@ -76,10 +146,55 @@
         "alarmId": {
           "type": "uint32",
           "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "alarms"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alarm_DELIVERY_NOT_STOPPED",
+                "1": "Alarm_SPOOL_MOVE",
+                "2": "Alarm_OCCLUSION",
+                "3": "Alarm_NO_STARTUP_ACK",
+                "4": "Alarm_OBE",
+                "5": "Alarm_P2",
+                "6": "Alarm_VENT_NOT_WORKING",
+                "7": "Alarm_AUTO_OFF_TRIGGERED",
+                "8": "Alarm_LIQ_OUT",
+                "9": "Alarm_LIQ_EX",
+                "10": "Alarm_TEMPERATURE_OOR",
+                "11": "Alarm_TEMPERATURE_XDCR",
+                "12": "Alarm_LIPO_VERY_LOW",
+                "13": "Alarm_FLUID_CHANGE_obsolete",
+                "14": "Alarm_USER_DATE_INVALID",
+                "15": "Alarm_LIPO_TEMPERATURE",
+                "16": "Alarm_DELIVERY_REQUEST_FAIL",
+                "17": "Alarm_CANT_HOME_obsolete",
+                "18": "Alarm_STATE_SUSPEND",
+                "19": "Alarm_UNICORN_DO_NOT_USE",
+                "20": "Alarm_MOTOR_PICASSO",
+                "21": "Alarm_PRESSURE_DISAGREE",
+                "22": "Alarm_STUCK_BUTTON",
+                "23": "Alarm_GENERIC",
+                "24": "Alarm_PATM",
+                "25": "Alarm_CART_REMOVED",
+                "26": "Alarm_OCCLUSION_THE_YOUNGER",
+                "27": "Alarm_UNUSED_1",
+                "28": "Alarm_UNUSED_2",
+                "29": "Alarm_MOTOR_CART_RANGE_LOW",
+                "30": "Alarm_MOTOR_STALL",
+                "31": "Alarm_MOTOR_VENT_STALL",
+                "32": "Alarm_NO_CARTRIDGE_DETECTED",
+                "33": "Alarm_LIPO_INSUFF_POWER",
+                "34": "Alarm_MOTOR_HALL_EFFECT_FAIL",
+                "35": "Alarm_MOTOR_FAILURE_MODE",
+                "36": "Alarm_MOTOR_PRIME_STALL_OBE",
+                "37": "Alarm_AUXCPU_SYSTEM_RESET",
+                "38": "NUM_ALARMS"
+              }
             ]
           ]
         },
@@ -103,10 +218,44 @@
         "malfId": {
           "type": "uint32",
           "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "malfs"
+            ],
+            [
+              "enum",
+              {
+                "0": "Malf_SOFTWARE",
+                "1": "Malf_CPU_CORE",
+                "2": "Malf_ARM_MSP_COM",
+                "3": "Malf_SENSOR",
+                "4": "Malf_LIPO",
+                "5": "Malf_TOUCHSCREEN",
+                "6": "Malf_NVM",
+                "7": "Malf_DISPLAY",
+                "8": "Malf_MSP",
+                "9": "Malf_MOTOR",
+                "10": "Malf_EXTERNAL_BINS",
+                "11": "Malf_SW_INIT",
+                "12": "Malf_VIBE",
+                "13": "Malf_PERIPH_POWER",
+                "14": "Malf_P2",
+                "15": "Malf_DATALOG",
+                "16": "Malf_SPEAKER",
+                "17": "Malf_MSP_SUPPLY",
+                "18": "Malf_CAL_DATA",
+                "19": "Malf_BTLE",
+                "20": "Malf_AP",
+                "21": "Malf_RTC",
+                "22": "Malf_ARM_BLE_COM",
+                "23": "Malf_OVERTRAVEL_STALL",
+                "24": "Malf_UNDERTRAVEL_STALL",
+                "25": "Malf_PUSHOFF_STALL",
+                "26": "Malf_HW_CRYPTO_FAIL",
+                "27": "NUM_MALFUNCTIONS"
+              }
             ]
           ]
         },
@@ -129,16 +278,18 @@
       "data": {
         "preSuspendState": {
           "type": "uint32",
-          "offset": 0
+          "offset": 0,
+          "uom": "enum"
         },
         "insulinAmount": {
           "type": "uint16",
-          "offset": 6,
+          "offset": 4,
           "uom": "units"
         },
         "suspendReason": {
           "type": "uint8",
-          "offset": 5,
+          "offset": 6,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -153,7 +304,7 @@
         },
         "rpaTimeout": {
           "type": "uint8",
-          "offset": 4,
+          "offset": 7,
           "uom": "minutes"
         }
       }
@@ -163,11 +314,12 @@
       "data": {
         "preResumeState": {
           "type": "uint32",
-          "offset": 0
+          "offset": 0,
+          "uom": "enum"
         },
         "insulinAmount": {
           "type": "uint16",
-          "offset": 6,
+          "offset": 4,
           "uom": "units"
         }
       }
@@ -215,33 +367,35 @@
     "16": {
       "name": "LID_BG_READING_TAKEN",
       "data": {
-        "selectedIob": {
+        "bg": {
+          "type": "uint16",
+          "offset": 0,
+          "uom": "mg/dL"
+        },
+        "cgmCalibration": {
           "type": "uint8",
-          "offset": 15,
+          "offset": 2,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
-                "0": "Mudaliar IOB",
-                "1": "Swan IOB Meal"
+                "0": "No, it was not used to Calibrate.",
+                "1": "Yes, it was used to calibrate."
               }
             ]
           ]
         },
-        "bg": {
-          "type": "uint16",
-          "offset": 2,
-          "uom": "mg/dL"
-        },
         "bgEntryType": {
           "type": "uint8",
-          "offset": 0,
+          "offset": 3,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
                 "0": "Manual Entry by the User via Numpad",
-                "1": "Auto Populated BG using Dexcom EGV"
+                "1": "Auto Populated BG using CGM"
               }
             ]
           ]
@@ -253,36 +407,38 @@
         },
         "targetBg": {
           "type": "uint16",
-          "offset": 10,
+          "offset": 8,
           "uom": "mg/dL"
         },
         "isf": {
           "type": "uint16",
-          "offset": 8,
+          "offset": 10,
           "uom": "(mg/dL)/unit"
+        },
+        "selectedIob": {
+          "type": "uint8",
+          "offset": 12,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Mudaliar IOB",
+                "1": "Swan IOB Meal"
+              }
+            ]
+          ]
         },
         "bgSourceType": {
           "type": "uint8",
-          "offset": 14,
+          "offset": 13,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
                 "0": "Local Pump entry",
                 "1": "Remote entry"
-              }
-            ]
-          ]
-        },
-        "cgmCalibration": {
-          "type": "uint8",
-          "offset": 1,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "No, it was not used to Calibrate.",
-                "1": "Yes, it was used to calibrate."
               }
             ]
           ]
@@ -294,7 +450,8 @@
       "data": {
         "completionStatus": {
           "type": "uint16",
-          "offset": 2,
+          "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -314,7 +471,12 @@
         },
         "bolusId": {
           "type": "uint16",
-          "offset": 0
+          "offset": 2
+        },
+        "iob": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
         },
         "insulinDelivered": {
           "type": "float32",
@@ -324,11 +486,6 @@
         "insulinRequested": {
           "type": "float32",
           "offset": 12,
-          "uom": "units"
-        },
-        "iob": {
-          "type": "float32",
-          "offset": 4,
           "uom": "units"
         }
       }
@@ -338,7 +495,8 @@
       "data": {
         "completionStatus": {
           "type": "uint16",
-          "offset": 2,
+          "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -358,7 +516,12 @@
         },
         "bolusId": {
           "type": "uint16",
-          "offset": 0
+          "offset": 2
+        },
+        "iob": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
         },
         "insulinDelivered": {
           "type": "float32",
@@ -368,11 +531,6 @@
         "insulinRequested": {
           "type": "float32",
           "offset": 12,
-          "uom": "units"
-        },
-        "iob": {
-          "type": "float32",
-          "offset": 4,
           "uom": "units"
         }
       }
@@ -383,10 +541,81 @@
         "alertId": {
           "type": "uint32",
           "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "alerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "oaAlert_LIQ_LOW",
+                "1": "oaAlert_USB_INSUFF_CURRENT",
+                "2": "aaAlert_LIPO_LOW",
+                "3": "aaAlert_LIPO_VERY_LOW",
+                "4": "oaAlert_NVM",
+                "5": "oaAlert_AUTO_OFF",
+                "6": "oaAlert_BASAL_RATE_LIMIT",
+                "7": "oaAlert_LIPO_CANT_CHARGE",
+                "8": "oaAlert_BASAL_RATE_TOO_LOW",
+                "9": "aaAlert_USB_NOT_RECOGNIZED",
+                "10": "aaAlert_BAD_PC_COM",
+                "11": "oaAlert_INCOMPLETE_BOLUS",
+                "12": "oaAlert_INCOMPLETE_TEMP_RATE",
+                "13": "oaAlert_INCOMPLETE_CARTRIDGE",
+                "14": "oaAlert_INCOMPLETE_TUBING",
+                "15": "oaAlert_INCOMPLETE_CANNULA",
+                "16": "oaAlert_INCOMPLETE_SETTING",
+                "17": "oaAlert_LIQ_VERY_LOW",
+                "18": "oaAlert_ABS_MAX_BASAL_LIMIT",
+                "19": "aaAlert_STUCK_BUTTON",
+                "20": "aaAlert_CGM_SUPPORT_PACKAGE_ERROR",
+                "21": "aaAlert_FSL2_SUPPORT_PACKAGE_ERROR",
+                "22": "aaAlert_STK_CSP_REQ",
+                "23": "oaAlert_USB_SHUTDOWN",
+                "24": "aaAlert_CGM_MANY_SENSORS",
+                "25": "aaAlert_CGM_GRAPH_REMOVAL",
+                "26": "oaAlert_BASAL_RATE_LOW",
+                "27": "aaAlert_CGM_INCOMPLETE_CAL",
+                "28": "aaAlert_CGM_CAL_TIMEOUT",
+                "29": "aaAlert_CGM_INVALID_TX_ID",
+                "30": "aaAlert_DEBUG_INFO_DECLARED",
+                "31": "oaAlert_UNUSED_1",
+                "32": "oaAlert_OPEN_SESAME",
+                "33": "aaAlert_QUICK_BOLUS_ABORT",
+                "34": "aaAlert_MANY_FAILED_QUICK_BOLUS",
+                "35": "Alert_AP_ALERT",
+                "36": "aaAlert_STK_EXCHANGE_REQ",
+                "37": "aaAlert_STK_ODYSSEY_REQ",
+                "38": "aaAlert_STK_INVALID",
+                "39": "aaAlert_CGM_TX_EOL",
+                "40": "aaAlert_CGM_BLE_SD",
+                "41": "aaAlert_CGM_BLE_HW_WATCHDOG",
+                "42": "aaAlert_CGM_BLE_HW_TIMEOUT",
+                "43": "aaAlert_CGM_INCOMPATIBLE",
+                "44": "aaAlert_CGM_TX_EXPIRING_SOON_1",
+                "45": "aaAlert_CGM_TX_EXPIRING_SOON_2",
+                "46": "aaAlert_CGM_TX_EXPIRING_STARTUP",
+                "47": "oaAlert_TZ_INCOMPLETE_SETTING",
+                "48": "aaAlert_CGM_NO_READINGS",
+                "49": "aaAlert_PRIME_LIMIT",
+                "50": "aaAlert_TZ_HYPER_LIGHT",
+                "51": "aaAlert_TZ_HYPO_LIGHT",
+                "52": "aaAlert_TZ_IIDM",
+                "53": "aaAlert_BLE_CRASH_DUMP",
+                "54": "aaAlert_MH_PAIRED",
+                "55": "aaAlert_BLE_HW_ERROR",
+                "56": "aaAlert_USER_SET_MAX_BASAL",
+                "57": "aaAlert_SENSOR",
+                "58": "aaAlert_COM_LOG_ERROR_LOGGED",
+                "59": "alert_FCL_AUTOMATION_OFF",
+                "60": "oaAlert_CONTROLLER_CONNECTION_LOST",
+                "61": "aaAlert_LIPO_SUPER_LOW",
+                "62": "aaAlert_LIPO_INSUFF_POWER",
+                "63": "oaAlert_BTLE_PAIRING_TIMEOUT",
+                "64": "NUM_ALERTS"
+              }
             ]
           ]
         },
@@ -402,10 +631,55 @@
         "alarmId": {
           "type": "uint32",
           "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "alarms"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alarm_DELIVERY_NOT_STOPPED",
+                "1": "Alarm_SPOOL_MOVE",
+                "2": "Alarm_OCCLUSION",
+                "3": "Alarm_NO_STARTUP_ACK",
+                "4": "Alarm_OBE",
+                "5": "Alarm_P2",
+                "6": "Alarm_VENT_NOT_WORKING",
+                "7": "Alarm_AUTO_OFF_TRIGGERED",
+                "8": "Alarm_LIQ_OUT",
+                "9": "Alarm_LIQ_EX",
+                "10": "Alarm_TEMPERATURE_OOR",
+                "11": "Alarm_TEMPERATURE_XDCR",
+                "12": "Alarm_LIPO_VERY_LOW",
+                "13": "Alarm_FLUID_CHANGE_obsolete",
+                "14": "Alarm_USER_DATE_INVALID",
+                "15": "Alarm_LIPO_TEMPERATURE",
+                "16": "Alarm_DELIVERY_REQUEST_FAIL",
+                "17": "Alarm_CANT_HOME_obsolete",
+                "18": "Alarm_STATE_SUSPEND",
+                "19": "Alarm_UNICORN_DO_NOT_USE",
+                "20": "Alarm_MOTOR_PICASSO",
+                "21": "Alarm_PRESSURE_DISAGREE",
+                "22": "Alarm_STUCK_BUTTON",
+                "23": "Alarm_GENERIC",
+                "24": "Alarm_PATM",
+                "25": "Alarm_CART_REMOVED",
+                "26": "Alarm_OCCLUSION_THE_YOUNGER",
+                "27": "Alarm_UNUSED_1",
+                "28": "Alarm_UNUSED_2",
+                "29": "Alarm_MOTOR_CART_RANGE_LOW",
+                "30": "Alarm_MOTOR_STALL",
+                "31": "Alarm_MOTOR_VENT_STALL",
+                "32": "Alarm_NO_CARTRIDGE_DETECTED",
+                "33": "Alarm_LIPO_INSUFF_POWER",
+                "34": "Alarm_MOTOR_HALL_EFFECT_FAIL",
+                "35": "Alarm_MOTOR_FAILURE_MODE",
+                "36": "Alarm_MOTOR_PRIME_STALL_OBE",
+                "37": "Alarm_AUXCPU_SYSTEM_RESET",
+                "38": "NUM_ALARMS"
+              }
             ]
           ]
         }
@@ -436,17 +710,17 @@
         },
         "liPoCurrent": {
           "type": "int16",
-          "offset": 6,
+          "offset": 4,
           "uom": "mA"
         },
         "liPoAbc": {
           "type": "uint8",
-          "offset": 5,
+          "offset": 6,
           "uom": "%"
         },
         "liPoIbc": {
           "type": "uint8",
-          "offset": 4,
+          "offset": 7,
           "uom": "%"
         },
         "liPoRemCap": {
@@ -464,22 +738,23 @@
     "55": {
       "name": "LID_BOLUS_ACTIVATED",
       "data": {
+        "bolusId": {
+          "type": "uint16",
+          "offset": 0
+        },
         "selectedIob": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
                 "0": "Mudaliar IOB",
-                "1": "Swan IOB Meal"
+                "1": "Algorithm IOB"
               }
             ]
           ]
-        },
-        "bolusId": {
-          "type": "uint16",
-          "offset": 2
         },
         "iob": {
           "type": "float32",
@@ -493,12 +768,106 @@
         }
       }
     },
+    "57": {
+      "name": "LID_IDP_MSG2",
+      "data": {
+        "idp": {
+          "type": "uint8",
+          "offset": 0
+        },
+        "name8": {
+          "type": "uint8",
+          "offset": 8,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name9": {
+          "type": "uint8",
+          "offset": 9,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name10": {
+          "type": "uint8",
+          "offset": 10,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name11": {
+          "type": "uint8",
+          "offset": 11,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name12": {
+          "type": "uint8",
+          "offset": 12,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name13": {
+          "type": "uint8",
+          "offset": 13,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name14": {
+          "type": "uint8",
+          "offset": 14,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name15": {
+          "type": "uint8",
+          "offset": 15,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        }
+      }
+    },
     "59": {
       "name": "LID_BOLEX_ACTIVATED",
       "data": {
+        "bolusId": {
+          "type": "uint16",
+          "offset": 0
+        },
         "selectedIob": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -508,10 +877,6 @@
               }
             ]
           ]
-        },
-        "bolusId": {
-          "type": "uint16",
-          "offset": 2
         },
         "iob": {
           "type": "float32",
@@ -534,7 +899,23 @@
         },
         "reason": {
           "type": "uint8",
-          "offset": 7
+          "offset": 4,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Invalid Header Id",
+                "1": "Bad Integrity",
+                "2": "Invalid Block",
+                "3": "Spare Deactivation Failed",
+                "4": "Invalid Sequence Number",
+                "5": "Pattern Mismatch",
+                "6": "Bad First Block",
+                "7": "Discovery Bad Sequence Number Increment"
+              }
+            ]
+          ]
         }
       }
     },
@@ -549,14 +930,30 @@
         "completionStatus": {
           "type": "uint32",
           "offset": 4,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
-                "0": "User Aborted",
+                "0": "User Aborted (Does not apply to Mobi)",
                 "1": "Terminated by Alarm",
                 "2": "Terminated by Malfunction",
                 "3": "Completed"
+              }
+            ]
+          ]
+        },
+        "infusionSetType": {
+          "type": "uint8",
+          "offset": 8,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Default (tubed)",
+                "1": "Tubed",
+                "2": "Tubeless"
               }
             ]
           ]
@@ -574,6 +971,7 @@
         "completionStatus": {
           "type": "uint32",
           "offset": 4,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -598,11 +996,12 @@
       "data": {
         "bolusId": {
           "type": "uint16",
-          "offset": 2
+          "offset": 0
         },
         "bolusType": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -617,68 +1016,57 @@
         },
         "correctionBolusIncluded": {
           "type": "uint8",
-          "offset": 0,
+          "offset": 3,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
-                "0": "No",
-                "1": "Yes"
+                "0": "False",
+                "1": "True"
               }
             ]
           ]
         },
         "carbAmount": {
           "type": "uint16",
-          "offset": 6,
+          "offset": 4,
           "uom": "grams"
         },
         "bg": {
           "type": "uint16",
-          "offset": 4,
+          "offset": 6,
           "uom": "mg/dL"
-        },
-        "carbRatio": {
-          "type": "uint32",
-          "offset": 12,
-          "transform": [
-            [
-              "ratio",
-              0.001
-            ]
-          ],
-          "uom": "g/u"
         },
         "iob": {
           "type": "float32",
           "offset": 8,
           "uom": "units"
+        },
+        "carbRatio": {
+          "type": "uint32",
+          "offset": 12,
+          "uom": "1ct = 0.001 g/u",
+          "transform": [
+            [
+              "ratio",
+              0.001
+            ]
+          ]
         }
       }
     },
     "65": {
       "name": "LID_BOLUS_REQUESTED_MSG2",
       "data": {
-        "selectedIob": {
-          "type": "uint8",
-          "offset": 13,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "Mudaliar IOB",
-                "1": "Swan IOB Meal"
-              }
-            ]
-          ]
-        },
         "bolusId": {
           "type": "uint16",
-          "offset": 2
+          "offset": 0
         },
         "options": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -690,53 +1078,70 @@
                 "4": "BLE Standard Bolus",
                 "5": "BLE Extended Bolus",
                 "6": "Eating Soon Automatic Bolus",
-                "7": "Late Bolus"
+                "7": "Late Bolus",
+                "8": "BLE with AID Recommendation Bolus"
               }
             ]
           ]
         },
         "standardPercent": {
           "type": "uint8",
-          "offset": 0,
+          "offset": 3,
           "uom": "%"
         },
         "duration": {
           "type": "uint16",
-          "offset": 6,
+          "offset": 4,
           "uom": "minutes"
         },
         "isf": {
           "type": "uint16",
-          "offset": 10,
+          "offset": 8,
           "uom": "(mg/dL)/unit"
         },
         "targetBg": {
           "type": "uint16",
-          "offset": 8,
+          "offset": 10,
           "uom": "mg/dL"
         },
         "userOverride": {
           "type": "uint8",
-          "offset": 15,
+          "offset": 12,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
-                "0": "\"No\", user did not override the bolus size",
-                "1": "\"Yes\", user did override the bolus size"
+                "0": "No, user did not override the bolus size",
+                "1": "Yes, user did override the bolus size"
               }
             ]
           ]
         },
         "declinedCorrection": {
           "type": "uint8",
-          "offset": 14,
+          "offset": 13,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
-                "0": "\"No\", user did not decline the recommended correction",
-                "1": "\"Yes\", user declined the recommended correction"
+                "0": "No, user did not decline the recommended correction",
+                "1": "Yes, user declined the recommended correction"
+              }
+            ]
+          ]
+        },
+        "selectedIob": {
+          "type": "uint8",
+          "offset": 14,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Mudaliar IOB",
+                "1": "Swan IOB Meal"
               }
             ]
           ]
@@ -748,7 +1153,12 @@
       "data": {
         "bolusId": {
           "type": "uint16",
-          "offset": 2
+          "offset": 0
+        },
+        "queued": {
+          "type": "uint8",
+          "offset": 2,
+          "uom": "Boolean"
         },
         "foodBolusSize": {
           "type": "float32",
@@ -767,6 +1177,116 @@
         }
       }
     },
+    "69": {
+      "name": "LID_IDP",
+      "data": {
+        "idp": {
+          "type": "uint8",
+          "offset": 0
+        },
+        "status": {
+          "type": "uint8",
+          "offset": 1,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "new",
+                "1": "copy",
+                "2": "delete",
+                "3": "activate",
+                "4": "rename"
+              }
+            ]
+          ]
+        },
+        "sourceIdp": {
+          "type": "uint8",
+          "offset": 2
+        },
+        "name0": {
+          "type": "uint8",
+          "offset": 8,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name1": {
+          "type": "uint8",
+          "offset": 9,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name2": {
+          "type": "uint8",
+          "offset": 10,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name3": {
+          "type": "uint8",
+          "offset": 11,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name4": {
+          "type": "uint8",
+          "offset": 12,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name5": {
+          "type": "uint8",
+          "offset": 13,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name6": {
+          "type": "uint8",
+          "offset": 14,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        },
+        "name7": {
+          "type": "uint8",
+          "offset": 15,
+          "uom": "ASCII",
+          "transform": [
+            [
+              "bytes2str"
+            ]
+          ]
+        }
+      }
+    },
     "90": {
       "name": "LID_NEW_DAY",
       "data": {
@@ -777,11 +1297,13 @@
         },
         "featuresBitmask": {
           "type": "uint32",
-          "offset": 4
+          "offset": 4,
+          "uom": "Bitmask"
         },
         "featureBitmaskIndex": {
           "type": "uint32",
-          "offset": 8
+          "offset": 8,
+          "uom": "Bitmask"
         }
       }
     },
@@ -794,11 +1316,13 @@
         },
         "configABits": {
           "type": "uint32",
-          "offset": 4
+          "offset": 4,
+          "uom": "Bitmask"
         },
         "configBBits": {
           "type": "uint32",
-          "offset": 8
+          "offset": 8,
+          "uom": "Bitmask"
         },
         "numLogEntries": {
           "type": "uint32",
@@ -816,17 +1340,18 @@
         },
         "fmr": {
           "type": "uint16",
-          "offset": 6,
+          "offset": 4,
           "uom": "mg/dL"
         },
         "pgv": {
           "type": "uint16",
-          "offset": 4,
+          "offset": 6,
           "uom": "mg/dL"
         },
         "fmrStatus": {
           "type": "uint8",
-          "offset": 11,
+          "offset": 8,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -844,20 +1369,13 @@
         },
         "pgvValid": {
           "type": "uint8",
-          "offset": 10,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "FALSE",
-                "1": "TRUE"
-              }
-            ]
-          ]
+          "offset": 9,
+          "uom": "Boolean"
         },
         "ruleState": {
           "type": "uint8",
-          "offset": 9,
+          "offset": 10,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -871,14 +1389,15 @@
         },
         "hoMinState": {
           "type": "uint8",
-          "offset": 8,
+          "offset": 11,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
                 "0": "On and available",
                 "1": "On and suspended",
-                "2": "Off",
+                "2": "False",
                 "3": "On and not available"
               }
             ]
@@ -887,6 +1406,7 @@
         "status": {
           "type": "uint32",
           "offset": 12,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -917,10 +1437,50 @@
         "dalertId": {
           "type": "uint32",
           "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "dalerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alert_CGM_DEPRECATED_3",
+                "1": "Alert_CGM_FIXED_LOW",
+                "2": "Alert_CGM_USER_HIGH_EGV",
+                "3": "Alert_CGM_USER_LOW_EGV",
+                "4": "Alert_CGM_CALIBRATION_REQUEST",
+                "5": "Alert_CGM_RISE",
+                "6": "Alert_CGM_RAPID_RISE",
+                "7": "Alert_CGM_FALL",
+                "8": "Alert_CGM_RAPID_FALL",
+                "9": "Alert_CGM_CALIB_ERROR",
+                "10": "Alert_CGM_CALIB_HIGH_WEDGE",
+                "11": "Alert_CGM_SENSOR_FAILED",
+                "12": "Alert_CGM_SENSOR_EXPIRING",
+                "13": "Alert_CGM_SENSOR_EXPIRED",
+                "14": "Alert_CGM_OUT_OF_RANGE",
+                "15": "Alert_CGM_DEPRECATED",
+                "16": "Alert_CGM_CALIB_START_FIRST",
+                "17": "Alert_CGM_CALIB_START_SECOND",
+                "18": "Alert_CGM_CALIB_REQUIRED",
+                "19": "Alert_CGM_LOW_TX_BATTERY",
+                "20": "Alert_CGM_TRANSMITTER_ERROR",
+                "21": "Alert_CGM_DEPRECATED_2",
+                "22": "Alert_CGM_SENSOR_EXPIRING_SOON",
+                "23": "Alert_CGM_DEPRECATED_4",
+                "24": "Alert_CGM_URGENT_LOW_SOON",
+                "25": "Alert_CGM_SENSOR_REUSE",
+                "26": "Alert_CGM_SENSOR_TEMP",
+                "27": "Alert_CGM_CONNECTION_ERROR",
+                "28": "Alert_CGM_CHECK_SENSOR",
+                "29": "Alert_CGM_EGV_UNUSABLE",
+                "30": "Alert_CGM_UNUSED1",
+                "31": "Alert_CGM_GRACE_PERIOD_START",
+                "32": "Alert_CGM_GRACE_PERIOD_EXPIRING_SOON",
+                "33": "NUM_CGM_ALERTS"
+              }
             ]
           ]
         },
@@ -944,10 +1504,50 @@
         "dalertId": {
           "type": "uint32",
           "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "dalerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alert_CGM_DEPRECATED_3",
+                "1": "Alert_CGM_FIXED_LOW",
+                "2": "Alert_CGM_USER_HIGH_EGV",
+                "3": "Alert_CGM_USER_LOW_EGV",
+                "4": "Alert_CGM_CALIBRATION_REQUEST",
+                "5": "Alert_CGM_RISE",
+                "6": "Alert_CGM_RAPID_RISE",
+                "7": "Alert_CGM_FALL",
+                "8": "Alert_CGM_RAPID_FALL",
+                "9": "Alert_CGM_CALIB_ERROR",
+                "10": "Alert_CGM_CALIB_HIGH_WEDGE",
+                "11": "Alert_CGM_SENSOR_FAILED",
+                "12": "Alert_CGM_SENSOR_EXPIRING",
+                "13": "Alert_CGM_SENSOR_EXPIRED",
+                "14": "Alert_CGM_OUT_OF_RANGE",
+                "15": "Alert_CGM_DEPRECATED",
+                "16": "Alert_CGM_CALIB_START_FIRST",
+                "17": "Alert_CGM_CALIB_START_SECOND",
+                "18": "Alert_CGM_CALIB_REQUIRED",
+                "19": "Alert_CGM_LOW_TX_BATTERY",
+                "20": "Alert_CGM_TRANSMITTER_ERROR",
+                "21": "Alert_CGM_DEPRECATED_2",
+                "22": "Alert_CGM_SENSOR_EXPIRING_SOON",
+                "23": "Alert_CGM_DEPRECATED_4",
+                "24": "Alert_CGM_URGENT_LOW_SOON",
+                "25": "Alert_CGM_SENSOR_REUSE",
+                "26": "Alert_CGM_SENSOR_TEMP",
+                "27": "Alert_CGM_CONNECTION_ERROR",
+                "28": "Alert_CGM_CHECK_SENSOR",
+                "29": "Alert_CGM_EGV_UNUSABLE",
+                "30": "Alert_CGM_UNUSED1",
+                "31": "Alert_CGM_GRACE_PERIOD_START",
+                "32": "Alert_CGM_GRACE_PERIOD_EXPIRING_SOON",
+                "33": "NUM_CGM_ALERTS"
+              }
             ]
           ]
         }
@@ -962,15 +1562,17 @@
         },
         "configABits": {
           "type": "uint32",
-          "offset": 4
+          "offset": 4,
+          "uom": "Bitmask"
         },
         "configBBits": {
           "type": "uint32",
-          "offset": 8
+          "offset": 8,
+          "uom": "Bitmask"
         },
         "armCrc": {
           "type": "uint16",
-          "offset": 14
+          "offset": 12
         }
       }
     },
@@ -979,36 +1581,125 @@
       "data": {
         "swUpdateStatus": {
           "type": "uint16",
-          "offset": 2
-        },
-        "metadataAndVersionStatus": {
-          "type": "uint16",
-          "offset": 0
-        },
-        "fullDlAndCrcStatus": {
-          "type": "uint16",
-          "offset": 6
-        },
-        "fileDlAndSideloadStatus": {
-          "type": "uint16",
-          "offset": 4
-        },
-        "externalFlashStatus": {
-          "type": "uint16",
-          "offset": 10
-        },
-        "updateSuccessful": {
-          "type": "uint8",
-          "offset": 9,
+          "offset": 0,
+          "uom": "Bitmask",
           "transform": [
             [
-              "enum",
+              "bitmask",
               {
-                "0": "Update Not Successful",
-                "1": "Update Successful"
+                "0": "ARM update success",
+                "1": "MSP update success",
+                "2": "Radio processor update success",
+                "3": "Alphamasks (GUI images) update success",
+                "4": "Raster (GUI images) update success",
+                "5": "Radio application update success",
+                "6": "Radio bootloader update success",
+                "7": "Radio stack update success",
+                "8": "ARM update failed",
+                "9": "MSP update failed",
+                "10": "Radio processor update failed",
+                "11": "Alphamasks (GUI images) update failed",
+                "12": "Raster (GUI images) update failed",
+                "13": "Radio application update failed",
+                "14": "Radio bootloader update failed",
+                "15": "Radio stack update failed"
               }
             ]
           ]
+        },
+        "metadataAndVersionStatus": {
+          "type": "uint16",
+          "offset": 2,
+          "uom": "Bitmask",
+          "transform": [
+            [
+              "bitmask",
+              {
+                "0": "ARM metadata CRC failed",
+                "1": "MSP metadata CRC failed",
+                "2": "Radio processor metadata CRC failed",
+                "3": "Alphamasks (GUI images) metadata CRC failed",
+                "4": "Raster (GUI images) metadata CRC failed",
+                "5": "Radio application metadata CRC failed",
+                "6": "Radio bootloader metadata CRC failed",
+                "7": "Radio stack metadata CRC failed",
+                "8": "ARM version failed",
+                "9": "MSP version failed",
+                "10": "Radio processor version failed",
+                "11": "Alphamasks (GUI images) version failed",
+                "12": " Raster (GUI images) version failed",
+                "13": "Radio application version failed",
+                "14": "Radio bootloader version failed",
+                "15": "Radio stack version failed"
+              }
+            ]
+          ]
+        },
+        "fullDlAndCrcStatus": {
+          "type": "uint16",
+          "offset": 4,
+          "uom": "Bitmask",
+          "transform": [
+            [
+              "bitmask",
+              {
+                "0": "ARM full download failed",
+                "1": "MSP full download failed",
+                "2": "Radio processor full download failed",
+                "3": "Alphamasks (GUI images) full download failed",
+                "4": "Raster (GUI images) full download failed",
+                "5": "Radio application full download failed",
+                "6": "Radio bootloader full download failed",
+                "7": "Radio stack full download failed",
+                "8": "ARM CRC failed",
+                "9": "MSP CRC failed",
+                "10": "Radio processor CRC failed",
+                "11": "Alphamasks (GUI images) CRC failed",
+                "12": "Raster (GUI images) CRC failed",
+                "13": "Radio application CRC failed",
+                "14": "Radio bootloader CRC failed",
+                "15": "Radio stack CRC failed"
+              }
+            ]
+          ]
+        },
+        "fileDlAndSideloadStatus": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "Bitmask",
+          "transform": [
+            [
+              "bitmask",
+              {
+                "0": "ARM file downloaded",
+                "1": "MSP file downloaded",
+                "2": "Radio file downloaded",
+                "3": "Alphamasks (GUI images) file downloaded",
+                "4": "Raster (GUI images) file downloaded",
+                "5": "Radio application file downloaded",
+                "6": "Radio bootloader file downloaded",
+                "7": "Radio stack file downloaded",
+                "8": "ARM sideload started",
+                "9": "MSP sideload started",
+                "10": "Radio sideload started",
+                "11": "Alphamasks (GUI images) sideload started",
+                "12": "Raster (GUI images) sideload started",
+                "13": "Radio application sideload started",
+                "14": "Radio bootloader sideload started",
+                "15": "Radio stack sideload started"
+              }
+            ]
+          ]
+        },
+        "externalFlashStatus": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "Bitmask"
+        },
+        "updateSuccessful": {
+          "type": "uint8",
+          "offset": 10,
+          "uom": "Boolean"
         },
         "swPartNum": {
           "type": "uint32",
@@ -1031,8 +1722,36 @@
         },
         "sessionDuration": {
           "type": "uint8",
-          "offset": 15,
+          "offset": 12,
           "uom": "days"
+        },
+        "sessionStartReason": {
+          "type": "uint8",
+          "offset": 13,
+          "uom": "Enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "DEXBLES_REASON_USER",
+                "1": "DEXBLES_REASON_UNKNOWN",
+                "2": "Reserved",
+                "3": "DEXBLES_REASON_TX_END_OF_LIFE",
+                "4": "DEXBLES_REASON_TRANSMITTER_ERROR",
+                "5": "DEXBLES_REASON_SESSION_STOP_SUCCESS",
+                "6": "DEXBLES_REASON_TRANSMITTER_NOT_IN_SESSION",
+                "7": "Reserved",
+                "8": "DEXBLES_REASON_NEW_SESSION_STARTED_SUCCESS",
+                "9": "DEXBLES_REASON_SESSION_STARTED_IN_PROGRESS",
+                "10": "DEXBLES_REASON_TRANSMITTER_IN_SESSION",
+                "11": "DEXBLES_REASON_BLESTACK_INVALID",
+                "12": "DEXBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS",
+                "13": "DEXBLES_REASON_AUTOCAL_SESSION_IN_PROGRESS",
+                "21": "DEXBLES_REASON_STALE_START_CMD",
+                "22": "DEXBLES_REASON_STALE_STOP_CMD"
+              }
+            ]
+          ]
         }
       }
     },
@@ -1051,30 +1770,33 @@
         },
         "sessionDuration": {
           "type": "uint8",
-          "offset": 15,
+          "offset": 12,
           "uom": "days"
         },
         "sessionJoinReason": {
           "type": "uint8",
-          "offset": 14,
+          "offset": 13,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
               {
-                "0": "DEXBLES_REASON_USER,",
-                "1": "DEXBLES_REASON_UNKNOWN,",
-                "2": "Reserved,",
-                "3": "DEXBLES_REASON_TX_END_OF_LIFE,",
-                "4": "DEXBLES_REASON_TRANSMITTER_ERROR,",
-                "5": "DEXBLES_REASON_SESSION_STOP_SUCCESS,",
-                "6": "DEXBLES_REASON_TRANSMITTER_NOT_IN_SESSION,",
+                "0": "DEXBLES_REASON_USER",
+                "1": "DEXBLES_REASON_UNKNOWN",
+                "2": "Reserved",
+                "3": "DEXBLES_REASON_TX_END_OF_LIFE",
+                "4": "DEXBLES_REASON_TRANSMITTER_ERROR",
+                "5": "DEXBLES_REASON_SESSION_STOP_SUCCESS",
+                "6": "DEXBLES_REASON_TRANSMITTER_NOT_IN_SESSION",
                 "7": "Reserved",
-                "8": "DEXBLES_REASON_NEW_SESSION_STARTED_SUCCESS,",
-                "9": "DEXBLES_REASON_SESSION_STARTED_IN_PROGRESS,",
-                "10": "DEXBLES_REASON_TRANSMITTER_IN_SESSION,",
-                "11": "DEXBLES_REASON_BLESTACK_INVALID,",
-                "12": "DEXBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS,",
-                "13": "DEXBLES_REASON_NO_AUTOCAL_SESSION_IN_PROGRESS"
+                "8": "DEXBLES_REASON_NEW_SESSION_STARTED_SUCCESS",
+                "9": "DEXBLES_REASON_SESSION_STARTED_IN_PROGRESS",
+                "10": "DEXBLES_REASON_TRANSMITTER_IN_SESSION",
+                "11": "DEXBLES_REASON_BLESTACK_INVALID",
+                "12": "DEXBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS",
+                "13": "DEXBLES_REASON_AUTOCAL_SESSION_IN_PROGRESS",
+                "21": "DEXBLES_REASON_STALE_START_CMD",
+                "22": "DEXBLES_REASON_STALE_STOP_CMD"
               }
             ]
           ]
@@ -1101,30 +1823,36 @@
         },
         "sessionDuration": {
           "type": "uint8",
-          "offset": 15,
+          "offset": 12,
           "uom": "days"
         },
         "sessionStopReason": {
           "type": "uint8",
-          "offset": 14,
+          "offset": 13,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
               {
-                "0": "DEXBLES_REASON_USER,",
-                "1": "DEXBLES_REASON_UNKNOWN,",
-                "2": "Reserved,",
-                "3": "DEXBLES_REASON_TX_END_OF_LIFE,",
-                "4": "DEXBLES_REASON_TRANSMITTER_ERROR,",
-                "5": "DEXBLES_REASON_SESSION_STOP_SUCCESS,",
-                "6": "DEXBLES_REASON_TRANSMITTER_NOT_IN_SESSION,",
+                "0": "CGMBLES_REASON_USER",
+                "1": "CGMBLES_REASON_UNKNOWN",
+                "2": "Reserved",
+                "3": "CGMBLES_REASON_TX_END_OF_LIFE",
+                "4": "CGMBLES_REASON_TRANSMITTER_ERROR",
+                "5": "CGMBLES_REASON_SESSION_STOP_SUCCESS",
+                "6": "CGMBLES_REASON_TRANSMITTER_NOT_IN_SESSION",
                 "7": "Reserved",
-                "8": "DEXBLES_REASON_NEW_SESSION_STARTED_SUCCESS,",
-                "9": "DEXBLES_REASON_SESSION_STARTED_IN_PROGRESS,",
-                "10": "DEXBLES_REASON_TRANSMITTER_IN_SESSION,",
-                "11": "DEXBLES_REASON_BLESTACK_INVALID,",
-                "12": "DEXBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS,",
-                "13": "DEXBLES_REASON_NO_AUTOCAL_SESSION_IN_PROGRESS"
+                "8": "CGMBLES_REASON_NEW_SESSION_STARTED_SUCCESS",
+                "9": "CGMBLES_REASON_SESSION_STARTED_IN_PROGRESS",
+                "10": "CGMBLES_REASON_TRANSMITTER_IN_SESSION",
+                "11": "CGMBLES_REASON_BLESTACK_INVALID",
+                "12": "CGMBLES_REASON_NEW_AUTOCAL_SESSION_STARTED_SUCCESS",
+                "13": "CGMBLES_REASON_AUTOCAL_SESSION_IN_PROGRESS",
+                "15": "CGMBLES_REASON_SENSOR_ERROR",
+                "21": "CGMBLES_REASON_STALE_START_CMD",
+                "22": "CGMBLES_REASON_STALE_STOP_CMD",
+                "23": "CGMBLES_REASON_USER_CHANGED_SENSOR_TYPE",
+                "24": "CGMBLES_REASON_INVALID_START_SESSION"
               }
             ]
           ]
@@ -1134,27 +1862,10 @@
     "229": {
       "name": "LID_AA_USER_MODE_CHANGE",
       "data": {
-        "exerciseChoice": {
-          "type": "uint8",
-          "offset": 10,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "Continuous",
-                "1": "Timed"
-              }
-            ]
-          ]
-        },
-        "exerciseTime": {
-          "type": "uint16",
-          "offset": 8,
-          "uom": "minutes"
-        },
         "currentUserMode": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1169,7 +1880,8 @@
         },
         "previousUserMode": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1184,7 +1896,8 @@
         },
         "requestedAction": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1203,33 +1916,13 @@
         },
         "sleepStartedByGui": {
           "type": "uint8",
-          "offset": 7,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "FALSE",
-                "1": "TRUE"
-              }
-            ]
-          ]
-        },
-        "exerciseStoppedByTimer": {
-          "type": "uint8",
-          "offset": 11,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "False",
-                "1": "True"
-              }
-            ]
-          ]
+          "offset": 4,
+          "uom": "Boolean"
         },
         "activeSleepSchedule": {
           "type": "uint8",
-          "offset": 6,
+          "offset": 5,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -1242,18 +1935,34 @@
             ]
           ]
         },
-        "eatingSoonStoppedByTimer": {
+        "exerciseStoppedByTimer": {
           "type": "uint8",
-          "offset": 15,
+          "offset": 8,
+          "uom": "Boolean"
+        },
+        "exerciseChoice": {
+          "type": "uint8",
+          "offset": 9,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
               {
-                "0": "False",
-                "1": "True"
+                "0": "Continuous",
+                "1": "Timed"
               }
             ]
           ]
+        },
+        "exerciseTime": {
+          "type": "uint16",
+          "offset": 10,
+          "uom": "minutes"
+        },
+        "eatingSoonStoppedByTimer": {
+          "type": "uint8",
+          "offset": 12,
+          "uom": "Boolean"
         }
       }
     },
@@ -1262,7 +1971,8 @@
       "data": {
         "currentPcm": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1277,7 +1987,8 @@
         },
         "previousPcm": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1292,68 +2003,28 @@
         },
         "pumpSuspended": {
           "type": "uint8",
-          "offset": 1,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "FALSE",
-                "1": "TRUE"
-              }
-            ]
-          ]
+          "offset": 2,
+          "uom": "Boolean"
         },
         "calculationAvailable": {
           "type": "uint8",
-          "offset": 0,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "FALSE",
-                "1": "TRUE"
-              }
-            ]
-          ]
+          "offset": 3,
+          "uom": "Boolean"
         },
         "cgmAvailable": {
           "type": "uint8",
-          "offset": 7,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "FALSE",
-                "1": "TRUE"
-              }
-            ]
-          ]
+          "offset": 4,
+          "uom": "Boolean"
         },
         "closedLoopPreferred": {
           "type": "uint8",
-          "offset": 6,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "FALSE",
-                "1": "TRUE"
-              }
-            ]
-          ]
+          "offset": 5,
+          "uom": "Boolean"
         },
         "sufficientClosedLoopParams": {
           "type": "uint8",
-          "offset": 5,
-          "transform": [
-            [
-              "enum",
-              {
-                "0": "FALSE",
-                "1": "TRUE"
-              }
-            ]
-          ]
+          "offset": 6,
+          "uom": "Boolean"
         }
       }
     },
@@ -1362,21 +2033,23 @@
       "data": {
         "glucoseValueStatus": {
           "type": "uint16",
-          "offset": 2,
+          "offset": 0,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
               {
-                "0": "\"currentGlucoseDisplayValue\" contains the glucose reading",
-                "1": "The glucose reading is \"high\", \"currentGlucoseDisplayValue\" set to 0",
-                "2": "The glucose reading is \"low\", \"currentGlucoseDisplayValue\" set to 0"
+                "0": "currentGlucoseDisplayValue contains the glucose reading",
+                "1": "The glucose reading is high, currentGlucoseDisplayValue set to 0",
+                "2": "The glucose reading is low, currentGlucoseDisplayValue set to 0"
               }
             ]
           ]
         },
         "cgmDataType": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -1392,27 +2065,22 @@
         },
         "rate": {
           "type": "int8",
-          "offset": 0,
-          "transform": [
-            [
-              "ratio",
-              0.1
-            ]
-          ],
+          "offset": 3,
           "uom": "mg/dL/min"
         },
         "algorithmState": {
           "type": "uint8",
-          "offset": 7
+          "offset": 4,
+          "uom": "Enum"
         },
         "rssi": {
           "type": "int8",
-          "offset": 6,
+          "offset": 5,
           "uom": "dBm"
         },
         "currentGlucoseDisplayValue": {
           "type": "uint16",
-          "offset": 4,
+          "offset": 6,
           "uom": "mg/dL"
         },
         "egvTimeStamp": {
@@ -1422,7 +2090,8 @@
         },
         "egvInfoBitmask": {
           "type": "uint16",
-          "offset": 14,
+          "offset": 12,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -1435,14 +2104,21 @@
                 "5": "Valid timestamp",
                 "6": "Valid EGV (valid range)",
                 "7": "Valid algState (algState is 6, 7, or 14)",
-                "8": "EGV was successfully added to CGM subsystem array (e.g.,"
+                "8": "EGV was successfully added to CGM subsystem array (e.g.",
+                "11": "Sensor Type (this should be 1 for this G6 log)*",
+                "12": "Sensor Type (this should be 1 for this G6 log)*",
+                "13": "Sensor Type (this should be 1 for this G6 log)*"
               }
             ]
           ]
         },
         "interval": {
           "type": "uint8",
-          "offset": 13
+          "offset": 14
+        },
+        "reservedD15": {
+          "type": "uint8",
+          "offset": 15
         }
       }
     },
@@ -1451,7 +2127,8 @@
       "data": {
         "commandedRateSource": {
           "type": "uint16",
-          "offset": 2,
+          "offset": 0,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1465,24 +2142,28 @@
             ]
           ]
         },
-        "commandedRate": {
-          "type": "uint16",
-          "offset": 6,
-          "uom": "milliunits/hr"
+        "reservedA2": {
+          "type": "uint8",
+          "offset": 2
         },
-        "profileBasalRate": {
+        "commandedRate": {
           "type": "uint16",
           "offset": 4,
           "uom": "milliunits/hr"
         },
+        "profileBasalRate": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "milliunits/hr"
+        },
         "algorithmRate": {
           "type": "uint16",
-          "offset": 10,
+          "offset": 8,
           "uom": "milliunits/hr"
         },
         "tempRate": {
           "type": "uint16",
-          "offset": 8,
+          "offset": 10,
           "uom": "milliunits/hr"
         }
       }
@@ -1492,11 +2173,12 @@
       "data": {
         "bolusId": {
           "type": "uint16",
-          "offset": 2
+          "offset": 0
         },
         "bolusDeliveryStatus": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1509,7 +2191,8 @@
         },
         "bolusType": {
           "type": "uint8",
-          "offset": 0,
+          "offset": 3,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -1519,14 +2202,16 @@
                 "2": "Override",
                 "3": "Correction",
                 "4": "Carb",
-                "5": "Eating Soon Mode"
+                "5": "Eating Soon Mode",
+                "6": "Queued"
               }
             ]
           ]
         },
         "bolusSource": {
           "type": "uint8",
-          "offset": 7,
+          "offset": 4,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1540,38 +2225,40 @@
                 "6": "Reserved",
                 "7": "Algorithm",
                 "8": "BLE",
-                "9": "Eating Soon Bolus"
+                "9": "Eating Soon Bolus",
+                "10": "Reserved",
+                "11": "BLE with AID Recommendation"
               }
             ]
           ]
         },
         "remoteId": {
           "type": "uint8",
-          "offset": 6
+          "offset": 5
         },
         "requestedNow": {
           "type": "uint16",
-          "offset": 4,
+          "offset": 6,
           "uom": "milliunits"
         },
         "requestedLater": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "milliunits"
+        },
+        "correction": {
           "type": "uint16",
           "offset": 10,
           "uom": "milliunits"
         },
         "extendedDurationRequested": {
           "type": "uint16",
-          "offset": 14,
+          "offset": 12,
           "uom": "minutes"
         },
         "deliveredTotal": {
           "type": "uint16",
-          "offset": 12,
-          "uom": "milliunits"
-        },
-        "correction": {
-          "type": "uint16",
-          "offset": 8,
+          "offset": 14,
           "uom": "milliunits"
         }
       }
@@ -1602,7 +2289,8 @@
       "data": {
         "pumpControlState": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -1617,7 +2305,8 @@
         },
         "usermode": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -1631,7 +2320,8 @@
         },
         "sensorType": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -1639,10 +2329,36 @@
                 "0": "CGM_TYPE_NONE",
                 "1": "CGM_TYPE_DEXCOM_G6",
                 "2": "CGM_TYPE_LIBRE2",
-                "3": "CGM_TYPE_DEXCOM_G7"
+                "3": "CGM_TYPE_DEXCOM_G7",
+                "4": "CGM_TYPE_LIBRE3"
               }
             ]
           ]
+        },
+        "weightUnit": {
+          "type": "uint8",
+          "offset": 3,
+          "uom": "Enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Weight Unit Not Set",
+                "1": "Weight is in Pounds (lbs)",
+                "2": "Weight is in Kilograms (kg)"
+              }
+            ]
+          ]
+        },
+        "weight": {
+          "type": "uint16",
+          "offset": 4,
+          "uom": "lbs or kg"
+        },
+        "currentTdIpop": {
+          "type": "uint8",
+          "offset": 6,
+          "uom": "units"
         }
       }
     },
@@ -1651,17 +2367,58 @@
       "data": {
         "dalertId": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "dalerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alert_CGM_DEPRECATED_3",
+                "1": "Alert_CGM_FIXED_LOW",
+                "2": "Alert_CGM_USER_HIGH_EGV",
+                "3": "Alert_CGM_USER_LOW_EGV",
+                "4": "Alert_CGM_CALIBRATION_REQUEST",
+                "5": "Alert_CGM_RISE",
+                "6": "Alert_CGM_RAPID_RISE",
+                "7": "Alert_CGM_FALL",
+                "8": "Alert_CGM_RAPID_FALL",
+                "9": "Alert_CGM_CALIB_ERROR",
+                "10": "Alert_CGM_CALIB_HIGH_WEDGE",
+                "11": "Alert_CGM_SENSOR_FAILED",
+                "12": "Alert_CGM_SENSOR_EXPIRING",
+                "13": "Alert_CGM_SENSOR_EXPIRED",
+                "14": "Alert_CGM_OUT_OF_RANGE",
+                "15": "Alert_CGM_DEPRECATED",
+                "16": "Alert_CGM_CALIB_START_FIRST",
+                "17": "Alert_CGM_CALIB_START_SECOND",
+                "18": "Alert_CGM_CALIB_REQUIRED",
+                "19": "Alert_CGM_LOW_TX_BATTERY",
+                "20": "Alert_CGM_TRANSMITTER_ERROR",
+                "21": "Alert_CGM_DEPRECATED_2",
+                "22": "Alert_CGM_SENSOR_EXPIRING_SOON",
+                "23": "Alert_CGM_DEPRECATED_4",
+                "24": "Alert_CGM_URGENT_LOW_SOON",
+                "25": "Alert_CGM_SENSOR_REUSE",
+                "26": "Alert_CGM_SENSOR_TEMP",
+                "27": "Alert_CGM_CONNECTION_ERROR",
+                "28": "Alert_CGM_CHECK_SENSOR",
+                "29": "Alert_CGM_EGV_UNUSABLE",
+                "30": "Alert_CGM_UNUSED1",
+                "31": "Alert_CGM_GRACE_PERIOD_START",
+                "32": "Alert_CGM_GRACE_PERIOD_EXPIRING_SOON",
+                "33": "NUM_CGM_ALERTS"
+              }
             ]
           ]
         },
         "sensorType": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -1692,17 +2449,58 @@
       "data": {
         "dalertId": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "dalerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alert_CGM_DEPRECATED_3",
+                "1": "Alert_CGM_FIXED_LOW",
+                "2": "Alert_CGM_USER_HIGH_EGV",
+                "3": "Alert_CGM_USER_LOW_EGV",
+                "4": "Alert_CGM_CALIBRATION_REQUEST",
+                "5": "Alert_CGM_RISE",
+                "6": "Alert_CGM_RAPID_RISE",
+                "7": "Alert_CGM_FALL",
+                "8": "Alert_CGM_RAPID_FALL",
+                "9": "Alert_CGM_CALIB_ERROR",
+                "10": "Alert_CGM_CALIB_HIGH_WEDGE",
+                "11": "Alert_CGM_SENSOR_FAILED",
+                "12": "Alert_CGM_SENSOR_EXPIRING",
+                "13": "Alert_CGM_SENSOR_EXPIRED",
+                "14": "Alert_CGM_OUT_OF_RANGE",
+                "15": "Alert_CGM_DEPRECATED",
+                "16": "Alert_CGM_CALIB_START_FIRST",
+                "17": "Alert_CGM_CALIB_START_SECOND",
+                "18": "Alert_CGM_CALIB_REQUIRED",
+                "19": "Alert_CGM_LOW_TX_BATTERY",
+                "20": "Alert_CGM_TRANSMITTER_ERROR",
+                "21": "Alert_CGM_DEPRECATED_2",
+                "22": "Alert_CGM_SENSOR_EXPIRING_SOON",
+                "23": "Alert_CGM_DEPRECATED_4",
+                "24": "Alert_CGM_URGENT_LOW_SOON",
+                "25": "Alert_CGM_SENSOR_REUSE",
+                "26": "Alert_CGM_SENSOR_TEMP",
+                "27": "Alert_CGM_CONNECTION_ERROR",
+                "28": "Alert_CGM_CHECK_SENSOR",
+                "29": "Alert_CGM_EGV_UNUSABLE",
+                "30": "Alert_CGM_UNUSED1",
+                "31": "Alert_CGM_GRACE_PERIOD_START",
+                "32": "Alert_CGM_GRACE_PERIOD_EXPIRING_SOON",
+                "33": "NUM_CGM_ALERTS"
+              }
             ]
           ]
         },
         "sensorType": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -1721,17 +2519,58 @@
       "data": {
         "dalertId": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "dalerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alert_CGM_DEPRECATED_3",
+                "1": "Alert_CGM_FIXED_LOW",
+                "2": "Alert_CGM_USER_HIGH_EGV",
+                "3": "Alert_CGM_USER_LOW_EGV",
+                "4": "Alert_CGM_CALIBRATION_REQUEST",
+                "5": "Alert_CGM_RISE",
+                "6": "Alert_CGM_RAPID_RISE",
+                "7": "Alert_CGM_FALL",
+                "8": "Alert_CGM_RAPID_FALL",
+                "9": "Alert_CGM_CALIB_ERROR",
+                "10": "Alert_CGM_CALIB_HIGH_WEDGE",
+                "11": "Alert_CGM_SENSOR_FAILED",
+                "12": "Alert_CGM_SENSOR_EXPIRING",
+                "13": "Alert_CGM_SENSOR_EXPIRED",
+                "14": "Alert_CGM_OUT_OF_RANGE",
+                "15": "Alert_CGM_DEPRECATED",
+                "16": "Alert_CGM_CALIB_START_FIRST",
+                "17": "Alert_CGM_CALIB_START_SECOND",
+                "18": "Alert_CGM_CALIB_REQUIRED",
+                "19": "Alert_CGM_LOW_TX_BATTERY",
+                "20": "Alert_CGM_TRANSMITTER_ERROR",
+                "21": "Alert_CGM_DEPRECATED_2",
+                "22": "Alert_CGM_SENSOR_EXPIRING_SOON",
+                "23": "Alert_CGM_DEPRECATED_4",
+                "24": "Alert_CGM_URGENT_LOW_SOON",
+                "25": "Alert_CGM_SENSOR_REUSE",
+                "26": "Alert_CGM_SENSOR_TEMP",
+                "27": "Alert_CGM_CONNECTION_ERROR",
+                "28": "Alert_CGM_CHECK_SENSOR",
+                "29": "Alert_CGM_EGV_UNUSABLE",
+                "30": "Alert_CGM_UNUSED1",
+                "31": "Alert_CGM_GRACE_PERIOD_START",
+                "32": "Alert_CGM_GRACE_PERIOD_EXPIRING_SOON",
+                "33": "NUM_CGM_ALERTS"
+              }
             ]
           ]
         },
         "sensorType": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -1746,6 +2585,7 @@
         "ackSource": {
           "type": "uint32",
           "offset": 4,
+          "uom": "enum",
           "transform": [
             [
               "enum",
@@ -1763,7 +2603,8 @@
       "data": {
         "glucoseValueStatus": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1777,7 +2618,8 @@
         },
         "cgmDataType": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -1785,26 +2627,20 @@
                 "0": "Five Minute Reading (FMR)",
                 "1": "Backfill",
                 "4": "None",
-                "5": "One Minute Reading (OMR)",
-                "6": "Real Time Reading"
+                "5": "One Minute Reading (OMR)"
               }
             ]
           ]
         },
         "rate": {
           "type": "int16",
-          "offset": 0,
-          "transform": [
-            [
-              "ratio",
-              0.1
-            ]
-          ],
+          "offset": 2,
           "uom": "mg/dL/min"
         },
         "algorithmState": {
           "type": "uint8",
-          "offset": 7,
+          "offset": 4,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1816,19 +2652,20 @@
                 "103": "Temp High State",
                 "104": "Temp Low State",
                 "105": "Invalid Data State",
-                "106": "Other State"
+                "106": "Other DQ State",
+                "107": "EGV Unusable Condition"
               }
             ]
           ]
         },
         "rssi": {
           "type": "int8",
-          "offset": 6,
+          "offset": 5,
           "uom": "dBm"
         },
         "currentGlucoseDisplayValue": {
           "type": "uint16",
-          "offset": 4,
+          "offset": 6,
           "uom": "mg/dL"
         },
         "egvTimeStamp": {
@@ -1838,29 +2675,34 @@
         },
         "egvInfoBitmask": {
           "type": "uint16",
-          "offset": 14,
+          "offset": 12,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
               {
                 "0": "Five Minute Reading (FMR)",
                 "1": "Backfill",
-                "2": "Immediate match value",
-                "3": "CRR (EGV is result of calibration, bit:14 was set to 1)",
                 "4": "NO_EGV message",
                 "5": "Valid timestamp",
                 "6": "Valid EGV (valid range)",
                 "7": "Valid algState (algState is 100)",
                 "8": "EGV was successfully added to CGM subsystem array (e.g., not a duplicate)",
                 "9": "OMR reading type",
-                "10": "Real Time Reading from NFC scan"
+                "11": "Sensor Type (this should be 2 for this FSL2 log)",
+                "12": "Sensor Type (this should be 2 for this FSL2 log)",
+                "13": "Sensor Type (this should be 2 for this FSL2 log)"
               }
             ]
           ]
         },
         "interval": {
           "type": "uint8",
-          "offset": 13
+          "offset": 14
+        },
+        "reservedD15": {
+          "type": "uint8",
+          "offset": 15
         }
       }
     },
@@ -1884,7 +2726,8 @@
       "data": {
         "glucoseValueStatus": {
           "type": "uint16",
-          "offset": 2,
+          "offset": 0,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1892,14 +2735,15 @@
                 "0": "Precise Value",
                 "1": "Special High",
                 "2": "Special Low",
-                "6": "Do Not Show"
+                "6": "Do Not Show, Do Not Store"
               }
             ]
           ]
         },
         "cgmDataType": {
           "type": "uint8",
-          "offset": 1,
+          "offset": 2,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -1915,18 +2759,13 @@
         },
         "rate": {
           "type": "int8",
-          "offset": 0,
-          "transform": [
-            [
-              "ratio",
-              0.1
-            ]
-          ],
-          "uom": "mg/dL/min/10"
+          "offset": 3,
+          "uom": "mg/dL/min"
         },
         "algorithmState": {
           "type": "uint8",
-          "offset": 7,
+          "offset": 4,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -1948,12 +2787,12 @@
         },
         "rssi": {
           "type": "int8",
-          "offset": 6,
+          "offset": 5,
           "uom": "dBm"
         },
         "currentGlucoseDisplayValue": {
           "type": "uint16",
-          "offset": 4,
+          "offset": 6,
           "uom": "mg/dL"
         },
         "egvTimeStamp": {
@@ -1963,7 +2802,8 @@
         },
         "egvInfoBitmask": {
           "type": "uint16",
-          "offset": 14,
+          "offset": 12,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -1976,16 +2816,23 @@
                 "5": "Valid timestamp",
                 "6": "Valid EGV (valid range)",
                 "7": "Valid algState (algState is 32)",
-                "8": "EGV was successfully added to CGM subsystem array (e.g.,",
+                "8": "EGV was successfully added to CGM subsystem array (e.g.",
                 "9": "Reserved",
-                "10": "Reserved"
+                "10": "Reserved",
+                "11": "Sensor Type (this should be 3 for this G7 log)",
+                "12": "Sensor Type (this should be 3 for this G7 log)",
+                "13": "Sensor Type (this should be 3 for this G7 log)"
               }
             ]
           ]
         },
         "interval": {
           "type": "uint8",
-          "offset": 13
+          "offset": 14
+        },
+        "reservedD15": {
+          "type": "uint8",
+          "offset": 15
         }
       }
     },
@@ -1999,7 +2846,7 @@
         },
         "sessionDuration": {
           "type": "uint8",
-          "offset": 7,
+          "offset": 4,
           "uom": "days"
         }
       }
@@ -2019,12 +2866,13 @@
         },
         "sessionDuration": {
           "type": "uint8",
-          "offset": 11,
+          "offset": 8,
           "uom": "days"
         },
         "sessionStopReason": {
           "type": "uint8",
-          "offset": 10
+          "offset": 9,
+          "uom": "enum"
         }
       }
     },
@@ -2043,12 +2891,13 @@
         },
         "sessionDuration": {
           "type": "uint8",
-          "offset": 11,
+          "offset": 8,
           "uom": "days"
         },
         "sessionJoinReason": {
           "type": "uint8",
-          "offset": 10
+          "offset": 9,
+          "uom": "enum"
         }
       }
     },
@@ -2072,41 +2921,85 @@
         },
         "sessionDuration": {
           "type": "uint8",
-          "offset": 15,
+          "offset": 12,
           "uom": "days"
         },
         "sessionStopReason": {
           "type": "uint8",
-          "offset": 14
+          "offset": 13,
+          "uom": "enum"
         },
         "stopSessionCode": {
           "type": "uint8",
-          "offset": 13
+          "offset": 14,
+          "uom": "enum"
         }
       }
     },
     "460": {
-      "name": "LID_CGM_ALERT_ACTIVATED_FSL2",
+      "name": "LID_CGM_ALERT_ACTIVATED_ABT",
       "data": {
         "dalertId": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "dalerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alert_CGM_DEPRECATED_3",
+                "1": "Alert_CGM_FIXED_LOW",
+                "2": "Alert_CGM_USER_HIGH_EGV",
+                "3": "Alert_CGM_USER_LOW_EGV",
+                "4": "Alert_CGM_CALIBRATION_REQUEST",
+                "5": "Alert_CGM_RISE",
+                "6": "Alert_CGM_RAPID_RISE",
+                "7": "Alert_CGM_FALL",
+                "8": "Alert_CGM_RAPID_FALL",
+                "9": "Alert_CGM_CALIB_ERROR",
+                "10": "Alert_CGM_CALIB_HIGH_WEDGE",
+                "11": "Alert_CGM_SENSOR_FAILED",
+                "12": "Alert_CGM_SENSOR_EXPIRING",
+                "13": "Alert_CGM_SENSOR_EXPIRED",
+                "14": "Alert_CGM_OUT_OF_RANGE",
+                "15": "Alert_CGM_DEPRECATED",
+                "16": "Alert_CGM_CALIB_START_FIRST",
+                "17": "Alert_CGM_CALIB_START_SECOND",
+                "18": "Alert_CGM_CALIB_REQUIRED",
+                "19": "Alert_CGM_LOW_TX_BATTERY",
+                "20": "Alert_CGM_TRANSMITTER_ERROR",
+                "21": "Alert_CGM_DEPRECATED_2",
+                "22": "Alert_CGM_SENSOR_EXPIRING_SOON",
+                "23": "Alert_CGM_DEPRECATED_4",
+                "24": "Alert_CGM_URGENT_LOW_SOON",
+                "25": "Alert_CGM_SENSOR_REUSE",
+                "26": "Alert_CGM_SENSOR_TEMP",
+                "27": "Alert_CGM_CONNECTION_ERROR",
+                "28": "Alert_CGM_CHECK_SENSOR",
+                "29": "Alert_CGM_EGV_UNUSABLE",
+                "30": "Alert_CGM_UNUSED1",
+                "31": "Alert_CGM_GRACE_PERIOD_START",
+                "32": "Alert_CGM_GRACE_PERIOD_EXPIRING_SOON",
+                "33": "NUM_CGM_ALERTS"
+              }
             ]
           ]
         },
         "sensorType": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
                 "0": "Invalid",
-                "2": "CGM_TYPE_LIBRE2"
+                "2": "CGM_TYPE_LIBRE2",
+                "4": "CGM_TYPE_LIBRE3"
               }
             ]
           ]
@@ -2126,27 +3019,69 @@
       }
     },
     "461": {
-      "name": "LID_CGM_ALERT_CLEARED_FSL2",
+      "name": "LID_CGM_ALERT_CLEARED_ABT",
       "data": {
         "dalertId": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "enum",
           "transform": [
             [
               "dictionary",
               "dalerts"
+            ],
+            [
+              "enum",
+              {
+                "0": "Alert_CGM_DEPRECATED_3",
+                "1": "Alert_CGM_FIXED_LOW",
+                "2": "Alert_CGM_USER_HIGH_EGV",
+                "3": "Alert_CGM_USER_LOW_EGV",
+                "4": "Alert_CGM_CALIBRATION_REQUEST",
+                "5": "Alert_CGM_RISE",
+                "6": "Alert_CGM_RAPID_RISE",
+                "7": "Alert_CGM_FALL",
+                "8": "Alert_CGM_RAPID_FALL",
+                "9": "Alert_CGM_CALIB_ERROR",
+                "10": "Alert_CGM_CALIB_HIGH_WEDGE",
+                "11": "Alert_CGM_SENSOR_FAILED",
+                "12": "Alert_CGM_SENSOR_EXPIRING",
+                "13": "Alert_CGM_SENSOR_EXPIRED",
+                "14": "Alert_CGM_OUT_OF_RANGE",
+                "15": "Alert_CGM_DEPRECATED",
+                "16": "Alert_CGM_CALIB_START_FIRST",
+                "17": "Alert_CGM_CALIB_START_SECOND",
+                "18": "Alert_CGM_CALIB_REQUIRED",
+                "19": "Alert_CGM_LOW_TX_BATTERY",
+                "20": "Alert_CGM_TRANSMITTER_ERROR",
+                "21": "Alert_CGM_DEPRECATED_2",
+                "22": "Alert_CGM_SENSOR_EXPIRING_SOON",
+                "23": "Alert_CGM_DEPRECATED_4",
+                "24": "Alert_CGM_URGENT_LOW_SOON",
+                "25": "Alert_CGM_SENSOR_REUSE",
+                "26": "Alert_CGM_SENSOR_TEMP",
+                "27": "Alert_CGM_CONNECTION_ERROR",
+                "28": "Alert_CGM_CHECK_SENSOR",
+                "29": "Alert_CGM_EGV_UNUSABLE",
+                "30": "Alert_CGM_UNUSED1",
+                "31": "Alert_CGM_GRACE_PERIOD_START",
+                "32": "Alert_CGM_GRACE_PERIOD_EXPIRING_SOON",
+                "33": "NUM_CGM_ALERTS"
+              }
             ]
           ]
         },
         "sensorType": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "enum",
           "transform": [
             [
               "enum",
               {
                 "0": "Invalid",
-                "2": "CGM_TYPE_LIBRE2"
+                "2": "CGM_TYPE_LIBRE2",
+                "4": "CGM_TYPE_LIBRE3"
               }
             ]
           ]
@@ -2173,7 +3108,13 @@
         },
         "sessionJoinReason": {
           "type": "uint8",
-          "offset": 9
+          "offset": 9,
+          "uom": "Enum"
+        },
+        "sessionDurationSecs": {
+          "type": "uint32",
+          "offset": 12,
+          "uom": "Seconds"
         }
       }
     },
@@ -2182,7 +3123,8 @@
       "data": {
         "glucoseValueStatus": {
           "type": "uint8",
-          "offset": 3,
+          "offset": 0,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -2196,7 +3138,8 @@
         },
         "cgmDataType": {
           "type": "uint8",
-          "offset": 2,
+          "offset": 1,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -2211,18 +3154,13 @@
         },
         "rate": {
           "type": "int16",
-          "offset": 0,
-          "transform": [
-            [
-              "ratio",
-              0.1
-            ]
-          ],
+          "offset": 2,
           "uom": "mg/dL/min"
         },
         "algorithmState": {
           "type": "uint8",
-          "offset": 7,
+          "offset": 4,
+          "uom": "Enum",
           "transform": [
             [
               "enum",
@@ -2234,12 +3172,12 @@
         },
         "rssi": {
           "type": "int8",
-          "offset": 6,
+          "offset": 5,
           "uom": "dBm"
         },
         "currentGlucoseDisplayValue": {
           "type": "uint16",
-          "offset": 4,
+          "offset": 6,
           "uom": "mg/dL"
         },
         "egvTimeStamp": {
@@ -2249,7 +3187,8 @@
         },
         "egvInfoBitmask": {
           "type": "uint16",
-          "offset": 14,
+          "offset": 12,
+          "uom": "Bitmask",
           "transform": [
             [
               "bitmask",
@@ -2262,16 +3201,20 @@
                 "7": "Valid algState (algState is 100)",
                 "8": "EGV was successfully added to CGM subsystem array (e.g., not a duplicate)",
                 "9": "OMR reading type",
-                "11": "Sensor Type (see CGMTxType enum)",
-                "12": "Sensor Type (see CGMTxType enum)",
-                "13": "Sensor Type (see CGMTxType enum)"
+                "11": "Sensor Type (this should be 4 for this FSL3 log)",
+                "12": "Sensor Type (this should be 4 for this FSL3 log)",
+                "13": "Sensor Type (this should be 4 for this FSL3 log)"
               }
             ]
           ]
         },
         "interval": {
           "type": "uint8",
-          "offset": 13
+          "offset": 14
+        },
+        "reservedD15": {
+          "type": "uint8",
+          "offset": 15
         }
       }
     },
@@ -2295,7 +3238,452 @@
         },
         "sessionStopReason": {
           "type": "uint8",
-          "offset": 9
+          "offset": 9,
+          "uom": "enum"
+        }
+      }
+    },
+    "558": {
+      "name": "LID_SYNC_DOSE_START",
+      "data": {
+        "doseId": {
+          "type": "uint16",
+          "offset": 0
+        },
+        "doseSource": {
+          "type": "uint8",
+          "offset": 2,
+          "uom": "Enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Suspended 1 = Profile 2 = Profile + Temporary Basal Rate 3 = Algorithm 4 = Algorithm + Temporary Control Rate"
+              }
+            ]
+          ]
+        },
+        "tempAdjustmentPercent": {
+          "type": "uint8",
+          "offset": 3,
+          "uom": "% (100.0 = 100%)"
+        },
+        "syncDoseSizeRequested": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        },
+        "currentBasalRate": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "milliunits/hr"
+        },
+        "profileBasalRate": {
+          "type": "uint16",
+          "offset": 10,
+          "uom": "milliunits/hr"
+        },
+        "activeInsulin": {
+          "type": "float32",
+          "offset": 12,
+          "uom": "units"
+        }
+      }
+    },
+    "559": {
+      "name": "LID_SYNC_DOSE_COMPLETE",
+      "data": {
+        "doseId": {
+          "type": "uint16",
+          "offset": 0
+        },
+        "doseSource": {
+          "type": "uint8",
+          "offset": 2,
+          "uom": "Enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Suspended 1 = Profile 2 = Profile + Temporary Basal Rate 3 = Algorithm 4 = Algorithm + Temporary Control Rate"
+              }
+            ]
+          ]
+        },
+        "tempAdjustmentPercent": {
+          "type": "uint8",
+          "offset": 3,
+          "uom": "percent"
+        },
+        "syncDoseSizeRequested": {
+          "type": "uint8",
+          "offset": 3
+        },
+        "syncDoseSizeDelivered": {
+          "type": "float32",
+          "offset": 4,
+          "uom": "units"
+        },
+        "currentBasalRate": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "milliunits/hr"
+        },
+        "activeInsulin": {
+          "type": "float32",
+          "offset": 12,
+          "uom": "units"
+        }
+      }
+    },
+    "562": {
+      "name": "LID_ANT_DAILY_STATUS1",
+      "data": {
+        "closedLoopPreferred": {
+          "type": "uint8",
+          "offset": 0,
+          "uom": "Boolean"
+        },
+        "totalDailyInsulinUnits": {
+          "type": "uint8",
+          "offset": 1,
+          "uom": "units"
+        },
+        "glycemicGoal": {
+          "type": "uint8",
+          "offset": 2,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Relaxed",
+                "1": "Balanced",
+                "2": "Tightest"
+              }
+            ]
+          ]
+        },
+        "priorTherapy": {
+          "type": "uint8",
+          "offset": 3,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Previous Pumping Experience",
+                "1": "Multiple Daily Injections",
+                "2": "Prior Therapy Not Set"
+              }
+            ]
+          ]
+        },
+        "sleepEatSegmentStartTime0": {
+          "type": "uint16",
+          "offset": 4,
+          "uom": "minutes"
+        },
+        "sleepEatSegmentStartTime1": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "minutes"
+        },
+        "sleepEatSegmentStartTime2": {
+          "type": "uint16",
+          "offset": 8,
+          "uom": "minutes"
+        },
+        "sleepEatSegmentStartTime3": {
+          "type": "uint16",
+          "offset": 10,
+          "uom": "minutes"
+        },
+        "sleepEatSegmentType0": {
+          "type": "uint8",
+          "offset": 12,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "None",
+                "1": "Less",
+                "2": "Standard",
+                "3": "More",
+                "4": "Max",
+                "5": "Sleep",
+                "6": "Not Defined"
+              }
+            ]
+          ]
+        },
+        "sleepEatSegmentType1": {
+          "type": "uint8",
+          "offset": 13,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "None",
+                "1": "Less",
+                "2": "Standard",
+                "3": "More",
+                "4": "Max",
+                "5": "Sleep",
+                "6": "Not Defined"
+              }
+            ]
+          ]
+        },
+        "sleepEatSegmentType2": {
+          "type": "uint8",
+          "offset": 14,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "None",
+                "1": "Less",
+                "2": "Standard",
+                "3": "More",
+                "4": "Max",
+                "5": "Sleep",
+                "6": "Not Defined"
+              }
+            ]
+          ]
+        },
+        "sleepEatSegmentType3": {
+          "type": "uint8",
+          "offset": 15,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "None",
+                "1": "Less",
+                "2": "Standard",
+                "3": "More",
+                "4": "Max",
+                "5": "Sleep",
+                "6": "Not Defined"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "563": {
+      "name": "LID_ANT_DAILY_STATUS2",
+      "data": {
+        "pumpControlState": {
+          "type": "uint8",
+          "offset": 0,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "PCM No Control (No cartridge installed)",
+                "1": "PCM Open Loop",
+                "2": "PCM Pining",
+                "3": "PCM Closed Loop"
+              }
+            ]
+          ]
+        },
+        "sensorType": {
+          "type": "uint8",
+          "offset": 1,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "CGM_TYPE_NONE",
+                "1": "CGM_TYPE_DEXCOM_G6",
+                "3": "CGM_TYPE_DEXCOM_G7",
+                "4": "CGM_TYPE_LIBRE3"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "564": {
+      "name": "LID_TEMP_ADJUSTMENT_COMPLETED",
+      "data": {
+        "stopReason": {
+          "type": "uint16",
+          "offset": 0,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "User Aborted",
+                "1": "Terminated by Alarm",
+                "3": "Completed",
+                "8": "User aborted ble",
+                "10": "Terminated by pump control mode change (unable to convert)",
+                "11": "Terminated by closed loop preferred change"
+              }
+            ]
+          ]
+        },
+        "tempRateId": {
+          "type": "uint16",
+          "offset": 2
+        },
+        "timeLeft": {
+          "type": "uint32",
+          "offset": 4,
+          "uom": "ms"
+        }
+      }
+    },
+    "565": {
+      "name": "LID_TEMP_ADJUSTMENT_ACTIVATED",
+      "data": {
+        "requestedPercent": {
+          "type": "uint16",
+          "offset": 0,
+          "uom": "%"
+        },
+        "tempBasalPercent": {
+          "type": "uint16",
+          "offset": 2,
+          "uom": "%"
+        },
+        "duration": {
+          "type": "uint32",
+          "offset": 8,
+          "uom": "ms"
+        },
+        "requestedAdjustmentType": {
+          "type": "uint16",
+          "offset": 12,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "Temporary Basal Rate (from GUI)",
+                "1": "Unused (OBE)",
+                "2": "Temporary Basal Rate (from BLE)",
+                "3": "Temporary Control Rate (from BLE)"
+              }
+            ]
+          ]
+        },
+        "tempRateId": {
+          "type": "uint16",
+          "offset": 14
+        }
+      }
+    },
+    "566": {
+      "name": "LID_ANT_SLEEP_EAT_SCHED_SETTING_CHANGE",
+      "data": {
+        "sleepEatSegmentStartTime0": {
+          "type": "uint16",
+          "offset": 0,
+          "uom": "minutes"
+        },
+        "sleepEatSegmentStartTime1": {
+          "type": "uint16",
+          "offset": 2,
+          "uom": "minutes"
+        },
+        "sleepEatSegmentStartTime2": {
+          "type": "uint16",
+          "offset": 4,
+          "uom": "minutes"
+        },
+        "sleepEatSegmentStartTime3": {
+          "type": "uint16",
+          "offset": 6,
+          "uom": "minutes"
+        },
+        "sleepEatSegmentType0": {
+          "type": "uint8",
+          "offset": 8,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "None",
+                "1": "Less",
+                "2": "Standard",
+                "3": "More",
+                "4": "Max",
+                "5": "Sleep",
+                "6": "Not Defined"
+              }
+            ]
+          ]
+        },
+        "sleepEatSegmentType1": {
+          "type": "uint8",
+          "offset": 9,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "None",
+                "1": "Less",
+                "2": "Standard",
+                "3": "More",
+                "4": "Max",
+                "5": "Sleep",
+                "6": "Not Defined"
+              }
+            ]
+          ]
+        },
+        "sleepEatSegmentType2": {
+          "type": "uint8",
+          "offset": 10,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "None",
+                "1": "Less",
+                "2": "Standard",
+                "3": "More",
+                "4": "Max",
+                "5": "Sleep",
+                "6": "Not Defined"
+              }
+            ]
+          ]
+        },
+        "sleepEatSegmentType3": {
+          "type": "uint8",
+          "offset": 11,
+          "uom": "enum",
+          "transform": [
+            [
+              "enum",
+              {
+                "0": "None",
+                "1": "Less",
+                "2": "Standard",
+                "3": "More",
+                "4": "Max",
+                "5": "Sleep",
+                "6": "Not Defined"
+              }
+            ]
+          ]
         }
       }
     }

@@ -148,11 +148,10 @@ class TestEnumAndRatioFields(unittest.TestCase):
         self.assertEqual(ev.previousUserMode,
                          eventtypes.LidAaUserModeChange.PrevioususermodeEnum.Sleeping)
 
-    def test_ratio_field_scales(self):
-        # rate:-6 -> -0.6 mg/dL/min (rateRaw ×0.1)
+    def test_rate_is_unscaled(self):
+        # rate:-6 is in tenths of mg/dL/min; the schema no longer scales it
         ev = Event(CGM_399)
-        self.assertEqual(ev.rateRaw, -6)
-        self.assertAlmostEqual(ev.rate, -0.6)
+        self.assertEqual(ev.rate, -6)
 
     def test_enum_zero_value_resolves(self):
         # glucoseValueStatus:0 -> PreciseValue (0 must not be treated as missing)

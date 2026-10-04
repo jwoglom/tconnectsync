@@ -155,7 +155,7 @@ class ProcessUserMode:
     def sleep_to_nsentry(self, start: eventtypes.LidAaUserModeChange, stop: Optional[eventtypes.LidAaUserModeChange] = None, time_end: Optional[arrow.Arrow] = None) -> Optional[dict]:
         if start and stop:
             reason = None
-            if start.sleepStartedByGui == eventtypes.LidAaUserModeChange.SleepstartedbyguiEnum.TrueVal:
+            if start.sleepStartedByGui:
                 reason = "Sleep (Manual)"
             elif start.activeSleepSchedule:
                 reason = "Sleep (Scheduled)"
@@ -170,7 +170,7 @@ class ProcessUserMode:
             )
         elif start:
             reason = None
-            if start.sleepStartedByGui == eventtypes.LidAaUserModeChange.SleepstartedbyguiEnum.TrueVal:
+            if start.sleepStartedByGui:
                 reason = "Sleep (Manual)"
             elif start.activeSleepScheduleRaw:
                 reason = "Sleep (Scheduled)"
@@ -193,7 +193,7 @@ class ProcessUserMode:
             if start.exerciseChoice == eventtypes.LidAaUserModeChange.ExercisechoiceEnum.Timed:
                 reason = "Exercise (Timed)"
 
-            if stop.exerciseStoppedByTimer == eventtypes.LidAaUserModeChange.ExercisestoppedbytimerEnum.TrueVal:
+            if stop.exerciseStoppedByTimer:
                 reason += " (Stopped by timer)"
 
             duration_mins = (stop.eventTimestamp - start.eventTimestamp).total_seconds() / 60
@@ -244,7 +244,7 @@ class ProcessUserMode:
             self.nightscout.delete_entry('treatments/%s' % exercise_last_upload["_id"])
 
         reason = exercise_last_upload["reason"].replace(" - %s" % NOT_ENDED, "")
-        if event.exerciseStoppedByTimer == eventtypes.LidAaUserModeChange.ExercisestoppedbytimerEnum.TrueVal:
+        if event.exerciseStoppedByTimer:
             reason += " (Stopped by timer)"
 
         duration_mins = (event.eventTimestamp - arrow.get(exercise_last_upload["created_at"])).total_seconds() / 60

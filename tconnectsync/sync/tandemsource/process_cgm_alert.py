@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 CgmAlertEvent = Union[
     eventtypes.LidCgmAlertActivated,
     eventtypes.LidCgmAlertActivatedDex,
-    eventtypes.LidCgmAlertActivatedFsl2,
+    eventtypes.LidCgmAlertActivatedAbt,
 ]
 
 class ProcessCGMAlert:
@@ -98,7 +98,7 @@ class ProcessCGMAlert:
                 reason = ("Dexcom CGM Alert (%s)" % alert.dalertId.name) if alert.dalertId else "Dexcom CGM Alert (Unknown)",
                 pump_event_id = "%s" % alert.seqNum
             )
-        elif type(alert) == eventtypes.LidCgmAlertActivatedFsl2:
+        elif type(alert) == eventtypes.LidCgmAlertActivatedAbt:
             return NightscoutEntry.cgm_alert(
                 created_at = alert.eventTimestamp.format(),
                 reason = ("Libre CGM Alert (%s)" % alert.dalertId.name) if alert.dalertId else "Libre CGM Alert (Unknown)",

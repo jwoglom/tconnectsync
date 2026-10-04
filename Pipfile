@@ -9,6 +9,7 @@ flake8 = "*"
 pytest = "*"
 coverage = "*"
 mypy = "*"
+pyyaml = "*"
 
 [packages]
 tconnectsync = {path = "."}

@@ -11,8 +11,7 @@ from tconnectsync.eventparser.raw_event import RawEvent
 class TestLidCannulaFilled(unittest.TestCase):
     """61: LID_CANNULA_FILLED. Fixture is a real captured pump-log event.
     Only one distinct eventProperties shape exists in the captures, so a
-    single fixture covers the observed behavior. The extra infusionSetType
-    key is not in the schema and must be ignored by the parser."""
+    single fixture covers the observed behavior."""
     maxDiff = None
 
     def setUp(self):
@@ -51,12 +50,12 @@ class TestLidCannulaFilled(unittest.TestCase):
         self.assertEqual(ev.completionStatus,
                          eventtypes.LidCannulaFilled.CompletionstatusEnum.Completed)
 
-    def test_unknown_infusionsettype_key_is_ignored(self):
-        # infusionSetType is not in the schema; the parser must not raise and
-        # must not expose an attribute for it.
-        ev = Event(self.fixtureCompleted)  # must not raise
-        self.assertFalse(hasattr(ev, "infusionSetType"))
-        self.assertFalse(hasattr(ev, "infusionsettype"))
+    def test_infusionsettype_resolves_to_enum(self):
+        # infusionSetType:0 -> DefaultTubed
+        ev = Event(self.fixtureCompleted)
+        self.assertEqual(ev.infusionSetTypeRaw, 0)
+        self.assertEqual(ev.infusionSetType,
+                         eventtypes.LidCannulaFilled.InfusionsettypeEnum.DefaultTubed)
 
     def test_todict_is_json_serializable(self):
         ev = Event(self.fixtureCompleted)

@@ -87,11 +87,11 @@ class TestLidBolusActivated(unittest.TestCase):
         self.assertEqual(ev.bolusSize, 2)
 
     def test_selectediob_resolves_to_enum(self):
-        # selectedIob:1 -> Swan IOB Meal
+        # selectedIob:1 -> Algorithm IOB
         ev = Event(self.fixtureMeal)
         self.assertEqual(ev.selectedIobRaw, 1)
         self.assertEqual(ev.selectedIob,
-                         eventtypes.LidBolusActivated.SelectediobEnum.SwanIobMeal)
+                         eventtypes.LidBolusActivated.SelectediobEnum.AlgorithmIob)
 
     def test_spareA3_is_ignored(self):
         ev = Event(self.fixtureMeal)

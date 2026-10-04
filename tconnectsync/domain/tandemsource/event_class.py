@@ -17,7 +17,7 @@ class EventClass(set, Enum):  # type: ignore[misc]  # set/Enum both define __has
         events.LidBolexCompleted # extended bolus
     }
     CARTRIDGE = {events.LidCartridgeFilled, events.LidCannulaFilled, events.LidTubingFilled}
-    CGM_ALERT = {events.LidCgmAlertActivated, events.LidCgmAlertActivatedDex, events.LidCgmAlertActivatedFsl2}
+    CGM_ALERT = {events.LidCgmAlertActivated, events.LidCgmAlertActivatedDex, events.LidCgmAlertActivatedAbt}
     _CGM_START = {events.LidCgmStartSessionGx, events.LidCgmStartSessionFsl2}
     _CGM_JOIN = {events.LidCgmJoinSessionGx, events.LidCgmJoinSessionG7, events.LidCgmJoinSessionFsl2, events.LidCgmJoinSessionFsl3}
     _CGM_STOP = {events.LidCgmStopSessionGx, events.LidCgmStopSessionG7, events.LidCgmStopSessionFsl2, events.LidCgmStopSessionFsl3}
