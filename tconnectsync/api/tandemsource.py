@@ -619,7 +619,7 @@ class TandemSourceApi:
             'pumperId': self.pumperId,
             'startDate': '%sT00:00:00Z' % minDate,
             'endDate': '%sT23:59:59Z' % maxDate,
-            'eventIds': ','.join(map(str, event_ids_filter)) if event_ids_filter else '',
+            'eventCodes': ','.join(map(str, event_ids_filter)) if event_ids_filter else '',
         })
         return self.get('api/reports/bff/pump-logs/%s?%s' % (device_id, query), {})
 
