@@ -171,6 +171,21 @@ class TestNightscoutEntry(unittest.TestCase):
             }
         )
 
+    def test_insulinchange(self):
+        self.assertEqual(
+            NightscoutEntry.insulinchange(
+                created_at="2021-12-05T00:16:35.058Z",
+                reason="reason"),
+            {
+                "eventType": "Insulin Change",
+                "reason": "reason",
+                "notes": "reason",
+                "created_at": "2021-12-05T00:16:35.058Z",
+                "enteredBy": "Pump (tconnectsync)",
+                "pump_event_id": ""
+            }
+        )
+
     def test_basalsuspension(self):
         self.assertEqual(
             NightscoutEntry.basalsuspension(

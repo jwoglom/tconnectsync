@@ -57,7 +57,7 @@ class TestProcessCartridge(unittest.TestCase):
 
         self.assertEqual(len(p), 1)
         self.assertDictEqual(p[0], {
-            'eventType': 'Site Change',
+            'eventType': 'Insulin Change',
             'reason': 'Cartridge Filled (180u filled)',
             'notes': 'Cartridge Filled (180u filled)',
             'created_at': '2026-05-15 23:50:59-04:00',
@@ -84,7 +84,7 @@ class TestProcessCartridge(unittest.TestCase):
 
         self.assertEqual(len(p), 1)
         self.assertDictEqual(p[0], {
-            'eventType': 'Site Change',
+            'eventType': 'Insulin Change',
             'reason': 'Tubing Filled',
             'notes': 'Tubing Filled',
             'created_at': '2026-05-15 23:50:59-04:00',
@@ -117,6 +117,21 @@ class TestProcessCartridge(unittest.TestCase):
         self.assertEqual(len(p), 1)
         self.assertEqual(p[0]['reason'], 'Cannula Filled (0.3u primed)')
         self.assertEqual(p[0]['pump_event_id'], '448176')
+
+    def test_dedup_is_per_event_type(self):
+        # A site change after every event must not hold back cartridge/tubing fills,
+        # which are deduplicated against the last insulin change (none here).
+        last = {'Site Change': {'created_at': '2026-05-16 01:00:00-04:00'}}
+        self.nightscout.last_uploaded_entry = lambda eventType, *args, **kwargs: last.get(eventType)
+
+        p = self.process.process(
+            list(Events([dict(CARTRIDGE_FILLED), dict(CANNULA_FILLED), dict(TUBING_FILLED)])),
+            None, None)
+
+        self.assertEqual([(e['eventType'], e['reason']) for e in p], [
+            ('Insulin Change', 'Cartridge Filled (180u filled)'),
+            ('Insulin Change', 'Tubing Filled'),
+        ])
 
 
 if __name__ == '__main__':
