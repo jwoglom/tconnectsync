@@ -9,6 +9,7 @@ from ...eventparser import events as eventtypes
 from ...domain.tandemsource.event_class import EventClass
 from ...parser.nightscout import (
     SITECHANGE_EVENTTYPE,
+    INSULINCHANGE_EVENTTYPE,
     NightscoutEntry
 )
 
@@ -31,17 +32,14 @@ class ProcessCartridge:
         return features.PUMP_EVENTS in self.features
 
     def process(self, events: Iterable, time_start: arrow.Arrow, time_end: arrow.Arrow) -> List[dict]:
-        logger.debug("ProcessCartridge: querying for last uploaded entry")
-        last_upload = self.nightscout.last_uploaded_entry(SITECHANGE_EVENTTYPE, time_start=time_start, time_end=time_end)
-        last_upload_time = None
-        if last_upload:
-            last_upload_time = arrow.get(last_upload["created_at"])
-        logger.info("Last Nightscout sitechange upload: %s" % last_upload_time)
+        last_sitechange_time = self.last_upload_time(SITECHANGE_EVENTTYPE, time_start, time_end)
+        last_insulinchange_time = self.last_upload_time(INSULINCHANGE_EVENTTYPE, time_start, time_end)
 
         cartFilledEvents = []
         cannulaFilledEvents = []
         tubingFilledEvents = []
         for event in sorted(events, key=lambda x: x.eventTimestamp):
+            last_upload_time = last_sitechange_time if type(event) == eventtypes.LidCannulaFilled else last_insulinchange_time
             if last_upload_time and arrow.get(event.eventTimestamp) <= last_upload_time:
                 if self.pretend:
                     logger.info("Skipping %s not after last upload time: %s (time range: %s - %s)" % (type(event), event, time_start, time_end))
@@ -71,6 +69,13 @@ class ProcessCartridge:
 
         return ns_entries
 
+    def last_upload_time(self, eventType: str, time_start: arrow.Arrow, time_end: arrow.Arrow):
+        logger.debug("ProcessCartridge: querying for last uploaded %s" % eventType)
+        last_upload = self.nightscout.last_uploaded_entry(eventType, time_start=time_start, time_end=time_end)
+        last_upload_time = arrow.get(last_upload["created_at"]) if last_upload else None
+        logger.info("Last Nightscout %s upload: %s" % (eventType, last_upload_time))
+        return last_upload_time
+
     def write(self, ns_entries: List[dict]) -> int:
         count = 0
         for entry in ns_entries:
@@ -86,7 +91,7 @@ class ProcessCartridge:
     def cart_to_nsentry(self, cartFilled: eventtypes.LidCartridgeFilled) -> dict:
         # insulinVolume is populated on t:slim X2 / Mobi; v2Volume is a legacy fallback.
         volume = cartFilled.insulinVolume or cartFilled.v2Volume
-        return NightscoutEntry.sitechange(
+        return NightscoutEntry.insulinchange(
             created_at = cartFilled.eventTimestamp.format(),
             reason = "Cartridge Filled" + (" (%du filled)" % round(volume) if volume else ""),
             pump_event_id = "%s" % cartFilled.seqNum
@@ -104,7 +109,7 @@ class ProcessCartridge:
     def tubing_to_nsentry(self, tubingFilled: eventtypes.LidTubingFilled) -> dict:
         # primeSize is -1 (sentinel, "not recorded") on real tubing fills; only show a real prime volume.
         primed = tubingFilled.primeSize if tubingFilled.primeSize and tubingFilled.primeSize > 0 else None
-        return NightscoutEntry.sitechange(
+        return NightscoutEntry.insulinchange(
             created_at = tubingFilled.eventTimestamp.format(),
             reason = "Tubing Filled" + (" (%du primed)" % round(primed) if primed else ""),
             pump_event_id = "%s" % tubingFilled.seqNum

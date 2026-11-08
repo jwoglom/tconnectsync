@@ -69,9 +69,9 @@ EXPECTED_WRITES = [
         ('entries', {'type': 'sgv', 'sgv': 167, 'date': 1778731288000, 'dateString': '2026-05-14T00:01:28-0400', 'device': 'Pump (tconnectsync)', 'pump_event_id': '441314'}),
         ('entries', {'type': 'sgv', 'sgv': 149, 'date': 1778731588000, 'dateString': '2026-05-14T00:06:28-0400', 'device': 'Pump (tconnectsync)', 'pump_event_id': '441339'}),
         ('treatments', {'eventType': 'Combo Bolus', 'created_at': '2026-05-14 11:04:18-04:00', 'carbs': 20, 'insulin': 3.53, 'notes': 'BLE Standard Bolus', 'enteredBy': 'Pump (tconnectsync)', 'pump_event_id': '442700,442680,442681,442682', 'glucose': '116'}),
-        ('treatments', {'eventType': 'Site Change', 'reason': 'Cartridge Filled (180u filled)', 'notes': 'Cartridge Filled (180u filled)', 'created_at': '2026-05-15 23:50:59-04:00', 'enteredBy': 'Pump (tconnectsync)', 'pump_event_id': '448073'}),
+        ('treatments', {'eventType': 'Insulin Change', 'reason': 'Cartridge Filled (180u filled)', 'notes': 'Cartridge Filled (180u filled)', 'created_at': '2026-05-15 23:50:59-04:00', 'enteredBy': 'Pump (tconnectsync)', 'pump_event_id': '448073'}),
         ('treatments', {'eventType': 'Site Change', 'reason': 'Cannula Filled (0.3u primed)', 'notes': 'Cannula Filled (0.3u primed)', 'created_at': '2026-05-16 00:14:09-04:00', 'enteredBy': 'Pump (tconnectsync)', 'pump_event_id': '448176'}),
-        ('treatments', {'eventType': 'Site Change', 'reason': 'Tubing Filled', 'notes': 'Tubing Filled', 'created_at': '2026-05-15 23:50:59-04:00', 'enteredBy': 'Pump (tconnectsync)', 'pump_event_id': '448074'}),
+        ('treatments', {'eventType': 'Insulin Change', 'reason': 'Tubing Filled', 'notes': 'Tubing Filled', 'created_at': '2026-05-15 23:50:59-04:00', 'enteredBy': 'Pump (tconnectsync)', 'pump_event_id': '448074'}),
         ('treatments', {'eventType': 'Sleep', 'reason': 'Sleep (Manual)', 'notes': 'Sleep (Manual)', 'duration': 3.9166666666666665, 'created_at': '2026-05-18 10:16:00-04:00', 'enteredBy': 'Pump (tconnectsync)', 'pump_event_id': '456855,456952'}),
     ]
 
