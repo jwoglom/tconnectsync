@@ -8,6 +8,7 @@ ENTERED_BY = "Pump (tconnectsync)"
 BASAL_EVENTTYPE = "Temp Basal"
 BOLUS_EVENTTYPE = "Combo Bolus"
 SITECHANGE_EVENTTYPE = "Site Change"
+INSULINCHANGE_EVENTTYPE = "Insulin Change"
 BASALSUSPENSION_EVENTTYPE = "Basal Suspension"
 BASALRESUME_EVENTTYPE = "Basal Resume"
 ACTIVITY_EVENTTYPE = "Activity"
@@ -97,6 +98,21 @@ class NightscoutEntry:
     def sitechange(created_at, reason="", pump_event_id=""):
         return {
             "eventType": SITECHANGE_EVENTTYPE,
+            "reason": reason,
+            "notes": reason,
+            "created_at": created_at,
+            "enteredBy": ENTERED_BY,
+            "pump_event_id": pump_event_id
+        }
+
+    # A cartridge (reservoir) fill. Nightscout keys a treatment on created_at +
+    # eventType, and the pump logs the cartridge fill and the tubing fill in the
+    # same second, so the two must not share an eventType: the later upload
+    # would replace the earlier one.
+    @staticmethod
+    def insulinchange(created_at, reason="", pump_event_id=""):
+        return {
+            "eventType": INSULINCHANGE_EVENTTYPE,
             "reason": reason,
             "notes": reason,
             "created_at": created_at,

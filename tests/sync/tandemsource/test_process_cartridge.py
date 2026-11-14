@@ -57,7 +57,7 @@ class TestProcessCartridge(unittest.TestCase):
 
         self.assertEqual(len(p), 1)
         self.assertDictEqual(p[0], {
-            'eventType': 'Site Change',
+            'eventType': 'Insulin Change',
             'reason': 'Cartridge Filled (180u filled)',
             'notes': 'Cartridge Filled (180u filled)',
             'created_at': '2026-05-15 23:50:59-04:00',
@@ -118,6 +118,46 @@ class TestProcessCartridge(unittest.TestCase):
         self.assertEqual(p[0]['reason'], 'Cannula Filled (0.3u primed)')
         self.assertEqual(p[0]['pump_event_id'], '448176')
 
+    def test_cartridge_and_tubing_in_same_second_differ_in_event_type(self):
+        # The pump logs both in the same second and Nightscout keys a treatment on
+        # created_at + eventType, so a shared eventType would let the tubing fill
+        # replace the cartridge fill.
+        p = self.process.process(
+            list(Events([dict(CARTRIDGE_FILLED), dict(TUBING_FILLED)])),
+            None, None)
+
+        self.assertEqual(p[0]['created_at'], p[1]['created_at'])
+        self.assertEqual([(e['eventType'], e['reason']) for e in p], [
+            ('Insulin Change', 'Cartridge Filled (180u filled)'),
+            ('Site Change', 'Tubing Filled'),
+        ])
+
+    def test_dedup_is_per_event_type(self):
+        # A site change uploaded after every event must not hold back the cartridge
+        # fill, which is deduplicated against the last insulin change (none here).
+        last = {'Site Change': {'created_at': '2026-05-16 01:00:00-04:00'}}
+        self.nightscout.last_uploaded_entry = lambda eventType, *args, **kwargs: last.get(eventType)
+
+        p = self.process.process(
+            list(Events([dict(CARTRIDGE_FILLED), dict(CANNULA_FILLED), dict(TUBING_FILLED)])),
+            None, None)
+
+        self.assertEqual([(e['eventType'], e['reason']) for e in p], [
+            ('Insulin Change', 'Cartridge Filled (180u filled)'),
+        ])
+
+    def test_dedup_skips_cartridge_at_or_before_last_insulin_change(self):
+        last = {'Insulin Change': {'created_at': '2026-05-15 23:50:59-04:00'}}
+        self.nightscout.last_uploaded_entry = lambda eventType, *args, **kwargs: last.get(eventType)
+
+        p = self.process.process(
+            list(Events([dict(CARTRIDGE_FILLED), dict(CANNULA_FILLED), dict(TUBING_FILLED)])),
+            None, None)
+
+        self.assertEqual([e['reason'] for e in p], [
+            'Cannula Filled (0.3u primed)',
+            'Tubing Filled',
+        ])
 
 if __name__ == '__main__':
     unittest.main()
