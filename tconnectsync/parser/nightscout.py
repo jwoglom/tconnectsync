@@ -193,19 +193,47 @@ class NightscoutEntry:
             "pump_event_id": pump_event_id
         }
 
+    # The pump's battery and, when given, its own insulin on board figure.
+    # iob is what the pump reports, in units; 0.0 is a value, not "missing".
     @staticmethod
-    def devicestatus(created_at, batteryVoltage, batteryPercent, pump_event_id=""):
+    def devicestatus(created_at, batteryVoltage, batteryPercent, pump_event_id="", iob=None):
+        pump = {
+            "clock": created_at,
+            "battery": {
+                "voltage": float(batteryVoltage),
+                "percent": int(batteryPercent) if batteryPercent is not None else None,
+                "status": "%.0f%s" % (batteryPercent, '%')
+            },
+        }
+        if iob is not None:
+            pump["iob"] = {
+                "timestamp": created_at,
+                "iob": float(iob)
+            }
         return {
             "device": ENTERED_BY,
             "created_at": created_at,
-            "pump": {
-                "clock": created_at,
-                "battery": {
-                    "voltage": float(batteryVoltage),
-                    "percent": int(batteryPercent) if batteryPercent else None,
-                    "status": "%.0f%s" % (batteryPercent, '%')
-                },
-            },
+            "pump": pump,
+            "pump_event_id": pump_event_id
+        }
+
+    # The insulin left in the cartridge, in units, as the pump reports it
+    # (0 is a value, not "missing"), with the battery percent of the same
+    # moment when the event has one.
+    @staticmethod
+    def devicestatus_reservoir(created_at, reservoir, batteryPercent=None, pump_event_id=""):
+        pump = {
+            "clock": created_at,
+            "reservoir": float(reservoir),
+        }
+        if batteryPercent is not None:
+            pump["battery"] = {
+                "percent": int(batteryPercent)
+            }
+        return {
+            "device": ENTERED_BY,
+            "created_at": created_at,
+            "pump": pump,
             "pump_event_id": pump_event_id
         }
 

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Tests for the Nightscout date-filter query building in time_range()."""
+"""Tests for the Nightscout query building: the date filter in time_range()
+and the devicestatus "last uploaded" lookup."""
 
 import unittest
 import urllib.parse
+from unittest import mock
 
 import arrow
 
-from tconnectsync.nightscout import time_range
+from tconnectsync.nightscout import NightscoutApi, time_range
 
 
 class TestTimeRangeEncoding(unittest.TestCase):
@@ -62,6 +64,46 @@ class TestTimeRangeEncoding(unittest.TestCase):
 
     def test_omitted_bounds_produce_no_filter(self):
         self.assertEqual(time_range('created_at', None, None), '')
+
+
+class TestLastUploadedDevicestatus(unittest.TestCase):
+    """The pump's status goes up as more than one kind of devicestatus
+    document; has_field asks Nightscout for the newest one of a kind."""
+
+    def requested_url(self, **kwargs):
+        response = mock.Mock(status_code=200)
+        response.json.return_value = [{'created_at': '2026-11-19T16:24:21.000Z'}]
+        with mock.patch('tconnectsync.nightscout.requests.get', return_value=response) as get:
+            ret = NightscoutApi('https://ns.example/', 'secret').last_uploaded_devicestatus(**kwargs)
+        self.assertEqual(ret, {'created_at': '2026-11-19T16:24:21.000Z'})
+        return get.call_args[0][0]
+
+    def test_without_a_field_asks_for_the_newest_of_this_tool(self):
+        url = self.requested_url()
+
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+        self.assertEqual(query['find[device]'], ['Pump (tconnectsync)'])
+        self.assertEqual(query['count'], ['1'])
+        self.assertFalse([k for k in query if '$exists' in k])
+
+    def test_has_field_filters_on_the_field_existing(self):
+        url = self.requested_url(has_field='pump.reservoir')
+
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+        self.assertEqual(query['find[pump.reservoir][$exists]'], ['true'])
+        self.assertEqual(query['find[device]'], ['Pump (tconnectsync)'])
+        self.assertEqual(query['count'], ['1'])
+
+    def test_has_field_keeps_the_date_window(self):
+        url = self.requested_url(
+            has_field='pump.battery.voltage',
+            time_start=arrow.get("2026-11-18T17:00:00+01:00"),
+            time_end=arrow.get("2026-11-19T17:00:00+01:00"))
+
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
+        self.assertEqual(query['find[pump.battery.voltage][$exists]'], ['true'])
+        self.assertEqual(arrow.get(query['find[created_at][$gte]'][0]), arrow.get("2026-11-18T17:00:00+01:00"))
+        self.assertEqual(arrow.get(query['find[created_at][$lte]'][0]), arrow.get("2026-11-19T17:00:00+01:00"))
 
 
 if __name__ == "__main__":

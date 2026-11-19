@@ -26,7 +26,7 @@ class NightscoutApi(tconnectsync.nightscout.NightscoutApi):
     def last_uploaded_activity(self, activityType):
         raise NotImplementedError
 
-    def last_uploaded_devicestatus(self, time_start=None, time_end=None):
+    def last_uploaded_devicestatus(self, time_start=None, time_end=None, has_field=None):
         raise NotImplementedError
 
     def api_status(self):

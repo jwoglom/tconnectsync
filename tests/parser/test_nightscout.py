@@ -156,6 +156,60 @@ class TestNightscoutEntry(unittest.TestCase):
             }
         )
 
+    def test_devicestatus(self):
+        self.assertEqual(
+            NightscoutEntry.devicestatus(
+                created_at="2026-11-19T17:24:21+01:00",
+                batteryVoltage=3.894,
+                batteryPercent=87,
+                pump_event_id="102",
+                iob=2.31),
+            {
+                "device": "Pump (tconnectsync)",
+                "created_at": "2026-11-19T17:24:21+01:00",
+                "pump": {
+                    "clock": "2026-11-19T17:24:21+01:00",
+                    "battery": {"voltage": 3.894, "percent": 87, "status": "87%"},
+                    "iob": {"timestamp": "2026-11-19T17:24:21+01:00", "iob": 2.31}
+                },
+                "pump_event_id": "102"
+            })
+
+    def test_devicestatus_without_iob_has_no_iob(self):
+        entry = NightscoutEntry.devicestatus(
+            created_at="2026-11-19T17:24:21+01:00", batteryVoltage=3.894, batteryPercent=87)
+        self.assertNotIn("iob", entry["pump"])
+
+    def test_devicestatus_keeps_zero(self):
+        entry = NightscoutEntry.devicestatus(
+            created_at="2026-11-19T17:24:21+01:00", batteryVoltage=3.5, batteryPercent=0, iob=0)
+        self.assertEqual(entry["pump"]["iob"]["iob"], 0.0)
+        self.assertEqual(entry["pump"]["battery"]["percent"], 0)
+        self.assertEqual(entry["pump"]["battery"]["status"], "0%")
+
+    def test_devicestatus_reservoir(self):
+        self.assertEqual(
+            NightscoutEntry.devicestatus_reservoir(
+                created_at="2026-11-19T17:26:21+01:00",
+                reservoir=115,
+                batteryPercent=86,
+                pump_event_id="103"),
+            {
+                "device": "Pump (tconnectsync)",
+                "created_at": "2026-11-19T17:26:21+01:00",
+                "pump": {
+                    "clock": "2026-11-19T17:26:21+01:00",
+                    "reservoir": 115.0,
+                    "battery": {"percent": 86}
+                },
+                "pump_event_id": "103"
+            })
+
+    def test_devicestatus_reservoir_keeps_zero_and_drops_a_missing_battery(self):
+        entry = NightscoutEntry.devicestatus_reservoir(
+            created_at="2026-11-19T17:26:21+01:00", reservoir=0)
+        self.assertEqual(entry["pump"], {"clock": "2026-11-19T17:26:21+01:00", "reservoir": 0.0})
+
     def test_sitechange(self):
         self.assertEqual(
             NightscoutEntry.sitechange(

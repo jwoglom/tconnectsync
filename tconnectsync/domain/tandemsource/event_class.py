@@ -1,6 +1,7 @@
 from enum import Enum
 
 from ...eventparser import events
+from ...eventparser import json_events
 
 class EventClass(set, Enum):  # type: ignore[misc]  # set/Enum both define __hash__; the combination works at runtime
     # LidBasalDelivery = every 5min entry
@@ -24,7 +25,9 @@ class EventClass(set, Enum):  # type: ignore[misc]  # set/Enum both define __has
     CGM_START_JOIN_STOP = {*_CGM_START, *_CGM_JOIN, *_CGM_STOP}
     CGM_READING = {events.LidCgmDataGxb, events.LidCgmDataG7, events.LidCgmDataFsl2, events.LidCgmDataFsl3}
     USER_MODE = {events.LidAaUserModeChange}
-    DEVICE_STATUS = {events.LidDailyBasal}
+    # LidDailyBasal = every 10min: battery and IOB
+    # PumpStatusSnapshot = while the pump is in use: insulin left in the cartridge
+    DEVICE_STATUS = {events.LidDailyBasal, json_events.PumpStatusSnapshot}
 
     @staticmethod
     def for_event(evt):
