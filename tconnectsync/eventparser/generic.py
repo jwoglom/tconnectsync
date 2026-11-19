@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from .raw_event import RawEvent, EVENT_LEN
 from .events import EVENT_IDS
+from .json_events import JSON_EVENT_IDS
 from .utils import batched
 
 logger = logging.getLogger(__name__)
@@ -14,6 +15,9 @@ def Event(x):
     # Accepts either a 26-byte binary event or a pump-logs JSON event (dict).
     if isinstance(x, dict):
         raw_event = RawEvent.build_from_json(x)
+        if raw_event.id in JSON_EVENT_IDS:
+            return JSON_EVENT_IDS[raw_event.id].build_from_json(x)
+
         if not raw_event.id in EVENT_IDS:
             # Log unknown events with their property keys for reverse-engineering
             props = ' '.join(x['eventProperties'].keys())

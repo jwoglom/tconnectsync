@@ -6,6 +6,7 @@ from tconnectsync.sync.tandemsource.process_device_status import ProcessDeviceSt
 from tconnectsync.eventparser import events as eventtypes
 from tconnectsync.eventparser.generic import Event, Events
 from tconnectsync.eventparser.raw_event import RawEvent
+from tconnectsync.eventparser.json_events import PumpStatusSnapshot
 
 from ...api.fake import TConnectApi
 from ...nightscout_fake import NightscoutApi
@@ -199,18 +200,23 @@ class TestProcessDeviceStatus(unittest.TestCase):
 
         self.assertEqual(len(p), 1)
         self.assertDictEqual(p[0], {
-            'created_at': '2024-12-03 23:40:23-05:00',
+            'created_at': '2024-12-03T23:40:23-05:00',
             'device': 'Pump (tconnectsync)',
             'pump': {
-                'clock': '2024-12-03 23:40:23-05:00',
+                'clock': '2024-12-03T23:40:23-05:00',
                 'battery': {
                     'status': '55%',
                     'percent': 55,
                     'voltage': 3.83
+                },
+                'iob': {
+                    'timestamp': '2024-12-03T23:40:23-05:00',
+                    'iob': events[0].iob
                 }
             },
             'pump_event_id': '1046436'
         })
+        self.assertAlmostEqual(p[0]['pump']['iob']['iob'], 3.9823, places=4)
 
     def test_single_event_already_uploaded(self):
         self.nightscout.last_uploaded_devicestatus = lambda *args, **kwargs: {'created_at': '2024-12-03 23:40:23-05:00'}
@@ -253,18 +259,23 @@ class TestProcessDeviceStatus(unittest.TestCase):
 
         self.assertEqual(len(p), 1)
         self.assertDictEqual(p[0], {
-            'created_at': '2024-12-04 02:30:23-05:00',
+            'created_at': '2024-12-04T02:30:23-05:00',
             'device': 'Pump (tconnectsync)',
             'pump': {
-                'clock': '2024-12-04 02:30:23-05:00',
+                'clock': '2024-12-04T02:30:23-05:00',
                 'battery': {
                     'status': '54%',
                     'percent': 54,
                     'voltage': 3.827
+                },
+                'iob': {
+                    'timestamp': '2024-12-04T02:30:23-05:00',
+                    'iob': events[1].iob
                 }
             },
             'pump_event_id': '1046875'
         })
+        self.assertAlmostEqual(p[0]['pump']['iob']['iob'], 1.7781, places=4)
 
     def test_multiple_event_only_latest_applied(self):
         self.nightscout.last_uploaded_devicestatus = lambda *args, **kwargs: {'created_at': '2024-12-03 23:40:23-05:00'}
@@ -297,18 +308,23 @@ class TestProcessDeviceStatus(unittest.TestCase):
 
         self.assertEqual(len(p), 1)
         self.assertDictEqual(p[0], {
-            'created_at': '2024-12-04 05:50:23-05:00',
+            'created_at': '2024-12-04T05:50:23-05:00',
             'device': 'Pump (tconnectsync)',
             'pump': {
-                'clock': '2024-12-04 05:50:23-05:00',
+                'clock': '2024-12-04T05:50:23-05:00',
                 'battery': {
                     'status': '53%',
                     'percent': 53,
                     'voltage': 3.822
+                },
+                'iob': {
+                    'timestamp': '2024-12-04T05:50:23-05:00',
+                    'iob': events[2].iob
                 }
             },
             'pump_event_id': '1047614'
         })
+        self.assertAlmostEqual(p[0]['pump']['iob']['iob'], 2.2731, places=4)
 
     def test_no_daily_basal_event_degrades_gracefully(self):
         # DEVICE_STATUS relies on event 81 (LidDailyBasal), which is not in
@@ -411,7 +427,10 @@ class TestProcessDeviceStatus(unittest.TestCase):
                 p = self.process.process([Event(expected['raw'])], time_start=None, time_end=None)
 
                 self.assertEqual(len(p), 1)
-                self.assertEqual(p[0]['created_at'], expected['timestamp'])
+                self.assertEqual(p[0]['created_at'], expected['timestamp'].replace(' ', 'T'))
+                self.assertEqual(p[0]['pump']['clock'], p[0]['created_at'])
+                self.assertEqual(p[0]['pump']['iob']['timestamp'], p[0]['created_at'])
+                self.assertAlmostEqual(p[0]['pump']['iob']['iob'], expected['iob'], places=4)
                 self.assertEqual(p[0]['pump_event_id'], str(expected['seqNum']))
                 self.assertEqual(p[0]['pump']['battery'], {
                     'status': '%d%%' % expected['abc'],
@@ -436,6 +455,194 @@ class TestProcessDeviceStatus(unittest.TestCase):
             'percent': 100,
             'voltage': 4.176,
         })
+
+
+
+
+def daily_basal_json(seq, pump_time, iob=1.25, abc=88, li_po_mv=3900):
+    return {
+        "eventCode": 81, "sequenceGroup": 0, "sequenceNumber": seq,
+        "pumpDateTime": pump_time,
+        "eventProperties": {
+            "dailyTotalBasal": 7.5, "lastBasalRate": 0.8, "iob": iob,
+            "displayInHistory": 0, "abc": abc, "liPoMV": li_po_mv,
+        },
+    }
+
+
+# The shape of event 9 as the pump-logs endpoint returns it (a t:slim X2,
+# software 7.8.1): its iob is in tenths of a unit and is not uploaded.
+def status_snapshot_json(seq, pump_time, insulin=115, abc=94):
+    return {
+        "eventCode": 9, "sequenceGroup": 0, "sequenceNumber": seq,
+        "pumpDateTime": pump_time,
+        "eventProperties": {
+            "insulin": insulin, "insulinBars": 2, "iob": 12, "iobHours": 4, "iobMinutes": 15,
+            "selectedIob": 1, "abc": abc, "ibc": 95, "batteryBars": 5,
+            "controllerAbc": 255, "controllerIbc": 255, "controllerBattBar": 255, "reservedD14": 0,
+        },
+    }
+
+
+class TestProcessDeviceStatusKinds(unittest.TestCase):
+    """The daily basal event and the status snapshot each make their own
+    devicestatus document, with their own "last uploaded" check."""
+    maxDiff = None
+
+    def setUp(self):
+        self.tconnect = TConnectApi()
+        self.nightscout = NightscoutApi()
+        self.process = ProcessDeviceStatus(self.tconnect, self.nightscout, 'abcdef', pretend=False)
+        self.asked = []
+
+    def last_uploaded(self, by_field):
+        def last_uploaded_devicestatus(time_start=None, time_end=None, has_field=None):
+            self.asked.append(has_field)
+            return by_field.get(has_field)
+        self.nightscout.last_uploaded_devicestatus = last_uploaded_devicestatus
+
+    def test_one_document_per_kind_from_the_newest_event_of_each(self):
+        self.last_uploaded({})
+
+        events = list(Events([
+            daily_basal_json(100, "2026-11-19T17:14:21", iob=2.5),
+            status_snapshot_json(101, "2026-11-19T17:20:02", insulin=120),
+            daily_basal_json(102, "2026-11-19T17:24:21", iob=2.31, abc=87, li_po_mv=3894),
+            status_snapshot_json(103, "2026-11-19T17:26:21", insulin=115, abc=86),
+        ]))
+        self.assertEqual([type(e) for e in events], [
+            eventtypes.LidDailyBasal, PumpStatusSnapshot, eventtypes.LidDailyBasal, PumpStatusSnapshot])
+
+        p = self.process.process(events, time_start=None, time_end=None)
+
+        daily_time = events[2].eventTimestamp.isoformat()
+        snapshot_time = events[3].eventTimestamp.isoformat()
+        self.assertEqual(daily_time[:19], '2026-11-19T17:24:21')
+        self.assertEqual(snapshot_time[:19], '2026-11-19T17:26:21')
+        self.assertEqual(p, [
+            {
+                'created_at': daily_time,
+                'device': 'Pump (tconnectsync)',
+                'pump': {
+                    'clock': daily_time,
+                    'battery': {'status': '87%', 'percent': 87, 'voltage': 3.894},
+                    'iob': {'timestamp': daily_time, 'iob': 2.31},
+                },
+                'pump_event_id': '102',
+            },
+            {
+                'created_at': snapshot_time,
+                'device': 'Pump (tconnectsync)',
+                'pump': {
+                    'clock': snapshot_time,
+                    'reservoir': 115.0,
+                    'battery': {'percent': 86},
+                },
+                'pump_event_id': '103',
+            },
+        ])
+        self.assertEqual(sorted(self.asked), ['pump.battery.voltage', 'pump.reservoir'])
+
+    def test_a_newer_snapshot_in_nightscout_does_not_hold_back_the_daily_basal(self):
+        # The snapshot of 17:26 is already up; the daily basal of 17:24 is not.
+        self.last_uploaded({
+            'pump.reservoir': {'created_at': '2026-11-19T17:26:21-05:00'},
+            'pump.battery.voltage': {'created_at': '2026-11-19T17:14:21-05:00'},
+        })
+
+        p = self.process.process(list(Events([
+            daily_basal_json(100, "2026-11-19T17:14:21"),
+            daily_basal_json(102, "2026-11-19T17:24:21"),
+            status_snapshot_json(103, "2026-11-19T17:26:21"),
+        ])), time_start=None, time_end=None)
+
+        self.assertEqual([e['pump_event_id'] for e in p], ['102'])
+        self.assertIn('iob', p[0]['pump'])
+
+    def test_a_newer_daily_basal_in_nightscout_does_not_hold_back_the_snapshot(self):
+        # Overnight in reverse: daily basal documents are up to 17:24, the
+        # last snapshot in Nightscout is from the morning.
+        self.last_uploaded({
+            'pump.battery.voltage': {'created_at': '2026-11-19T17:24:21-05:00'},
+            'pump.reservoir': {'created_at': '2026-11-19T08:02:00-05:00'},
+        })
+
+        p = self.process.process(list(Events([
+            status_snapshot_json(101, "2026-11-19T17:20:02", insulin=120),
+            daily_basal_json(102, "2026-11-19T17:24:21"),
+        ])), time_start=None, time_end=None)
+
+        self.assertEqual([e['pump_event_id'] for e in p], ['101'])
+        self.assertEqual(p[0]['pump']['reservoir'], 120.0)
+
+    def test_both_already_uploaded(self):
+        self.last_uploaded({
+            'pump.battery.voltage': {'created_at': '2026-11-19T17:24:21-05:00'},
+            'pump.reservoir': {'created_at': '2026-11-19T17:26:21-05:00'},
+        })
+
+        p = self.process.process(list(Events([
+            daily_basal_json(102, "2026-11-19T17:24:21"),
+            status_snapshot_json(103, "2026-11-19T17:26:21"),
+        ])), time_start=None, time_end=None)
+
+        self.assertEqual(p, [])
+
+    def test_zero_iob_and_an_empty_cartridge_are_values(self):
+        self.last_uploaded({})
+
+        p = self.process.process(list(Events([
+            daily_basal_json(102, "2026-11-19T17:24:21", iob=0, abc=0),
+            status_snapshot_json(103, "2026-11-19T17:26:21", insulin=0, abc=0),
+        ])), time_start=None, time_end=None)
+
+        self.assertEqual(len(p), 2)
+        self.assertEqual(p[0]['pump']['iob']['iob'], 0.0)
+        self.assertEqual(p[0]['pump']['battery']['percent'], 0)
+        self.assertEqual(p[0]['pump']['battery']['status'], '0%')
+        self.assertEqual(p[1]['pump']['reservoir'], 0.0)
+        self.assertEqual(p[1]['pump']['battery'], {'percent': 0})
+
+    def test_daily_basal_without_iob_keeps_the_battery(self):
+        self.last_uploaded({})
+
+        event = daily_basal_json(102, "2026-11-19T17:24:21")
+        del event["eventProperties"]["iob"]
+        p = self.process.process(list(Events([event])), time_start=None, time_end=None)
+
+        self.assertEqual(len(p), 1)
+        self.assertNotIn('iob', p[0]['pump'])
+        self.assertEqual(p[0]['pump']['battery']['percent'], 88)
+
+    def test_snapshot_without_insulin_is_skipped(self):
+        self.last_uploaded({})
+
+        event = status_snapshot_json(103, "2026-11-19T17:26:21")
+        del event["eventProperties"]["insulin"]
+        p = self.process.process(list(Events([event])), time_start=None, time_end=None)
+
+        self.assertEqual(p, [])
+
+    def test_snapshot_without_battery_still_uploads_the_reservoir(self):
+        self.last_uploaded({})
+
+        event = status_snapshot_json(103, "2026-11-19T17:26:21", insulin=70)
+        del event["eventProperties"]["abc"]
+        p = self.process.process(list(Events([event])), time_start=None, time_end=None)
+
+        self.assertEqual(len(p), 1)
+        self.assertEqual(p[0]['pump'], {'clock': p[0]['created_at'], 'reservoir': 70.0})
+
+    def test_write_uploads_each_document_as_devicestatus(self):
+        self.last_uploaded({})
+
+        p = self.process.process(list(Events([
+            daily_basal_json(102, "2026-11-19T17:24:21"),
+            status_snapshot_json(103, "2026-11-19T17:26:21"),
+        ])), time_start=None, time_end=None)
+
+        self.assertEqual(self.process.write(p), 2)
+        self.assertEqual(self.nightscout.uploaded_entries['devicestatus'], p)
 
 
 if __name__ == '__main__':

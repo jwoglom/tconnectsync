@@ -131,10 +131,17 @@ class NightscoutApi:
 			else:
 				raise e
 
-	def last_uploaded_devicestatus(self, time_start: Optional[DateLike] = None, time_end: Optional[DateLike] = None) -> Optional[dict]:
+	def last_uploaded_devicestatus(self, time_start: Optional[DateLike] = None, time_end: Optional[DateLike] = None, has_field: Optional[str] = None) -> Optional[dict]:
+		"""
+		The newest devicestatus this tool uploaded. With has_field (a dotted
+		path such as 'pump.iob'), the newest one that carries that field: the
+		pump's status goes up as more than one kind of document, and each kind
+		needs its own "last uploaded" so that one does not hide the other.
+		"""
 		dateFilter = time_range('created_at', time_start, time_end)
+		fieldFilter = ('&find[%s][$exists]=true' % urllib.parse.quote(has_field)) if has_field else ''
 		try:
-			latest = requests.get(urljoin(self.url, 'api/v1/devicestatus?find[device]=' + urllib.parse.quote(ENTERED_BY) + dateFilter + '&ts=' + str(time.time())), headers={
+			latest = requests.get(urljoin(self.url, 'api/v1/devicestatus?count=1&find[device]=' + urllib.parse.quote(ENTERED_BY) + fieldFilter + dateFilter + '&ts=' + str(time.time())), headers={
 				'api-secret': hashlib.sha1(self.secret.encode()).hexdigest()
 			}, verify=self.verify)
 			if latest.status_code != 200:
