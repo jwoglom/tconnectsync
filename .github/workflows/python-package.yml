@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.11'
       - name: Verify Pipfile.lock is up to date with Pipfile
@@ -28,15 +28,32 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        include:
+          # ubuntu-latest (26.04) has no Python 3.8/3.9 builds; 24.04 is the newest runner that does.
+          - python-version: '3.8'
+            os: ubuntu-24.04
+          - python-version: '3.9'
+            os: ubuntu-24.04
+          - python-version: '3.10'
+            os: ubuntu-26.04
+          - python-version: '3.11'
+            os: ubuntu-26.04
+          - python-version: '3.12'
+            os: ubuntu-26.04
+          - python-version: '3.13'
+            os: ubuntu-26.04
+          - python-version: '3.14'
+            os: ubuntu-26.04
+          - python-version: '3.15'
+            os: ubuntu-26.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
