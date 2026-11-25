@@ -413,6 +413,7 @@ class TandemSourceApi:
                 id_token,
                 key=key,
                 algorithms=['RS256'],
+                leeway=60,  # tolerate small clock skew between this machine and the identity provider
                 audience=audience,
                 issuer=issuer,
             ))
@@ -425,6 +426,7 @@ class TandemSourceApi:
                 id_token,
                 key=key,
                 algorithms=['RS256'],
+                leeway=60,  # tolerate small clock skew between this machine and the identity provider
                 issuer=issuer,
                 options={"verify_aud": False},
             ))

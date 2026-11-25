@@ -99,6 +99,10 @@ class ProcessTimeRange:
                     # Cap events_last_time at time_end to handle pump clock drift
                     # Ensure time_end is timezone-aware for comparison
                     time_end_aware = arrow.get(time_end)
+                    if getattr(time_end, 'tzinfo', 1) is None:
+                        # A naive time_end comes from datetime.datetime.now(), which is local time.
+                        # arrow.get() would read it as UTC and shift it by the UTC offset.
+                        time_end_aware = time_end_aware.replace(tzinfo='local')
                     capped_time_end = min(events_last_time, time_end_aware) if events_last_time else time_end_aware
                     # events_first_time is populated whenever for_eventclass has entries
                     # (i.e. at least one event was seen); fall back to time_start otherwise.
