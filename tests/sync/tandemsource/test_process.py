@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
+import os
+import time
 import unittest
+import datetime
 import arrow
 from unittest.mock import patch
 
@@ -147,6 +150,69 @@ class TestProcessTimeRangeBasalDuration(unittest.TestCase):
         expected_duration = (arrow.get('2025-11-18T13:22:40-05:00') - arrow.get('2025-11-18T13:17:40-05:00')).seconds / 60
         self.assertAlmostEqual(basal_2['duration'], expected_duration, places=2)
         self.assertEqual(basal_2['duration'], 5.0)
+
+
+class TestProcessTimeRangeNaiveTimeEnd(unittest.TestCase):
+    """A naive time_end (as produced by datetime.datetime.now()) is local time, not UTC."""
+    maxDiff = None
+
+    def setUp(self):
+        # Run as US Eastern (UTC-5 in November) regardless of the host timezone.
+        self._old_tz = os.environ.get('TZ')
+        os.environ['TZ'] = 'America/New_York'
+        time.tzset()
+        self.addCleanup(self._restore_tz)
+
+        self.tconnect = TConnectApi()
+        self.tconnect._tandemsource = FakeTandemSourceApi()
+        self.nightscout = NightscoutApi()
+        self.nightscout.last_uploaded_entry = lambda *args, **kwargs: None
+
+        self.process = ProcessTimeRange(
+            self.tconnect,
+            self.nightscout,
+            {'assignmentId': 'test-device-123', 'maxDateOfEvents': '2025-11-18T13:00:00-05:00'},
+            pretend=False,
+            secret=build_secrets(FETCH_ALL_EVENT_TYPES=False)
+        )
+
+    def _restore_tz(self):
+        if self._old_tz is None:
+            os.environ.pop('TZ', None)
+        else:
+            os.environ['TZ'] = self._old_tz
+        time.tzset()
+
+    def test_naive_time_end_treated_as_local_time(self):
+        self.tconnect._tandemsource.events = [
+            Event(BASAL_EVENT_1),        # 13:12:40-05:00
+            Event(BASAL_EVENT_2),        # 13:17:40-05:00
+            Event(CGM_EVENT_FUTURE),     # 03:00:00-05:00 next day (drift)
+        ]
+
+        # Naive "now" of 13:29:00 local (Eastern). If misread as UTC this would be
+        # 08:29 Eastern, i.e. before the basal events, and the duration would be wrong.
+        time_start = datetime.datetime(2025, 11, 18, 13, 0, 0)
+        time_end = datetime.datetime(2025, 11, 18, 13, 29, 0)
+        self.assertIsNone(time_end.tzinfo)
+
+        self.process.process(time_start, time_end)
+
+        treatments = self.nightscout.uploaded_entries['treatments']
+        self.assertEqual(len(treatments), 2)
+        self.assertEqual(treatments[0]['duration'], 5.0)
+        # 13:17:40 -> 13:29:00 local = 11.333 minutes
+        self.assertAlmostEqual(treatments[1]['duration'], (11 * 60 + 20) / 60, places=2)
+
+    def test_aware_time_end_unchanged(self):
+        self.tconnect._tandemsource.events = [
+            Event(BASAL_EVENT_1), Event(BASAL_EVENT_2), Event(CGM_EVENT_FUTURE),
+        ]
+        time_start = arrow.get('2025-11-18T13:00:00-05:00')
+        time_end = arrow.get('2025-11-18T18:29:00+00:00')  # same instant as 13:29 EST
+        self.process.process(time_start, time_end)
+        treatments = self.nightscout.uploaded_entries['treatments']
+        self.assertAlmostEqual(treatments[1]['duration'], (11 * 60 + 20) / 60, places=2)
 
 
 BASAL_JSON_1 = {"deviceAssignmentId": "00000000-0000-0000-0000-000000000000", "eventCode": 279, "sequenceGroup": 0, "sequenceNumber": 417004, "pumpDateTime": "2026-05-07T00:01:11", "eventProperties": {"commandedRateSource": 3, "reservedA2": 3, "spareA3": 0, "commandedRate": 1000, "profileBasalRate": 1000, "algorithmRate": 1000, "tempRate": 65535}, "estimatedDateTime": "2026-05-07T00:01:11Z"}
